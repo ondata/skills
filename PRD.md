@@ -4,6 +4,16 @@
 
 A curated collection of AI skills maintained by the [onData](https://www.ondata.it/) association. The project aims to make powerful AI-assisted workflows accessible to everyone, with a focus on data work: reading, transforming, analyzing, and visualizing data. Skills are designed to be tool-agnostic: usable with any AI assistant or agent platform that supports the skill format.
 
+## Core Idea
+
+A skill is, at its heart, a piece of structured knowledge: a description of how to approach a task, written so that an AI agent can follow it reliably. Writing a skill does not require programming ability. It requires knowing the task well — what it involves, what good output looks like, what can go wrong.
+
+This makes skill creation a **fundamentally inclusive activity**. A data journalist who knows exactly how to audit an open dataset, a civic activist who has spent years navigating public records, a librarian who understands how metadata should be structured — any of them can write a useful skill, without writing a single line of code.
+
+The technical layer (wrapping the skill in the right format, adding supporting scripts if needed) can come later, or can be handled by someone else. The knowledge layer — the hard part — comes from experience and context, not from developer skills.
+
+This project is built on that premise: **the people with the most useful knowledge are not always the people who write code**, and the contribution model should reflect that.
+
 ## Guiding Philosophy
 
 The project is modeled on open source culture: a public repository, open contributions, transparent evolution, and community ownership. Skills are shared artifacts — anyone can use them, improve them, or propose new ones. The collection takes shape over time through collective effort, not top-down planning.

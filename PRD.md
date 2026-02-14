@@ -31,6 +31,8 @@ There is no strict constraint on skill types. The collection will grow organical
 - **Data quality** — validating, profiling, and auditing data.
 - **Productivity & support** — any skill that facilitates, supports, or improves workflows related to the above.
 
+There are no thematic constraints. Any skill that has proven useful to someone in the community — regardless of topic — is welcome, on the assumption that it may be useful to others too.
+
 ### What a Skill Contains
 
 Each skill is a self-contained directory with:
@@ -75,7 +77,7 @@ A user should be able to:
 ### Phase 3 — Community Growth
 
 - Publish contribution guidelines.
-- Accept skill submissions from the community.
+- Accept skill submissions via pull request: anyone can open a PR to add their own skill to the collection.
 - Introduce a review process to maintain quality.
 
 ## Constraints

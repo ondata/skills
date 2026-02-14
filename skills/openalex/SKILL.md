@@ -7,31 +7,39 @@ description: Query OpenAlex API from the command line with curl and jq for publi
 
 Use this skill to run reliable OpenAlex API workflows from shell.
 
+> **IMPORTANT:** Always write `curl` commands on a **single line**. Multi-line `\` continuation breaks argument parsing in agent environments and will cause errors.
+
+## Definition of Done
+
+A task is complete when:
+
+**Results**
+- The API returns at least one result (or a clear "no results found" message)
+- Each result shows: title (`display_name`), year, citation count
+- Output is readable — not a raw JSON blob
+
+**Process**
+- `curl` written on a single line
+- `api_key` included in every request
+- `select=` used to limit returned fields
+- `jq` used to format output
+
+**PDF download** (when requested)
+- If PDF is available: file saved locally, path printed
+- If PDF is not available: clear message, exit code 2, no crash
+
 ## Quick Start
 
-1. Export API key from environment:
+1. Export API key:
 
 ```bash
 export OPENALEX_API_KEY='...'
 ```
 
-2. Check quota and auth:
+2. Run list query (works):
 
 ```bash
-curl -sS "https://api.openalex.org/rate-limit?api_key=$OPENALEX_API_KEY" | jq
-```
-
-3. Run list query (works):
-
-```bash
-curl -sS --get 'https://api.openalex.org/works' \
-  --data-urlencode 'search="data quality" AND "open government data"' \
-  --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' \
-  --data-urlencode 'sort=relevance_score:desc' \
-  --data-urlencode 'per-page=20' \
-  --data-urlencode 'select=id,display_name,publication_year,cited_by_count,doi' \
-  --data-urlencode "api_key=$OPENALEX_API_KEY" \
-| jq '.results[] | {title:.display_name, year:.publication_year, cited_by:.cited_by_count, doi}'
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data quality" AND "open government data"' --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=relevance_score:desc' --data-urlencode 'per-page=20' --data-urlencode 'select=id,display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year, cited_by:.cited_by_count, doi}'
 ```
 
 ## Workflow
@@ -45,7 +53,8 @@ curl -sS --get 'https://api.openalex.org/works' \
 
 ## Query Blocks
 
-- `search=`: full-text relevance search.
+- `title.search=`: searches only in the title — use this by default for focused results. Must be passed inside `filter=`, not as a standalone parameter: `filter=title.search:"your query"`.
+- `search=`: full-text search across the entire document — use only when title-only matching is too restrictive.
 - `filter=`: exact/structured constraints; comma means AND.
 - `sort=`: `relevance_score:desc`, `cited_by_count:desc`, `publication_date:desc`, etc.
 - `per-page=`: 1..200.
@@ -64,11 +73,31 @@ For a work ID:
    - first non-null `.locations[].pdf_url`
 3. Download with `api_key` query parameter when source is `content.openalex.org`.
 
+## Output Format
+
+When displaying results, always show `display_name` as the title — never use `doi` or `id` in its place.
+
+Minimal jq for a results table:
+
+```bash
+| jq -r '.results[] | [.display_name, .publication_year, .cited_by_count, .doi] | @tsv'
+```
+
+Or as structured objects:
+
+```bash
+| jq '.results[] | {title: .display_name, year: .publication_year, cited_by: .cited_by_count, doi}'
+```
+
 ## Common Pitfalls
 
 - Do not sort by `relevance_score` without a search query.
 - Do not use nested fields in `select` (example: use `open_access`, then parse `.open_access.is_oa` with `jq`).
 - Expect some records to have no downloadable PDF.
+- `search=` searches full text and can return loosely related results. Use `title.search=` when the topic must appear in the title.
+- Always write `curl` commands on a single line — multi-line `\` continuation breaks argument parsing in agent environments.
+- `title.search` is NOT a valid standalone parameter — always pass it inside `filter=`: `filter=title.search:"your query"`.
+- Always include `api_key=$OPENALEX_API_KEY` in every request.
 
 ## Resources
 

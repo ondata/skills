@@ -1,0 +1,9 @@
+id,should_trigger,prompt
+test-01,true,"[Explicit invocation: use $skill-name to do X]"
+test-02,true,"[Implicit: describe the task the skill handles, without naming it]"
+test-03,true,"[Contextual: realistic prompt with domain-specific framing]"
+test-04,true,"[Slightly noisy realistic prompt a real user might write]"
+test-05,true,"[Edge case that should still trigger the skill]"
+test-06,false,"[Adjacent task that should NOT trigger this skill]"
+test-07,false,"[Another negative control — similar topic, different intent]"
+test-08,false,"[Generic request that could be confused with this skill]"

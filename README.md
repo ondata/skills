@@ -15,7 +15,7 @@ Skills follow the [Agent Skills](https://agentskills.io) open standard and can b
 npx skills add aborruso/ondata_skills
 
 # Install a single skill
-npx skills add aborruso/ondata_skills --skill data-quality-csv
+npx skills add aborruso/ondata_skills --skill openalex
 ```
 
 Or install manually:
@@ -28,9 +28,17 @@ Or install manually:
 
 ## Catalog
 
-| Skill | Description | Category |
-|---|---|---|
-| [data-quality-csv](skills/data-quality-csv/) | Analyzes a CSV for encoding, types, missing values, and structural issues | Data quality |
+| Skill | Description | Category | Eval |
+|---|---|---|---|
+| [openalex](skills/openalex/) | Query OpenAlex API for scholarly works, authors, and PDF retrieval | Research | [🟡 78/100](evals/openalex/) |
+
+---
+
+## Evals
+
+Each skill has a test battery in [`evals/`](evals/) to verify trigger behavior, process correctness, and output quality.
+
+See [`evals/README.md`](evals/README.md) for the full dashboard and instructions on how to run or contribute evals.
 
 ---
 

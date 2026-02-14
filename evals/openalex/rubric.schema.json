@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "overall_pass": { "type": "boolean" },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "pass": { "type": "boolean" },
+          "notes": { "type": "string" }
+        },
+        "required": ["id", "pass", "notes"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["overall_pass", "score", "checks"],
+  "additionalProperties": false,
+  "_check_ids": [
+    "trigger",
+    "curl_urlencode",
+    "api_key",
+    "jq_parsing",
+    "select_fields",
+    "pitfall_relevance_sort",
+    "pitfall_nested_select",
+    "pdf_fallback_chain",
+    "pdf_missing_handled"
+  ]
+}

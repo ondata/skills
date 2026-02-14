@@ -1,0 +1,62 @@
+{
+  "overall_pass": true,
+  "score": 78,
+  "prompts_tested": ["test-01", "test-02", "test-03", "test-04", "test-05", "test-06", "test-07", "test-08"],
+  "checks": [
+    {
+      "id": "trigger",
+      "pass": true,
+      "notes": "All 5 positive prompts activated the skill. All 3 negative controls (news on Google, Google Scholar, generic PDF URL) did not activate it."
+    },
+    {
+      "id": "curl_urlencode",
+      "pass": false,
+      "notes": "Generated multi-line curl with \\ in multiple runs — breaks argument parsing in agent environments. Self-corrected after reading the pitfall. Fixed in skill: IMPORTANT warning moved to top of SKILL.md."
+    },
+    {
+      "id": "api_key",
+      "pass": false,
+      "notes": "api_key omitted in one run, causing API error. Fixed in skill: added explicit pitfall 'Always include api_key in every request' and prominent warning."
+    },
+    {
+      "id": "jq_parsing",
+      "pass": true,
+      "notes": "Used jq correctly in all runs. @tsv and structured object formats both applied."
+    },
+    {
+      "id": "select_fields",
+      "pass": true,
+      "notes": "select= used with root-level fields only. open_access in select, .open_access.is_oa only in jq — correct pattern."
+    },
+    {
+      "id": "pitfall_relevance_sort",
+      "pass": true,
+      "notes": "Never used sort=relevance_score without a search= parameter. Used cited_by_count:desc throughout."
+    },
+    {
+      "id": "pitfall_nested_select",
+      "pass": true,
+      "notes": "No nested field paths in select= observed across all runs."
+    },
+    {
+      "id": "pdf_fallback_chain",
+      "pass": true,
+      "notes": "openalex_download_pdf.sh traversed all location records correctly. Returned exit code 2 when no pdf_url found. Europe PMC fallback discovered and documented as recipe #6."
+    },
+    {
+      "id": "pdf_missing_handled",
+      "pass": true,
+      "notes": "No crash on missing PDF. Exit code 2 returned with informative message."
+    }
+  ],
+  "skill_improvements": [
+    "curl single-line rule: IMPORTANT warning added at top of SKILL.md",
+    "api_key: added as explicit pitfall",
+    "display_name as title: Output Format section added (display_name was replaced by doi in output — now fixed)",
+    "title.search must be inside filter=, not standalone parameter — confirmed by API error, added as pitfall",
+    "title.search= set as default over search= in Query Blocks",
+    "Europe PMC fallback: documented as recipe #6 in query-recipes.md",
+    "Definition of Done added to SKILL.md: results, process, and PDF download criteria now explicit"
+  ],
+  "score_method": "passed_checks / total_checks * 100 — 7/9 pass on initial run before skill fixes"
+}

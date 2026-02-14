@@ -1,0 +1,9 @@
+id,should_trigger,prompt
+test-01,true,"Use the $openalex skill to find papers about open government data published after 2022"
+test-02,true,"Search for the top-cited articles on machine learning fairness in 2023"
+test-03,true,"Find scholarly works on data quality in Italian public administrations"
+test-04,true,"I need papers about climate change adaptation written in English, sorted by citations"
+test-05,true,"Download the PDF of OpenAlex work W2741809807"
+test-06,false,"Search for news articles about open data on Google"
+test-07,false,"Find papers on Google Scholar about machine learning"
+test-08,false,"Download this PDF from this URL: https://example.com/paper.pdf"

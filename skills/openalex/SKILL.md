@@ -1,6 +1,12 @@
 ---
 name: openalex
 description: Query OpenAlex API from the command line with curl and jq for publication discovery, filtering, sorting, pagination, and PDF availability checks. Use when searching scholarly works/authors/sources, building or debugging OpenAlex queries, extracting results, or downloading available PDFs using OPENALEX_API_KEY.
+compatibility: Requires curl, jq, bash, OPENALEX_API_KEY environment variable, and internet access.
+license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
+metadata:
+  version: "0.1"
+  author: "Andrea Borruso <aborruso@gmail.com>"
+  tags: [api, research, scholarly, bibliometrics, open-access, curl, jq, pdf]
 ---
 
 # OpenAlex

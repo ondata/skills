@@ -6,7 +6,7 @@ This project uses **GitHub Flow**: `main` is always stable; all work happens on 
 
 ### Rules
 
-- Never commit directly to `main`.
+- Commit directly to `main` only for single-line typo/fact fixes. Everything else goes through a PR.
 - One branch per contribution (skill, fix, eval, doc).
 - Open a pull request for every change; merge only after review.
 - Delete the branch after merge (locally and on remote).

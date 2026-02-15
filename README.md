@@ -42,6 +42,7 @@ During installation you'll be asked:
 
 - **Which AI tools** to make the skill available in (e.g. Claude code, OpenAI Codex, Gemini cli, Cursor, Windsurf, ecc.).
 - **User or project scope** — user skills are available in every project on your machine; project skills are installed into the current repository and shared with anyone who clones it.
+- **Installation method** — **Symlink** (recommended) creates a single canonical copy that all your agents share; run `npx skills update` to update. **Copy** creates independent copies per agent and is useful only when symlinks are not supported on your system.
 
 ---
 

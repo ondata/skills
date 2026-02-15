@@ -1,6 +1,10 @@
 # onData Skills
 
-A curated collection of AI skills maintained by [onData](https://www.ondata.it/). Skills are tool-agnostic instructions that help AI assistants handle specific tasks consistently — without re-explaining your workflows every time.
+A curated collection of AI skills maintained by onData. Skills are tool-agnostic instructions that help AI assistants handle specific tasks consistently — without re-explaining your workflows every time.
+
+A **skill** is a set of instructions that tells an AI assistant how to handle a specific task: which tools to use, in what order, and how to format the output. Once installed, it activates automatically when relevant.
+
+For example, install the `openalex` skill and ask `$openalex: Find recent papers on urban heat islands with open access PDFs` — you'll get a structured list of works with titles, authors, DOIs, and direct download links.
 
 The project follows an open source model: public repo, open contributions, organic growth.
 
@@ -12,17 +16,26 @@ Skills follow the [Agent Skills](https://agentskills.io) open standard and can b
 
 ```bash
 # Install all skills
-npx skills add aborruso/ondata_skills
+npx skills add ondata/skills
 
 # Install a single skill
-npx skills add aborruso/ondata_skills --skill openalex
+npx skills add ondata/skills --skill openalex
 ```
 
 Or install manually:
 
-1. Clone the repo: `git clone https://github.com/aborruso/ondata_skills`
-2. Copy the skill folder (e.g. `skills/data-quality-csv/`) into your AI tool's skills directory
+1. Clone the repo: `git clone https://github.com/ondata/skills`
+2. Copy the skill folder (e.g. `skills/openalex/`) into your AI tool's skills directory
 3. Enable the skill in your tool's settings
+
+### About the install tool
+
+The `npx skills add` commands above use [skills.sh](https://skills.sh/docs), currently the most convenient way to install and manage Agent Skills across AI tools.
+
+During installation you'll be asked:
+
+- **Which AI tools** to make the skill available in (e.g. Claude code, OpenAI Codex, Gemini cli, Cursor, Windsurf, ecc.).
+- **User or project scope** — user skills are available in every project on your machine; project skills are installed into the current repository and shared with anyone who clones it.
 
 ---
 

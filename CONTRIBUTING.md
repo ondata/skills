@@ -15,8 +15,8 @@ After a PR is merged, delete the branch:
 
 ```bash
 git checkout main
-git branch -d nome-branch
-git push origin --delete nome-branch
+git branch -d <branch-name>
+git push origin --delete <branch-name>
 ```
 
 ### Branch naming

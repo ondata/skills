@@ -46,20 +46,20 @@ fix broken curl example in query-recipes
 
 ## Frontmatter fields
 
-Required:
+### Required fields
 
 ```yaml
 name: skill-name
-description: One-sentence description used for agent trigger matching.
+description: 1–1024 characters describing what the skill does and when to use it, including specific keywords to help agents match relevant tasks (see docs/agent-skills-specification.md).
 ```
 
-Optional:
+### Optional fields
 
 ```yaml
+license: CC BY-SA 4.0
 compatibility: Lists runtime dependencies (tools, env vars, internet).
-license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
   version: "0.1"
   author: "Name Surname <email@example.com>"
-  tags: [tag1, tag2]
+  tags: "tag1, tag2"
 ```

@@ -18,6 +18,8 @@ Skills follow the [Agent Skills](https://agentskills.io) open standard. If you'r
 npx skills add ondata/skills --skill openalex
 ```
 
+Once installed, open your AI tool and try it: `use $openalex skill to find recent papers on urban heat islands with open access PDFs` — you'll get a list of works with titles, authors, DOIs, and direct PDF links.
+
 Once comfortable, you can install the full collection:
 
 ```bash

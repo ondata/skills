@@ -14,6 +14,7 @@ This project uses **GitHub Flow**: `main` is always stable; all work happens on 
 After a PR is merged, delete the branch:
 
 ```bash
+git checkout main
 git branch -d nome-branch
 git push origin --delete nome-branch
 ```

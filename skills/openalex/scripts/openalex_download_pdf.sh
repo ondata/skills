@@ -6,6 +6,11 @@ if [[ -z "${OPENALEX_API_KEY:-}" ]]; then
   exit 1
 fi
 
+if ! command -v jq &>/dev/null; then
+  echo "ERROR: jq is not installed." >&2
+  exit 1
+fi
+
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   echo "Usage: $(basename "$0") <WORK_ID_or_URL> [output_dir]" >&2
   exit 1

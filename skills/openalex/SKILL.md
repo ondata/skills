@@ -89,6 +89,19 @@ Or as structured objects:
 | jq '.results[] | {title: .display_name, year: .publication_year, cited_by: .cited_by_count, doi}'
 ```
 
+## CSV Export
+
+To save results as a CSV file, use `jq` with `@csv` and include a header row:
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' ... --data-urlencode "api_key=$OPENALEX_API_KEY" | jq -r '["title","year","cited_by","doi"], (.results[] | [.display_name, .publication_year, .cited_by_count, (.doi // "")]) | @csv' > results.csv
+```
+
+Rules:
+- Use `// ""` for fields that may be null (e.g. `doi`) — `@csv` fails on null values.
+- The header array and data array must have the same number of columns.
+- Use `-r` (raw output) so `@csv` produces plain text, not JSON strings.
+
 ## Common Pitfalls
 
 - Do not sort by `relevance_score` without a search query.

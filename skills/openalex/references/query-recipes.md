@@ -51,7 +51,21 @@ WID='W4386028661'
 curl -sS "https://api.openalex.org/works/$WID?api_key=$OPENALEX_API_KEY" | jq '{id, has_content, content_urls, best_pdf:.best_oa_location.pdf_url}'
 ```
 
-## 6) Europe PMC fallback when OpenAlex has no pdf_url
+## 6) Export results to CSV
+
+Use `jq` with `@csv` to write a header + data rows in one pass:
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'filter=title.search:"open government data",from_publication_date:2023-01-01' --data-urlencode 'sort=cited_by_count:desc' --data-urlencode 'per-page=20' --data-urlencode 'select=display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq -r '["title","year","cited_by","doi"], (.results[] | [.display_name, .publication_year, .cited_by_count, (.doi // "")]) | @csv' > results.csv
+```
+
+Add `open_access` to `select=` and include the OA flag in the CSV:
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'filter=title.search:"open government data",from_publication_date:2023-01-01' --data-urlencode 'sort=cited_by_count:desc' --data-urlencode 'per-page=20' --data-urlencode 'select=display_name,publication_year,cited_by_count,doi,open_access,best_oa_location' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq -r '["title","year","cited_by","doi","is_oa","pdf_url"], (.results[] | [.display_name, .publication_year, .cited_by_count, (.doi // ""), .open_access.is_oa, (.best_oa_location.pdf_url // "")]) | @csv' > results.csv
+```
+
+## 7) Europe PMC fallback when OpenAlex has no pdf_url
 
 Some OA works have no `pdf_url` in any OpenAlex location record (script exits with code 2).
 If the work is indexed in Europe PMC, the PDF is still reachable directly:

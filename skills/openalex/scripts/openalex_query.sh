@@ -6,6 +6,11 @@ if [[ -z "${OPENALEX_API_KEY:-}" ]]; then
   exit 1
 fi
 
+if ! command -v jq &>/dev/null; then
+  echo "ERROR: jq is not installed." >&2
+  exit 1
+fi
+
 entity="works"
 per_page="25"
 raw="false"

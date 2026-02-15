@@ -39,7 +39,7 @@ fix broken curl example in query-recipes
 
 ## Adding a skill
 
-1. Create `skills/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`, `compatibility`, `license`, `metadata`).
+1. Create `skills/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`).
 2. Add optional `scripts/`, `references/`, `assets/` as needed.
 3. Copy evals template: `cp -r evals/_template/ evals/<skill-name>/` and fill in the three files.
 4. Open a PR.
@@ -51,6 +51,11 @@ Required:
 ```yaml
 name: skill-name
 description: One-sentence description used for agent trigger matching.
+```
+
+Optional:
+
+```yaml
 compatibility: Lists runtime dependencies (tools, env vars, internet).
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:

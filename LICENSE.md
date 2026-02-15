@@ -12,7 +12,7 @@ Licensed under the **Creative Commons Attribution-ShareAlike 4.0 International (
 
 You are free to share and adapt this material for any purpose, including commercial use, provided you:
 
-- give appropriate credit to **onData Association** — [info@ondata.it](mailto:info@ondata.it) — [ondata.it](https://www.ondata.it/)
+- give appropriate credit to **onData Association** — [info@ondata.it](mailto:info@ondata.it)
 - distribute any derivative works under the same license.
 
 Full license text: <https://creativecommons.org/licenses/by-sa/4.0/legalcode>

@@ -32,7 +32,9 @@ Or install manually:
 
 ### About the install tool
 
-The `npx skills add` commands above use [skills.sh](https://skills.sh/docs), currently the most convenient way to install and manage Agent Skills across AI tools.
+The `npx skills add` commands above use [skills.sh](https://skills.sh/docs), a shell tool and currently the most convenient way to install and manage Agent Skills across AI tools.
+
+Skills work best with CLI-based AI tools (Claude Code, Gemini CLI, OpenAI Codex, etc.) — the command-line context gives the agent full access to your environment and makes skill workflows faster and richer.
 
 During installation you'll be asked:
 

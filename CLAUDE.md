@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A curated collection of AI skills maintained by the [onData](https://www.ondata.it/) association. Skills are tool-agnostic instructions for AI agents, following the [Agent Skills](https://agentskills.io) open standard.
 
-All content must be in **English**.
+All content must be in **English** — skills, docs, comments, commit messages, and `LOG.md` entries.
 
 ## Skill structure
 

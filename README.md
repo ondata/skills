@@ -12,14 +12,16 @@ The project follows an open source model: public repo, open contributions, organ
 
 ## Install
 
-Skills follow the [Agent Skills](https://agentskills.io) open standard and can be installed with:
+Skills follow the [Agent Skills](https://agentskills.io) open standard. If you're new to skills, start with a single one to get familiar with how they work:
 
 ```bash
-# Install all skills
-npx skills add ondata/skills
-
-# Install a single skill
 npx skills add ondata/skills --skill openalex
+```
+
+Once comfortable, you can install the full collection:
+
+```bash
+npx skills add ondata/skills
 ```
 
 Or install manually:

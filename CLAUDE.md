@@ -50,6 +50,16 @@ Then restart Claude Code for changes to take effect.
 - `docs/testing-agent-skills-with-evals.md` — eval methodology reference ([online](https://developers.openai.com/blog/eval-skills/))
 - `evals/README.md` — eval dashboard and contributor guide
 
+## Git workflow
+
+Use **GitHub Flow**: `main` is always stable; all work happens on branches.
+
+- Never commit directly to `main`.
+- Branch naming: `add/`, `fix/`, `eval/`, `docs/` prefix + short description.
+- Open a PR for every change; merge only after review.
+
+See `CONTRIBUTING.md` for full details.
+
 ## Bash commands in skills
 
 When writing or generating shell commands inside skill instructions or recipes:

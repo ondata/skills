@@ -9,6 +9,15 @@ This project uses **GitHub Flow**: `main` is always stable; all work happens on 
 - Never commit directly to `main`.
 - One branch per contribution (skill, fix, eval, doc).
 - Open a pull request for every change; merge only after review.
+- Delete the branch after merge (locally and on remote).
+
+After a PR is merged, delete the branch:
+
+```bash
+git checkout main
+git branch -d <branch-name>
+git push origin --delete <branch-name>
+```
 
 ### Branch naming
 

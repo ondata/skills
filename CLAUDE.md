@@ -57,6 +57,7 @@ Use **GitHub Flow**: `main` is always stable; all work happens on branches.
 - Never commit directly to `main`.
 - Branch naming: `add/`, `fix/`, `eval/`, `docs/` prefix + short description.
 - Open a PR for every change; merge only after review.
+- Delete the branch after merge: `git switch main && git branch -d <branch> && git push origin --delete <branch>`.
 
 See `CONTRIBUTING.md` for full details.
 

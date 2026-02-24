@@ -4,7 +4,7 @@ description: Query OpenAlex API from the command line with curl and jq for publi
 compatibility: Requires curl, jq, bash, OPENALEX_API_KEY environment variable, and internet access.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.1"
+  version: "0.2"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, research, scholarly, bibliometrics, open-access, curl, jq, pdf]
 ---
@@ -45,7 +45,7 @@ export OPENALEX_API_KEY='...'
 2. Run list query (works):
 
 ```bash
-curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data quality" AND "open government data"' --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=relevance_score:desc' --data-urlencode 'per-page=20' --data-urlencode 'select=id,display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year, cited_by:.cited_by_count, doi}'
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data quality" AND "open government data"' --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=relevance_score:desc' --data-urlencode 'per-page=200' --data-urlencode 'select=id,display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year, cited_by:.cited_by_count, doi}'
 ```
 
 ## Workflow
@@ -61,11 +61,55 @@ curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data q
 
 - `title.search=`: searches only in the title — use this by default for focused results. Must be passed inside `filter=`, not as a standalone parameter: `filter=title.search:"your query"`.
 - `search=`: full-text search across the entire document — use only when title-only matching is too restrictive.
+- `search.semantic=`: semantic/conceptual search (costs $0.001/request; requires API key).
 - `filter=`: exact/structured constraints; comma means AND.
 - `sort=`: `relevance_score:desc`, `cited_by_count:desc`, `publication_date:desc`, etc.
-- `per-page=`: 1..200.
+- `per-page=`: 1..200. **Default is 25 — always set `per-page=200` for bulk queries (8× fewer API calls).**
+- `page=`: page number for standard pagination.
 - `cursor=*`: deep pagination beyond first 10k records.
 - `select=`: reduce payload; nested paths are not allowed in `select`.
+- `group_by=`: aggregate results by a field (e.g. `group_by=publication_year`, `group_by=topics.id`).
+- `sample=`: random sample of N results (e.g. `sample=20`). Add `seed=42` for reproducibility.
+
+## Filter Syntax
+
+Filters are comma-separated AND conditions. Within a single attribute:
+
+| Logic | Syntax | Example |
+|-------|--------|---------|
+| AND (comma) | `filter=a:x,b:y` | `filter=type:article,is_oa:true` |
+| OR (pipe) | `filter=type:article\|book` | multiple values for same field |
+| NOT (exclamation) | `filter=type:!journal-article` | negation |
+| Greater than | `filter=cited_by_count:>100` | comparison |
+| Less than | `filter=publication_year:<2020` | comparison |
+| Range | `filter=publication_year:2020-2023` | inclusive range |
+
+## Batch Lookup
+
+Combine up to **50 IDs in one request** using the pipe operator — avoid sequential calls:
+
+```bash
+# Batch DOI lookup (up to 50 per request)
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'filter=doi:https://doi.org/10.1/abc|https://doi.org/10.2/def' --data-urlencode 'per-page=50' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, doi}'
+```
+
+## Two-Step Entity Lookup
+
+Names are ambiguous; always resolve to an OpenAlex ID first, then filter.
+
+**Step 1 — find the entity ID:**
+
+```bash
+curl -sS --get 'https://api.openalex.org/authors' --data-urlencode 'search=Heather Piwowar' --data-urlencode 'per-page=5' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {id, display_name}'
+```
+
+**Step 2 — use the ID in a filter:**
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'filter=authorships.author.id:A5023888391' --data-urlencode 'per-page=200' --data-urlencode 'select=id,display_name,publication_year,cited_by_count' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year}'
+```
+
+Applies to: authors (`authorships.author.id`), institutions (`authorships.institutions.id`), sources/journals (`primary_location.source.id`). External IDs are also accepted: ORCID, ROR, ISSN, DOI.
 
 ## PDF Retrieval
 
@@ -108,10 +152,41 @@ Rules:
 - The header array and data array must have the same number of columns.
 - Use `-r` (raw output) so `@csv` produces plain text, not JSON strings.
 
+## Error Handling
+
+Implement exponential backoff on 403 (rate limit) and 500 (server error):
+
+```
+attempt 1 → wait 1s → attempt 2 → wait 2s → attempt 3 → wait 4s → attempt 4 → wait 8s
+```
+
+HTTP codes:
+- `200` — success
+- `400` — invalid parameter or filter syntax; fix the query
+- `403` — rate limit exceeded; back off and retry
+- `404` — entity not found
+- `500` — temporary server error; retry with backoff
+
+## Endpoint Costs
+
+With the free $1/day budget:
+
+| Request type | Cost | Daily limit |
+|---|---|---|
+| Singleton (`/works/W123`) | free | unlimited |
+| List / filter | $0.0001 | ~10,000 requests |
+| Search (full-text or semantic) | $0.001 | ~1,000 requests |
+| PDF download (`content.openalex.org`) | $0.01 | ~100 downloads |
+
+Use `select=` and `per-page=200` to minimize request count.
+
 ## Common Pitfalls
 
 - Do not sort by `relevance_score` without a search query.
 - Do not use nested fields in `select` (example: use `open_access`, then parse `.open_access.is_oa` with `jq`).
+- Do not filter by entity names directly — use the two-step entity lookup to get the ID first.
+- Do not use sequential calls for batch ID lookups — batch up to 50 with the pipe operator.
+- Do not use `per-page=25` (default) for bulk extraction — always set `per-page=200`.
 - Expect some records to have no downloadable PDF.
 - `search=` searches full text and can return loosely related results. Use `title.search=` when the topic must appear in the title.
 - Always write `curl` commands on a single line — multi-line `\` continuation breaks argument parsing in agent environments.

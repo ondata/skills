@@ -1,0 +1,8 @@
+id,event_name,start_date,end_date,participants,budget_eur
+1,Convegno nazionale,01/03/2023,03/03/2023,450,12500
+2,Workshop digitale,15/04/2023,15/04/2023,80,3200
+3,Seminario PA,22.05.2023,23.05.2023,120,5800
+4,Forum open data,10/06/2023,11/06/2023,300,9400
+5,Conferenza annuale,05.09.2023,07.09.2023,600,28000
+6,Hackathon,18/11/2023,19/11/2023,200,7500
+7,Tavola rotonda,02/12/2023,02/12/2023,50,1800

@@ -1,0 +1,9 @@
+id,should_trigger,prompt
+test-01,true,"Use the open-data-quality skill to validate the CSV at /tmp/bilancio_2023.csv"
+test-02,true,"Check the data quality of this CKAN dataset: https://dati.gov.it/opendata dataset ID bilancio-di-genere-2023"
+test-03,true,"I downloaded a CSV from our open data portal. Can you run a quality check on it? The file is at /tmp/export.csv"
+test-04,true,"We need to assess whether the municipality budget dataset on dati.gov.it is usable. Can you evaluate its metadata and CSV quality?"
+test-05,true,"Run odq-csv on data.csv and give me the JSON report"
+test-06,true,"Is this CSV file compliant with DCAT-AP_IT standards? Check /tmp/dataset.csv and the portal metadata"
+test-07,false,"Convert this CSV file from semicolons to commas and fix the encoding"
+test-08,false,"Scrape all datasets from the Italian open data portal and download them"

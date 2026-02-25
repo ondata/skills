@@ -1,0 +1,11 @@
+id,name,value_a,value_b,category,notes
+1,Alpha,100,200,A,ok
+2,Beta,n/a,150,B,n.d.
+3,Gamma,-,300,A,n/a
+4,Delta,250,n.d.,C,ok
+5,Epsilon,180,n/a,B,-
+6,Zeta,n.a.,420,A,ok
+7,Eta,310,nd,C,n.r.
+8,Theta,n/a,n/a,B,k.a.
+9,Iota,200,180,A,ok
+10,Kappa,-,-,C,ok

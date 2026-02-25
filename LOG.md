@@ -1,5 +1,13 @@
 # LOG
 
+## 2026-02-25
+
+- Added `open-data-quality` skill: CSV validator (`odq-csv`) and CKAN/DCAT-AP metadata validator (`odq-ckan`)
+- Created missing `__init__.py` for package discovery
+- Translated `scripts/README.md` from Italian to English
+- Tested end-to-end on real dati.gov.it datasets (bilancio, popolazione)
+- Created eval suite: `evals/open-data-quality/` (8 prompts, 15 checks)
+
 ## 2026-02-24
 
 - `openalex` SKILL.md v0.2: added filter syntax (OR/NOT/ranges), batch pipe lookup, two-step entity lookup, `group_by`/`sample`/`seed` params, `per-page=200` default, error handling with backoff, endpoint costs table

@@ -1,0 +1,8 @@
+department,category,q1_budget,q2_budget,q3_budget,q4_budget
+Informatica,hardware,15000,12000,18000,14000
+Informatica,software,8000,9000,7500,11000
+Amministrazione,personale,45000,45000,45000,48000
+Amministrazione,formazione,2000,1500,3000,2500
+Servizi,pulizie,6000,6000,6000,6500
+Servizi,manutenzione,4000,5000,3500,4500
+TOTALE,,80000,78500,83000,86500

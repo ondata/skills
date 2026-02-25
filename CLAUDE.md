@@ -34,13 +34,19 @@ To add evals for a new skill: copy `evals/_template/` into `evals/<skill-name>/`
 
 ## Installing a skill locally
 
-After modifying a skill, sync it to Claude Code:
+**Do NOT install skills unless explicitly asked.**
+
+When asked, use the `skills` CLI (from [vercel-labs/skills](https://github.com/vercel-labs/skills)):
 
 ```bash
-cp -r skills/<skill-name> ~/.claude/skills/
+# Install one skill for Claude Code + Codex, globally, no prompts
+npx skills add skills/<skill-name> --agent claude-code --agent codex --global --yes
+
+# Install all skills at once
+npx skills add skills/ --skill '*' --agent claude-code --agent codex --global --yes
 ```
 
-Then restart Claude Code for changes to take effect.
+This copies the skill to `~/.agents/skills/<skill-name>/` (canonical) and symlinks it into `~/.claude/skills/<skill-name>/` for Claude Code.
 
 ## Key documents
 

@@ -57,6 +57,21 @@ curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data q
 5. Page results with `page` or `cursor=*`.
 6. Extract fields via `jq` and save/transform as needed.
 
+## Iterative Validation Workflow
+
+Use this when building or debugging non-trivial queries.
+
+1. Start with a toy query (`per-page=5` or `per-page=10`) and minimal `select=`.
+2. Manually inspect 5-10 records for relevance and field quality (`display_name`, year, DOI).
+3. Compare a baseline and a variant before scaling:
+   - baseline: `filter=title.search:"..."`
+   - variant: `search=...` with same filters
+4. Tune one parameter at a time (`search`, `filter`, `sort`, `per-page`, pagination mode).
+5. Scale only after validation (`per-page=200`, then `cursor=*` for deep pagination).
+6. Log each run: command, key parameters, result count, and quick notes.
+
+Avoid jumping directly from a paper/spec to a full extraction script without this short validation loop.
+
 ## Query Blocks
 
 - `title.search=`: searches only in the title — use this by default for focused results. Must be passed inside `filter=`, not as a standalone parameter: `filter=title.search:"your query"`.

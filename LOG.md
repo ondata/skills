@@ -1,5 +1,9 @@
 # LOG
 
+## 2026-02-25
+
+- `openalex` SKILL.md v0.3: added Iterative Validation Workflow section (toy query → inspect → compare baseline/variant → tune one param at a time → scale after validation → log each run)
+
 ## 2026-02-24
 
 - `openalex` SKILL.md v0.2: added filter syntax (OR/NOT/ranges), batch pipe lookup, two-step entity lookup, `group_by`/`sample`/`seed` params, `per-page=200` default, error handling with backoff, endpoint costs table

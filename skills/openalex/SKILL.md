@@ -4,7 +4,7 @@ description: Query OpenAlex API from the command line with curl and jq for publi
 compatibility: Requires curl, jq, bash, OPENALEX_API_KEY environment variable, and internet access.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.2"
+  version: "0.3"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, research, scholarly, bibliometrics, open-access, curl, jq, pdf]
 ---

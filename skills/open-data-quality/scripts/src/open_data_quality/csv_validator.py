@@ -53,6 +53,8 @@ MONTH_NAMES = re.compile(
 
 YEAR_COLUMN = re.compile(r"^(19|20)\d{2}$")
 
+ISO_DATETIME_PAT = re.compile(r"^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2})?", re.IGNORECASE)
+
 FOOTNOTE_PAT = re.compile(r"\(\d+\)|\(\*\)|\d+\s*\*")
 
 # codes columns heuristic
@@ -572,6 +574,8 @@ class CsvValidator:
                 val_list = [row[0] for row in vals if row[0]]
                 if len(val_list) < 2 or len(val_list) > 80:
                     continue
+                if val_list and ISO_DATETIME_PAT.match(val_list[0]):
+                    continue  # skip datetime-like columns
                 if len(val_list) / max(self._row_count, 1) > 0.5:
                     continue  # cardinality too high — not categorical
                 self._con.execute("DROP TABLE IF EXISTS __odq_cat")

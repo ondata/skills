@@ -2,6 +2,8 @@
 
 ## 2026-02-26
 
+- `open-data-quality`: fix encoding false positive — normalize `utf_8` → `utf-8` before comparison; was marking valid UTF-8 files as MAJOR issue
+- `open-data-quality`: split fuzzy check — trailing/leading whitespace now reported separately; fuzzy comparison works on trimmed values to avoid spurious matches
 - `open-data-quality`: fix #11 — placeholder message now shows actual values found (e.g. `NA`) instead of full catalog `n/a, n.d., -…`; SQL uses `list_distinct(list(...))` to collect found values per column
 
 - `open-data-quality`: non-UTF8 encoding no longer a BLOCKER — `charset_normalizer` detects encoding, file converted to UTF-8 temp copy, full analysis runs; MAJOR finding reported (tested on Comune di Palermo CP1250 dataset: 33→73/100)

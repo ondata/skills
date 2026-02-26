@@ -263,13 +263,14 @@ class CsvValidator:
         # Encoding — skip if Phase 0 already detected and flagged non-UTF-8
         if self._orig_path is None:
             enc, conf = _detect_encoding(self.path)
-            is_utf8 = enc in ("utf-8", "utf-8-sig", "ascii", "us-ascii")
+            enc_norm = enc.replace("_", "-").lower()
+            is_utf8 = enc_norm in ("utf-8", "utf-8-sig", "ascii", "us-ascii")
             if is_utf8:
-                r.ok(p, "encoding_utf8", f"Encoding: {enc} ({conf:.0%} confidence)")
+                r.ok(p, "encoding_utf8", f"Encoding: UTF-8 ({conf:.0%} confidence)")
             else:
                 r.major(p, "encoding_not_utf8",
-                        f"Encoding detected as {enc!r} ({conf:.0%} confidence) — expected UTF-8",
-                        fix=f"iconv -f {enc} -t UTF-8 input.csv > output.csv")
+                        f"Encoding detected as {enc_norm!r} ({conf:.0%} confidence) — expected UTF-8",
+                        fix=f"iconv -f {enc_norm} -t UTF-8 input.csv > output.csv")
 
         # BOM
         if _has_bom(self.path):
@@ -515,13 +516,34 @@ class CsvValidator:
                         detail=", ".join(row[0] for row in num_rows[:5]),
                         fix="Remove thousands separator then cast to DOUBLE/BIGINT")
 
-        # ── Fuzzy near-duplicate category values ─────────────────────────
+        # ── Trailing whitespace in category values ────────────────────────
         varchar_cats = [c["name"] for c in self._duckdb_columns if c["type"] in ("VARCHAR", "TEXT")]
+        ws_cols: list[str] = []
+        for col in varchar_cats[:20]:
+            try:
+                hit = self._con.execute(f"""
+                    SELECT COUNT(*) FROM {self._rcsv(path)}
+                    WHERE "{col}" IS NOT NULL AND "{col}" != trim("{col}")
+                    LIMIT 1
+                """).fetchone()
+                if hit and hit[0] > 0:
+                    ws_cols.append(col)
+            except Exception:
+                continue
+        if ws_cols:
+            r.minor(p, "trailing_whitespace_values",
+                    f"{len(ws_cols)} column(s) with leading/trailing whitespace in values",
+                    detail=", ".join(ws_cols[:5]),
+                    fix="trim() all string columns before publishing: UPDATE … SET col = TRIM(col)")
+        else:
+            r.ok(p, "no_trailing_whitespace", "No leading/trailing whitespace in category values")
+
+        # ── Fuzzy near-duplicate category values ─────────────────────────
         fuzzy_issues: list[tuple[str, list]] = []
         for col in varchar_cats[:20]:
             try:
                 vals = self._con.execute(f"""
-                    SELECT "{col}"::VARCHAR AS v
+                    SELECT trim("{col}"::VARCHAR) AS v
                     FROM {self._rcsv(path)}
                     WHERE "{col}" IS NOT NULL AND length(trim("{col}")) > 3
                     GROUP BY 1 HAVING COUNT(*) >= 2

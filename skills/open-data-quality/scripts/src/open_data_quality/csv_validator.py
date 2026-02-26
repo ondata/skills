@@ -186,6 +186,26 @@ class CsvValidator:
 
         with open(self.path, "rb") as f:
             chunk = f.read(8192)
+
+        # Detect common non-CSV file types via magic bytes / content sniffing
+        _MAGIC: list[tuple[bytes, str]] = [
+            (b"PK\x03\x04", "ZIP archive"),
+            (b"PK\x05\x06", "ZIP archive"),
+            (b"%PDF",        "PDF document"),
+            (b"\xd0\xcf\x11\xe0", "OLE2/Excel document"),
+            (b"\xff\xfe",   "UTF-16 LE encoded file (not UTF-8 CSV)"),
+            (b"\xfe\xff",   "UTF-16 BE encoded file (not UTF-8 CSV)"),
+        ]
+        for sig, label in _MAGIC:
+            if chunk[:len(sig)] == sig:
+                r.blocker(p, "file_wrong_type", f"File is a {label} — not a CSV"); return
+
+        head = chunk[:512].decode("utf-8", errors="replace").lstrip()
+        if head.lower().startswith(("<!doctype", "<html", "<?xml")):
+            r.blocker(p, "file_wrong_type", "File is an HTML/XML document — not a CSV"); return
+        if head.startswith("{") or head.startswith("["):
+            r.blocker(p, "file_wrong_type", "File is a JSON document — not a CSV"); return
+
         if b"\x00" in chunk:
             r.blocker(p, "file_binary", "File appears binary (null bytes) — not a CSV"); return
 
@@ -561,7 +581,9 @@ class CsvValidator:
                     SELECT a.v, b.v, jaro_winkler_similarity(a.v, b.v) AS sim
                     FROM __odq_cat a, __odq_cat b
                     WHERE a.v < b.v
-                      AND jaro_winkler_similarity(a.v, b.v) > 0.92
+                      AND length(a.v) > 5 AND length(b.v) > 5
+                      AND jaro_winkler_similarity(a.v, b.v) > 0.95
+                      AND levenshtein(a.v, b.v)::FLOAT / GREATEST(length(a.v), length(b.v)) < 0.10
                     ORDER BY sim DESC LIMIT 5
                 """).fetchall()
                 self._con.execute("DROP TABLE IF EXISTS __odq_cat")

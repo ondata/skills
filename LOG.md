@@ -2,6 +2,9 @@
 
 ## 2026-02-26
 
+- `open-data-quality`: file type detection in phase 0 — detect ZIP, HTML/XML, JSON, PDF, OLE2/Excel, UTF-16 via magic bytes/content sniffing; report specific type (e.g. "File is a ZIP archive") instead of generic binary/separator error
+- `open-data-quality`: fuzzy false positive fix — add `levenshtein/max_len < 10%` ratio filter + raise JW threshold to 0.95 + minimum length > 5; eliminates NORD-EST~NORD-OVEST, MINISTERO DELLA DIFESA~SALUTE type false positives while preserving real typos (D'INTERESSE~DI INTERESSE caught at 4% ratio)
+
 - `open-data-quality`: fix encoding false positive — normalize `utf_8` → `utf-8` before comparison; was marking valid UTF-8 files as MAJOR issue
 - `open-data-quality`: split fuzzy check — trailing/leading whitespace now reported separately; fuzzy comparison works on trimmed values to avoid spurious matches
 - `open-data-quality`: fix #11 — placeholder message now shows actual values found (e.g. `NA`) instead of full catalog `n/a, n.d., -…`; SQL uses `list_distinct(list(...))` to collect found values per column

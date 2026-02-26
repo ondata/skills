@@ -473,7 +473,7 @@ class CsvValidator:
         ph_list = ", ".join(f"'{v}'" for v in PLACEHOLDER_VALUES)
         try:
             ph_rows = self._con.execute(f"""
-                SELECT col, COUNT(*) AS n
+                SELECT col, COUNT(*) AS n, list_distinct(list(lower(trim(val)))) AS found_vals
                 FROM (UNPIVOT (
                     SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT {sample}
                 ) ON COLUMNS(*) INTO NAME col VALUE val)
@@ -484,8 +484,10 @@ class CsvValidator:
         except Exception:
             ph_rows = []
         if ph_rows:
+            all_found = sorted({v for row in ph_rows for v in (row[2] or [])})
+            found_str = ", ".join(all_found) if all_found else "…"
             r.major(p, "placeholder_values",
-                    f"Placeholder values (n/a, n.d., -, …) in {len(ph_rows)} column(s)",
+                    f"Placeholder values ({found_str}) in {len(ph_rows)} column(s)",
                     detail=", ".join(f"{row[0]}({row[1]})" for row in ph_rows[:5]),
                     fix="Replace with proper NULL/empty; document missing-data policy")
         else:

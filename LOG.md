@@ -2,6 +2,8 @@
 
 ## 2026-02-26
 
+- `open-data-quality`: fix #11 — placeholder message now shows actual values found (e.g. `NA`) instead of full catalog `n/a, n.d., -…`; SQL uses `list_distinct(list(...))` to collect found values per column
+
 - `open-data-quality`: non-UTF8 encoding no longer a BLOCKER — `charset_normalizer` detects encoding, file converted to UTF-8 temp copy, full analysis runs; MAJOR finding reported (tested on Comune di Palermo CP1250 dataset: 33→73/100)
 - `open-data-quality`: added fuzzy near-duplicate category check via `jaro_winkler_similarity > 0.92` (DuckDB built-in) — found real issues in Palermo dataset
 - `open-data-quality`: CRLF line endings no longer flagged (RFC 4180 prescribes CRLF)

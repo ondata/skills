@@ -11,6 +11,7 @@ Usage examples:
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 from typing import Annotated, Optional
@@ -20,6 +21,12 @@ from rich.console import Console
 
 from .csv_validator import CsvValidator
 from .reporter import render_markdown, render_terminal
+
+def _to_snake(name: str) -> str:
+    """Convert a filename stem to snake_case for the auto report filename."""
+    name = re.sub(r"[^a-zA-Z0-9]+", "_", name).strip("_").lower()
+    return name or "report"
+
 
 app = typer.Typer(
     name="odq-csv",
@@ -52,6 +59,14 @@ def main(
         output_json.write_text(report.to_json(), encoding="utf-8")
         if not quiet:
             console.print(f"[dim]JSON report written to:[/dim] {output_json}")
+
+    # Auto-write markdown report to ./open-data-quality/<name>.md
+    auto_md_dir = Path.cwd() / "open-data-quality"
+    auto_md_dir.mkdir(exist_ok=True)
+    auto_md_path = auto_md_dir / f"{_to_snake(csv_file.stem)}.md"
+    auto_md_path.write_text(render_markdown(report, show_ok=show_ok), encoding="utf-8")
+    if not quiet:
+        console.print(f"[dim]Report:[/dim] {auto_md_path}")
 
     if output_md:
         output_md.write_text(render_markdown(report, show_ok=show_ok), encoding="utf-8")

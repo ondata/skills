@@ -1,5 +1,18 @@
 # LOG
 
+## 2026-02-26
+
+- `open-data-quality`: non-UTF8 encoding no longer a BLOCKER — `charset_normalizer` detects encoding, file converted to UTF-8 temp copy, full analysis runs; MAJOR finding reported (tested on Comune di Palermo CP1250 dataset: 33→73/100)
+- `open-data-quality`: added fuzzy near-duplicate category check via `jaro_winkler_similarity > 0.92` (DuckDB built-in) — found real issues in Palermo dataset
+- `open-data-quality`: CRLF line endings no longer flagged (RFC 4180 prescribes CRLF)
+- `open-data-quality`: replaced `chardet` with `charset_normalizer` for more accurate encoding detection
+- `open-data-quality`: added developer notes to `CONTRIBUTING.md` (WSL/uvx cache, PYTHONUTF8, DuckDB lenient parsing)
+- `evals/open-data-quality/fixtures/palermo-edifici-pubblici-cp1250.csv`: archived as encoding test fixture
+- `open-data-quality`: fixed false BLOCKER on valid CSVs with quoted newlines in headers — retry with `strict_mode=false`; added `_lenient` flag + `_rcsv()` helper across all DuckDB queries (score 29→86 on Copertino dataset)
+- `open-data-quality`: SKILL.md rewritten — `uvx odq-csv`/`odq-ckan` is now the single primary path; all bash inline phases removed (no double maintenance)
+- SKILL.md reduced from ~450 to ~130 lines
+- `evals/checks.md` updated to validate `uvx` + package usage
+
 ## 2026-02-25
 
 - Added `open-data-quality` skill: CSV validator (`odq-csv`) and CKAN/DCAT-AP metadata validator (`odq-ckan`)

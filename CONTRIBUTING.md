@@ -53,6 +53,38 @@ fix broken curl example in query-recipes
 3. Copy evals template: `cp -r evals/_template/ evals/<skill-name>/` and fill in the three files.
 4. Open a PR.
 
+## Developer notes
+
+### Local development with open-data-quality scripts
+
+When editing Python sources under `skills/open-data-quality/scripts/` from WSL, do **not** use `uvx` from the Windows side — it builds a cached wheel and does not detect WSL source changes.
+
+Use WSL's own `uv` instead:
+
+```bash
+wsl -e bash -c "~/.local/bin/uv run --project ./skills/open-data-quality/scripts odq-csv /tmp/data.csv"
+wsl -e bash -c "~/.local/bin/uv run --project ./skills/open-data-quality/scripts odq-ckan https://dati.gov.it/opendata DATASET-ID"
+```
+
+### Windows encoding (cp1252 terminals)
+
+On Windows terminals that use cp1252, `uvx` may raise `UnicodeEncodeError` if the output contains characters outside ASCII.
+Set `PYTHONUTF8=1` before running:
+
+```powershell
+# PowerShell
+$env:PYTHONUTF8=1; uvx --from git+https://github.com/ondata/open-data-quality odq-csv data.csv
+
+# Command Prompt
+set PYTHONUTF8=1 && uvx --from git+https://github.com/ondata/open-data-quality odq-csv data.csv
+```
+
+### DuckDB lenient parsing (`strict_mode=false`)
+
+Some valid CSVs (e.g., with quoted newlines in headers, as per RFC 4180) fail DuckDB's default `read_csv_auto`. The validator retries with `strict_mode=false` before declaring a BLOCKER, and propagates the flag to all subsequent queries via the `_lenient` / `_rcsv()` pattern in `csv_validator.py`.
+
+---
+
 ## Frontmatter fields
 
 Required:

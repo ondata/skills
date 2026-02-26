@@ -10,11 +10,11 @@ These do not require code — they describe what to look for.
 
 ## Process checks
 
-- [ ] Agent installs the package with `uv tool install` or uses `uvx` before running
 - [ ] Agent runs `odq-csv` for local CSV validation
 - [ ] Agent runs `odq-ckan` when a portal URL and dataset ID are provided
-- [ ] Agent uses `--output-json` to produce machine-readable output when requested
-- [ ] Agent uses `--download` flag with `odq-ckan` when CSV validation is also needed
+- [ ] Agent uses `uvx --from git+...` (no install step needed)
+- [ ] Agent adds `--download` to `odq-ckan` when CSV validation is also requested
+- [ ] Agent skips `odq-ckan` when only a local CSV is provided
 
 ## Output checks
 

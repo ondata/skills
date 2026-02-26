@@ -42,9 +42,9 @@ Options:
 | Phase | Checks |
 |-------|--------|
 | **0 — Blockers** | File exists, not empty, not binary; DuckDB can parse it; minimum size |
-| **1 — Structure** | Encoding (UTF-8 required), BOM, CRLF line endings, separator, header present |
+| **1 — Structure** | Encoding (UTF-8 required), BOM, separator, header present |
 | **2 — Columns** | Duplicate names, non-SQL names (spaces, special characters, leading digit), wide format (years/months as columns), total/aggregate rows, footnote markers |
-| **3 — Content** | Comma decimal separator, non-ISO dates (DD/MM/YYYY, DD.MM.YYYY...), units in numeric values, multilingual placeholders (n/a, n.d., k.a., n.r....), null %, numeric columns typed as VARCHAR |
+| **3 — Content** | Comma decimal separator, non-ISO dates (DD/MM/YYYY, DD.MM.YYYY...), units in numeric values, multilingual placeholders (n/a, n.d., k.a., n.r....), null %, numeric columns typed as VARCHAR, near-duplicate category values (Jaro-Winkler fuzzy typo detection) |
 | **4 — Codes** | EU NUTS codes, ISTAT municipality codes (6 digits, leading zeros), ISO 3166-1 country |
 
 ### Output

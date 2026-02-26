@@ -13,8 +13,9 @@ from __future__ import annotations
 import csv as csvmod
 import io
 import re
+import tempfile
 from pathlib import Path
-import chardet
+from charset_normalizer import from_bytes
 import duckdb
 
 from .models import QualityReport, ScoreDimension, Severity
@@ -67,8 +68,11 @@ CODE_COL_PAT = re.compile(
 def _detect_encoding(path: Path) -> tuple[str, float]:
     with open(path, "rb") as f:
         raw = f.read(65536)
-    result = chardet.detect(raw)
-    return (result.get("encoding") or "unknown").lower(), result.get("confidence", 0.0)
+    results = from_bytes(raw)
+    best = results.best()
+    if best is None:
+        return "unknown", 0.0
+    return best.encoding.lower(), 1.0 - best.chaos
 
 
 def _has_bom(path: Path) -> bool:
@@ -137,6 +141,16 @@ class CsvValidator:
         self._raw_headers: list[str] = []       # original headers from file
         self._row_count: int = 0
         self._separator: str = ","
+        self._lenient: bool = False             # True when strict_mode=false is needed
+        self._orig_path: Path | None = None    # set when a UTF-8 temp copy replaces self.path
+
+    def _rcsv(self, path, opts: str = "") -> str:
+        """Build a read_csv_auto() SQL expression, adding strict_mode=false when needed."""
+        parts = [opts] if opts else []
+        if self._lenient:
+            parts.append("strict_mode=false")
+        suffix = (", " + ", ".join(parts)) if parts else ""
+        return f"read_csv_auto('{path}'{suffix})"
 
     def run(self) -> QualityReport:
         self._phase0_blockers()
@@ -154,6 +168,10 @@ class CsvValidator:
         finally:
             self._con.close()
         self._compute_scores()
+        # cleanup UTF-8 temp copy if one was created
+        if self._orig_path is not None:
+            self.path.unlink(missing_ok=True)
+            self.path = self._orig_path
         return self.report
 
     # ── Phase 0: blockers ────────────────────────────────────────────────
@@ -182,9 +200,51 @@ class CsvValidator:
             ).fetchall()
             cols = len(cols_info)
             con.close()
-        except Exception as e:
-            r.blocker(p, "csv_unparseable", f"DuckDB cannot parse file: {e}",
-                      fix="Check separator, quoting, and encoding"); return
+        except Exception:
+            # Retry 1: strict_mode=false (handles quoted newlines in headers, etc.)
+            try:
+                con = duckdb.connect()
+                row = con.execute(
+                    f"SELECT COUNT(*) FROM read_csv_auto('{self.path}', sample_size=1000, strict_mode=false)"
+                ).fetchone()
+                rows = row[0] if row else 0
+                cols_info = con.execute(
+                    f"DESCRIBE SELECT * FROM read_csv_auto('{self.path}', sample_size=1, strict_mode=false)"
+                ).fetchall()
+                cols = len(cols_info)
+                con.close()
+                self._lenient = True
+                r.minor(p, "csv_needs_lenient_parsing",
+                        "File required lenient parsing (quoted newlines or minor formatting issues)",
+                        fix="Review header quoting — a field name contains a newline inside quotes")
+            except Exception:
+                # Retry 2: detect encoding, convert to UTF-8 temp file and re-parse
+                try:
+                    enc, _conf = _detect_encoding(self.path)
+                    if enc in ("utf-8", "utf8", "ascii", "unknown"):
+                        raise ValueError("Could not parse despite UTF-8/unknown encoding")
+                    tmp = Path(tempfile.mktemp(suffix=".csv"))
+                    with open(self.path, "rb") as f:
+                        raw = f.read()
+                    tmp.write_text(raw.decode(enc, errors="replace"), encoding="utf-8")
+                    con = duckdb.connect()
+                    row = con.execute(
+                        f"SELECT COUNT(*) FROM read_csv_auto('{tmp}', sample_size=1000)"
+                    ).fetchone()
+                    rows = row[0] if row else 0
+                    cols_info = con.execute(
+                        f"DESCRIBE SELECT * FROM read_csv_auto('{tmp}', sample_size=1)"
+                    ).fetchall()
+                    cols = len(cols_info)
+                    con.close()
+                    self._orig_path = self.path
+                    self.path = tmp   # all subsequent phases analyse the UTF-8 copy
+                    r.major(p, "encoding_not_utf8",
+                            f"File is {enc!r} encoded — converted to UTF-8 for analysis",
+                            fix=f"iconv -f {enc} -t utf-8 input.csv > output.csv")
+                except Exception as e:
+                    r.blocker(p, "csv_unparseable", f"DuckDB cannot parse file: {e}",
+                              fix="Check separator, quoting, and encoding"); return
 
         if rows == 0:
             r.blocker(p, "no_data_rows", "No data rows (header only or empty)"); return
@@ -200,15 +260,16 @@ class CsvValidator:
     def _phase1_structure(self) -> None:
         r, p = self.report, self.P1
 
-        # Encoding
-        enc, conf = _detect_encoding(self.path)
-        is_utf8 = enc in ("utf-8", "utf-8-sig", "ascii", "us-ascii")
-        if is_utf8:
-            r.ok(p, "encoding_utf8", f"Encoding: {enc} ({conf:.0%} confidence)")
-        else:
-            r.major(p, "encoding_not_utf8",
-                    f"Encoding detected as {enc!r} ({conf:.0%} confidence) — expected UTF-8",
-                    fix=f"iconv -f {enc} -t UTF-8 input.csv > output.csv")
+        # Encoding — skip if Phase 0 already detected and flagged non-UTF-8
+        if self._orig_path is None:
+            enc, conf = _detect_encoding(self.path)
+            is_utf8 = enc in ("utf-8", "utf-8-sig", "ascii", "us-ascii")
+            if is_utf8:
+                r.ok(p, "encoding_utf8", f"Encoding: {enc} ({conf:.0%} confidence)")
+            else:
+                r.major(p, "encoding_not_utf8",
+                        f"Encoding detected as {enc!r} ({conf:.0%} confidence) — expected UTF-8",
+                        fix=f"iconv -f {enc} -t UTF-8 input.csv > output.csv")
 
         # BOM
         if _has_bom(self.path):
@@ -217,10 +278,9 @@ class CsvValidator:
         else:
             r.ok(p, "no_bom", "No BOM")
 
-        # Line endings
+        # Line endings — RFC 4180 prescribes CRLF; both CRLF and LF are accepted
         if _has_crlf(self.path):
-            r.minor(p, "crlf_endings", "Windows CRLF line endings — prefer LF",
-                    fix="dos2unix input.csv")
+            r.ok(p, "crlf_endings", "CRLF line endings (RFC 4180 standard)")
         else:
             r.ok(p, "lf_endings", "LF line endings (Unix-style)")
 
@@ -239,7 +299,7 @@ class CsvValidator:
 
         # DuckDB schema (renamed columns)
         schema = self._con.execute(
-            f"DESCRIBE SELECT * FROM read_csv_auto('{self.path}')"
+            f"DESCRIBE SELECT * FROM {self._rcsv(self.path)}"
         ).fetchall()
         self._duckdb_columns = [{"name": row[0], "type": row[1]} for row in schema]
 
@@ -331,7 +391,7 @@ class CsvValidator:
         # SUMMARIZE for null rates — pure DuckDB, no pandas
         try:
             cur = self._con.execute(
-                f"SUMMARIZE SELECT * FROM read_csv_auto('{path}') LIMIT {sample}"
+                f"SUMMARIZE SELECT * FROM {self._rcsv(path)} LIMIT {sample}"
             )
             col_idx = {d[0]: i for i, d in enumerate(cur.description)}
             rows = cur.fetchall()
@@ -343,7 +403,7 @@ class CsvValidator:
         # Verify the file can be loaded as all-varchar (needed for pattern checks)
         try:
             self._con.execute(
-                f"SELECT COUNT(*) FROM read_csv_auto('{path}', all_varchar=true) LIMIT 1"
+                f"SELECT COUNT(*) FROM {self._rcsv(path, 'all_varchar=true')} LIMIT 1"
             ).fetchone()
         except Exception:
             r.minor(p, "varchar_load_failed", "Could not load data for content checks")
@@ -354,7 +414,7 @@ class CsvValidator:
             comma_rows = self._con.execute(f"""
                 SELECT col, COUNT(*) AS hits, MIN(val) AS example
                 FROM (UNPIVOT (
-                    SELECT * FROM read_csv_auto('{path}', all_varchar=true) LIMIT {sample}
+                    SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT {sample}
                 ) ON COLUMNS(*) INTO NAME col VALUE val)
                 WHERE regexp_matches(val, '^\\d+,\\d+$')
                 GROUP BY col HAVING COUNT(*) >= 3
@@ -374,7 +434,7 @@ class CsvValidator:
             date_rows = self._con.execute(f"""
                 SELECT col, COUNT(*) AS hits, MIN(val) AS example
                 FROM (UNPIVOT (
-                    SELECT * FROM read_csv_auto('{path}', all_varchar=true) LIMIT {min(sample, 500)}
+                    SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT {min(sample, 500)}
                 ) ON COLUMNS(*) INTO NAME col VALUE val)
                 WHERE regexp_matches(val, '^\\d{{1,2}}[/.]\\d{{1,2}}[/.]\\d{{4}}$')
                 GROUP BY col HAVING COUNT(*) >= 2
@@ -394,7 +454,7 @@ class CsvValidator:
             unit_rows = self._con.execute(f"""
                 SELECT col, COUNT(*) AS hits, MIN(val) AS example
                 FROM (UNPIVOT (
-                    SELECT * FROM read_csv_auto('{path}', all_varchar=true) LIMIT {min(sample, 500)}
+                    SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT {min(sample, 500)}
                 ) ON COLUMNS(*) INTO NAME col VALUE val)
                 WHERE regexp_matches(val, '^\\d+[.,]?\\d*\\s*(kg|km|EUR|%|ha|MW|GWh|tCO2|tn)\\s*$', 'i')
                 GROUP BY col HAVING COUNT(*) >= 2
@@ -415,7 +475,7 @@ class CsvValidator:
             ph_rows = self._con.execute(f"""
                 SELECT col, COUNT(*) AS n
                 FROM (UNPIVOT (
-                    SELECT * FROM read_csv_auto('{path}', all_varchar=true) LIMIT {sample}
+                    SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT {sample}
                 ) ON COLUMNS(*) INTO NAME col VALUE val)
                 WHERE lower(trim(val)) IN ({ph_list})
                 GROUP BY col HAVING COUNT(*) > 0
@@ -439,7 +499,7 @@ class CsvValidator:
                 num_rows = self._con.execute(f"""
                     SELECT col, COUNT(*) AS hits
                     FROM (UNPIVOT (
-                        SELECT * FROM read_csv_auto('{path}', all_varchar=true) LIMIT 200
+                        SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT 200
                     ) ON COLUMNS(*) INTO NAME col VALUE val)
                     WHERE ({col_filter})
                       AND regexp_matches(val, '^\\d{{1,3}}([.,]\\d{{3}})+$')
@@ -452,6 +512,50 @@ class CsvValidator:
                         f"{len(num_rows)} column(s) are VARCHAR but contain numbers with thousands separator",
                         detail=", ".join(row[0] for row in num_rows[:5]),
                         fix="Remove thousands separator then cast to DOUBLE/BIGINT")
+
+        # ── Fuzzy near-duplicate category values ─────────────────────────
+        varchar_cats = [c["name"] for c in self._duckdb_columns if c["type"] in ("VARCHAR", "TEXT")]
+        fuzzy_issues: list[tuple[str, list]] = []
+        for col in varchar_cats[:20]:
+            try:
+                vals = self._con.execute(f"""
+                    SELECT "{col}"::VARCHAR AS v
+                    FROM {self._rcsv(path)}
+                    WHERE "{col}" IS NOT NULL AND length(trim("{col}")) > 3
+                    GROUP BY 1 HAVING COUNT(*) >= 2
+                    ORDER BY COUNT(*) DESC LIMIT 80
+                """).fetchall()
+                val_list = [row[0] for row in vals if row[0]]
+                if len(val_list) < 2 or len(val_list) > 80:
+                    continue
+                if len(val_list) / max(self._row_count, 1) > 0.5:
+                    continue  # cardinality too high — not categorical
+                self._con.execute("DROP TABLE IF EXISTS __odq_cat")
+                self._con.execute("CREATE TEMP TABLE __odq_cat (v VARCHAR)")
+                self._con.executemany("INSERT INTO __odq_cat VALUES (?)", [(v,) for v in val_list])
+                pairs = self._con.execute("""
+                    SELECT a.v, b.v, jaro_winkler_similarity(a.v, b.v) AS sim
+                    FROM __odq_cat a, __odq_cat b
+                    WHERE a.v < b.v
+                      AND jaro_winkler_similarity(a.v, b.v) > 0.92
+                    ORDER BY sim DESC LIMIT 5
+                """).fetchall()
+                self._con.execute("DROP TABLE IF EXISTS __odq_cat")
+                if pairs:
+                    fuzzy_issues.append((col, list(pairs)))
+            except Exception:
+                continue
+        if fuzzy_issues:
+            detail_parts = [
+                f"{col}: " + "; ".join(f"{p[0]!r}~{p[1]!r}" for p in pairs[:2])
+                for col, pairs in fuzzy_issues[:3]
+            ]
+            r.minor(p, "fuzzy_category_values",
+                    f"{len(fuzzy_issues)} column(s) with near-duplicate category values (possible typos)",
+                    detail="; ".join(detail_parts),
+                    fix="Standardise values: use CASE WHEN or regexp_replace to unify spellings")
+        else:
+            r.ok(p, "no_fuzzy_category_values", "No near-duplicate category values detected")
 
     def _check_null_rates(self, rows: list, col_idx: dict, phase: str) -> None:
         if not rows or "null_percentage" not in col_idx:
@@ -494,7 +598,7 @@ class CsvValidator:
                 values = [
                     str(row[0])
                     for row in self._con.execute(
-                        f"SELECT \"{duck_col}\"::VARCHAR FROM read_csv_auto('{self.path}', all_varchar=true) "
+                        f"SELECT \"{duck_col}\"::VARCHAR FROM {self._rcsv(self.path, 'all_varchar=true')} "
                         f"WHERE \"{duck_col}\" IS NOT NULL LIMIT 5000"
                     ).fetchall()
                     if row[0] is not None
@@ -543,7 +647,6 @@ class CsvValidator:
         fmt = 15
         if "encoding_not_utf8" in codes: fmt -= 10
         if "bom_present"        in codes: fmt -= 5
-        if "crlf_endings"       in codes: fmt -= 3
         if "no_header"          in codes: fmt -= 3
         r.dimensions.append(ScoreDimension("File format compliance", 15, max(0, fmt)))
 
@@ -565,5 +668,6 @@ class CsvValidator:
         if "units_in_cells"        in codes: content -= 3
         if "placeholder_values"    in codes: content -= 3
         if "invalid_reference_codes" in codes: content -= 4
-        if "numeric_as_varchar"    in codes: content -= 2
+        if "numeric_as_varchar"      in codes: content -= 2
+        if "fuzzy_category_values"   in codes: content -= 2
         r.dimensions.append(ScoreDimension("Data content quality", 25, max(0, content)))

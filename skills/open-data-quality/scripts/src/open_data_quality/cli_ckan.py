@@ -86,7 +86,7 @@ def _download_csv(url: str, console: Console, timeout: float = 60.0) -> Path | N
                 tmp.write(chunk)
             tmp.close()
             size_mb = Path(tmp.name).stat().st_size / 1_048_576
-            console.print(f"[dim]Downloaded:[/dim] {size_mb:.1f} MB → {tmp.name}")
+            console.print(f"[dim]Downloaded:[/dim] {size_mb:.1f} MB -> {tmp.name}")
             return Path(tmp.name)
     except Exception as e:
         console.print(f"[bold yellow]Warning:[/bold yellow] Could not download resource: {e}")

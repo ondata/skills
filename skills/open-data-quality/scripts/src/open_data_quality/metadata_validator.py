@@ -390,7 +390,7 @@ class ConsistencyChecker:
         self.report = report
 
     def run(self) -> None:
-        import chardet
+        from charset_normalizer import from_bytes
         r = self.report
         p = PHASE6
 
@@ -400,7 +400,8 @@ class ConsistencyChecker:
             from pathlib import Path
             with open(self.csv_path, "rb") as f:
                 raw = f.read(65536)
-            actual = (chardet.detect(raw).get("encoding") or "").lower().replace("-", "")
+            best = from_bytes(raw).best()
+            actual = (best.encoding if best else "").lower().replace("-", "")
             if declared_enc and actual and declared_enc not in actual and actual not in declared_enc:
                 r.major(p, "encoding_mismatch",
                         f"Declared encoding ({declared_enc!r}) ≠ actual ({actual!r})",

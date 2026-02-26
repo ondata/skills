@@ -177,6 +177,6 @@ With local CSV file only: score out of 60, normalized to /100.
 ## Requirements
 
 - Python >= 3.11
-- `duckdb`, `chardet`, `httpx`, `rich`, `typer`
+- `duckdb`, `charset-normalizer`, `httpx`, `rich`, `typer`
 
 Installed automatically by `uvx` or `uv tool install`.

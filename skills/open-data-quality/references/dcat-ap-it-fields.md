@@ -22,7 +22,7 @@ and controlled vocabulary references.
 | Temporal coverage | `dct:temporal` | R | `dcat:startDate` + `dcat:endDate` in ISO 8601 |
 | Update frequency | `dct:accrualPeriodicity` | R | From MDR frequency vocabulary |
 | Contact point | `dcat:contactPoint` | R | `vcard:hasEmail` |
-| Holder | `dcatapit:datasetHolder` | M (IT) | Specific to Italian profile |
+| Holder | `dct:rightsHolder` | M (IT) | Specific to Italian profile |
 | Creator | `dct:creator` | O | Specific to Italian profile |
 | Conforms to | `dct:conformsTo` | O | Schema/standard reference |
 | Geographical name | `dcatapit:geographicalName` | O | |
@@ -101,7 +101,7 @@ Use this to self-evaluate DCAT-AP_IT compliance:
 - [ ] Theme from EuroVoc
 - [ ] At least one Distribution
 - [ ] License on each Distribution (not just on dataset)
-- [ ] Holder (`dcatapit:datasetHolder`) declared
+- [ ] Holder (`dct:rightsHolder`) declared
 - [ ] Access URL resolvable (HTTP 200)
 
 **Recommended (should fix)**:

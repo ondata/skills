@@ -19,5 +19,11 @@ dependencies = [
 odq-csv  = "open_data_quality.cli_csv:app"
 odq-ckan = "open_data_quality.cli_ckan:app"
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

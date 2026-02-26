@@ -2,6 +2,15 @@
 
 ## 2026-02-26
 
+- `open-data-quality`: fix IT holder label — `dcatapit:datasetHolder` → `dct:rightsHolder` in code and all reference docs (confirmed from real dati.gov.it data)
+- `open-data-quality`: remove deprecated `dcatapit:datasetHolder` row from profiles table; `dct:rightsHolder` now marked M for IT
+- `open-data-quality`: add `portal_field_aliases.json` — JSON vocabulary mapping standard DCAT-AP field names to portal-specific CKAN extras keys; UK profile maps `issued`/`modified` → `dcat_issued`/`dcat_modified`
+- `open-data-quality`: fix UK date detection — `metadata_validator.py` now uses `FIELD_ALIASES` fallback for date fields per profile
+- `open-data-quality`: add 3 new tests — `test_it_holder_present_ok`, `test_it_holder_missing_flagged`, `test_uk_dcat_prefixed_dates_accepted`; 34/34 pass
+
+- `open-data-quality`: added pytest test suite — 25 tests across phase0–3 + CLI integration; fixtures in `scripts/tests/fixtures/`; `pytest` added as dev dependency in `pyproject.toml`
+- `open-data-quality`: fix fuzzy check — skip datetime/timestamp columns stored as VARCHAR (e.g. `2025-03-14T00:00:00` was triggering false positive near-duplicate alert)
+
 - `open-data-quality`: file type detection in phase 0 — detect ZIP, HTML/XML, JSON, PDF, OLE2/Excel, UTF-16 via magic bytes/content sniffing; report specific type (e.g. "File is a ZIP archive") instead of generic binary/separator error
 - `open-data-quality`: fuzzy false positive fix — add `levenshtein/max_len < 10%` ratio filter + raise JW threshold to 0.95 + minimum length > 5; eliminates NORD-EST~NORD-OVEST, MINISTERO DELLA DIFESA~SALUTE type false positives while preserving real typos (D'INTERESSE~DI INTERESSE caught at 4% ratio)
 

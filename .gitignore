@@ -3,4 +3,10 @@ tmp/
 *:Zone.Identifier
 *.Zone.Identifier
 docs/the_complete_guide_to_building_skills_for_claude.pdf
-skills/open-data-quality/
+skills/open-data-quality/scripts/.venv/
+skills/open-data-quality/scripts/.pytest_cache/
+skills/open-data-quality/**/__pycache__/
+skills/open-data-quality/**/*.pyc
+skills/open-data-quality/**/*.egg-info/
+skills/open-data-quality/**/build/
+skills/open-data-quality/**/dist/

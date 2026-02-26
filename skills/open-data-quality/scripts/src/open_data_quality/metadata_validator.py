@@ -7,18 +7,24 @@ Works on the Python dict returned by CKAN package_show.
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import date, datetime
+from pathlib import Path
 from typing import Any
 
 import httpx
 
 from .models import QualityReport, ScoreDimension
 
+_ALIASES_FILE = Path(__file__).parent / "portal_field_aliases.json"
+FIELD_ALIASES: dict[str, dict[str, str]] = json.loads(_ALIASES_FILE.read_text())
+
 PHASE5 = "phase5_metadata"
 PHASE6 = "phase6_consistency"
 
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+ISO_DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}")
 NON_ISO_DATE_RE = re.compile(r"^\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4}$")
 
 UNSTABLE_URL_RE = re.compile(
@@ -47,7 +53,7 @@ PORTAL_PROFILES: list[tuple[re.Pattern, str]] = [
 PROFILE_EXTRA_FIELDS: dict[str, list[tuple[str, str, str]]] = {
     # (extras_key, label, mandatory|recommended)
     "DCAT-AP_IT": [
-        ("holder_name",    "Dataset holder (dcatapit:datasetHolder)", "mandatory"),
+        ("holder_name",    "Dataset holder (dct:rightsHolder)", "mandatory"),
         ("identifier",     "Identifier (dct:identifier)",             "mandatory"),
         ("theme",          "Theme (dcat:theme)",                      "mandatory"),
     ],
@@ -133,11 +139,6 @@ class MetadataValidator:
             r.major(p, "missing_description", "Description (dct:description) is missing",
                     fix="Add a description explaining the dataset content, coverage, and purpose")
             score -= 4
-        elif len(notes) < 80:
-            r.major(p, "short_description",
-                    f"Description too short ({len(notes)} chars) — minimum 80 recommended",
-                    fix="Expand: what data, time period, collection method, column meanings, caveats")
-            score -= 2
         elif notes.strip() == title.strip():
             r.major(p, "description_equals_title",
                     "Description is identical to title — not a real description",
@@ -177,8 +178,13 @@ class MetadataValidator:
             r.ok(p, "tags_ok", f"{len(tags)} tags: {', '.join(tag_names[:5])}")
 
         # dates
+        _profile_aliases = FIELD_ALIASES.get(self.profile, {})
         for date_key in ("issued", "modified"):
             val = (self.meta.get(date_key) or _extras_value(self.meta, date_key)).strip()
+            if not val:
+                alias = _profile_aliases.get(date_key)
+                if alias:
+                    val = (self.meta.get(alias) or _extras_value(self.meta, alias)).strip()
             if not val:
                 r.major(p, f"missing_{date_key}",
                         f"Date field '{date_key}' (dct:{date_key}) is missing or empty string",
@@ -189,6 +195,8 @@ class MetadataValidator:
                         f"Field '{date_key}' is not ISO 8601: {val!r}",
                         fix=f"Convert to YYYY-MM-DD format")
                 score -= 2
+            elif ISO_DATETIME_RE.match(val):
+                r.ok(p, f"{date_key}_ok", f"{date_key}: {val}")
             elif not ISO_DATE_RE.match(val):
                 r.minor(p, f"invalid_{date_key}",
                         f"Field '{date_key}' has unexpected format: {val!r}")

@@ -28,11 +28,10 @@ Cardinality notation: **M** = Mandatory, **R** = Recommended, **O** = Optional, 
 | `dcat:contactPoint` | R | R | R | R | R | R | R | R |
 | `dct:conformsTo` | O | R | O | O | O | R | O | O |
 | `dct:provenance` | O | — | — | — | O | R | O | — |
-| `dct:rightsHolder` | O | — | R | — | R | — | O | — |
+| `dct:rightsHolder` | O | **M** | R | — | R | — | O | — |
 | `foaf:landingPage` | O | — | O | O | O | R | O | O |
 | `adms:versionInfo` | O | O | O | — | O | O | O | — |
 | `adms:versionNotes` | O | O | O | — | O | O | O | — |
-| **`dcatapit:datasetHolder`** | — | **M** | — | — | — | — | — | — |
 | **`dcatapit:creator`** | — | O | — | — | — | — | — | — |
 | **`dcatapit:geographicalName`** | — | O | — | — | — | — | — | — |
 | `dcat:spatialResolutionInMeters` | O | — | O | O | — | R | O | — |
@@ -81,7 +80,7 @@ Different CKAN instances serialize DCAT differently. Common mappings:
 | `dct:accrualPeriodicity` | `.extras[].key=="frequency"` | Often in extras |
 | `dct:spatial` | `.extras[].key=="geographical_geonames_url"` | IT-specific path |
 | `dct:temporal` | `.extras[].key=="temporal_coverage"` | Often in extras |
-| `dcatapit:datasetHolder` | `.extras[].key=="holder_name"` | IT only |
+| `dct:rightsHolder` | `.extras[].key=="holder_name"` | IT only (ckanext-dcatapit) |
 | Resource format | `.resources[].format` | Per-resource |
 | Resource MIME | `.resources[].mimetype` | Per-resource |
 | Resource license | `.resources[].license_id` | Per-resource |

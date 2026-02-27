@@ -45,6 +45,12 @@ curl -LsSf https://astral.sh/uv/install.sh | sh        # macOS / Linux
 winget install --id=astral-sh.uv -e                    # Windows
 ```
 
+**Codex / sandboxed environments**: if `uvx` fails with `Invalid cross-device link (EXDEV)`, the sandbox filesystem isolates temp and cache directories across different mounts. Run outside the sandbox, or set:
+
+```bash
+UV_LINK_MODE=copy UV_NO_CACHE=1 uvx --from git+https://github.com/ondata/open-data-quality odq-ckan ...
+```
+
 **Windows note**: set `PYTHONUTF8=1` to avoid encoding errors on cp1252 terminals:
 
 ```powershell

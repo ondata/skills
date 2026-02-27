@@ -25,5 +25,8 @@ dev = ["pytest>=8.0"]
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+open_data_quality = ["*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

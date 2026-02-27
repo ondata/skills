@@ -168,11 +168,11 @@ class MetadataValidator:
 
         # tags
         tags = self.meta.get("tags") or []
-        if len(tags) < 3:
-            r.minor(p, "few_tags",
-                    f"Only {len(tags)} tag(s) — 3+ recommended for discoverability",
+        if len(tags) == 0:
+            r.major(p, "no_tags",
+                    "No tags — keywords required for discoverability",
                     fix="Add relevant keywords describing topic, geography, and time period")
-            score -= 1
+            score -= 4
         else:
             tag_names = [t.get("name", "") for t in tags]
             r.ok(p, "tags_ok", f"{len(tags)} tags: {', '.join(tag_names[:5])}")

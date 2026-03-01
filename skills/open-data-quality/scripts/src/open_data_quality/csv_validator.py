@@ -14,6 +14,7 @@ import csv as csvmod
 import io
 import re
 import tempfile
+import zipfile
 from pathlib import Path
 from charset_normalizer import from_bytes
 import duckdb
@@ -145,6 +146,7 @@ class CsvValidator:
         self._separator: str = ","
         self._lenient: bool = False             # True when strict_mode=false is needed
         self._orig_path: Path | None = None    # set when a UTF-8 temp copy replaces self.path
+        self._zip_extracted: Path | None = None  # set when a CSV was extracted from a ZIP
 
     def _rcsv(self, path, opts: str = "") -> str:
         """Build a read_csv_auto() SQL expression, adding strict_mode=false when needed."""
@@ -153,6 +155,25 @@ class CsvValidator:
             parts.append("strict_mode=false")
         suffix = (", " + ", ".join(parts)) if parts else ""
         return f"read_csv_auto('{path}'{suffix})"
+
+    def _extract_csv_from_zip(self, zip_path: Path) -> Path | None:
+        """Extract the largest CSV from a ZIP archive to a temp file. Returns path or None."""
+        try:
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                csv_names = [
+                    n for n in zf.namelist()
+                    if n.lower().endswith(".csv") and not n.startswith("__MACOSX")
+                ]
+                if not csv_names:
+                    return None
+                # Pick the largest CSV by uncompressed size
+                csv_name = max(csv_names, key=lambda n: zf.getinfo(n).file_size)
+                tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)
+                tmp.write(zf.read(csv_name))
+                tmp.close()
+                return Path(tmp.name)
+        except Exception:
+            return None
 
     def run(self) -> QualityReport:
         self._phase0_blockers()
@@ -174,6 +195,9 @@ class CsvValidator:
         if self._orig_path is not None:
             self.path.unlink(missing_ok=True)
             self.path = self._orig_path
+        # cleanup ZIP-extracted temp CSV
+        if self._zip_extracted is not None:
+            self._zip_extracted.unlink(missing_ok=True)
         return self.report
 
     # ── Phase 0: blockers ────────────────────────────────────────────────
@@ -200,7 +224,24 @@ class CsvValidator:
         ]
         for sig, label in _MAGIC:
             if chunk[:len(sig)] == sig:
-                r.blocker(p, "file_wrong_type", f"File is a {label} — not a CSV"); return
+                if "ZIP" in label:
+                    extracted = self._extract_csv_from_zip(self.path)
+                    if extracted:
+                        self._zip_extracted = extracted
+                        self.path = extracted
+                        r.minor(p, "zip_wrapped_csv",
+                                "Resource is a ZIP archive; CSV extracted for analysis",
+                                detail="The declared CSV resource is packaged inside a ZIP. "
+                                       "The largest CSV found in the archive was extracted and validated.",
+                                fix="Publish the CSV file directly, without ZIP wrapping")
+                        with open(self.path, "rb") as f:
+                            chunk = f.read(8192)
+                        break
+                    else:
+                        r.blocker(p, "file_wrong_type",
+                                  "File is a ZIP archive with no CSV inside — not a CSV"); return
+                else:
+                    r.blocker(p, "file_wrong_type", f"File is a {label} — not a CSV"); return
 
         head = chunk[:512].decode("utf-8", errors="replace").lstrip()
         if head.lower().startswith(("<!doctype", "<html", "<?xml")):

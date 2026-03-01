@@ -74,11 +74,19 @@ PROFILE_EXTRA_FIELDS: dict[str, list[tuple[str, str, str]]] = {
 
 
 def _extras_value(metadata: dict, key: str) -> str:
-    """Get value from CKAN extras list by key. Returns '' if missing or empty."""
+    """Get value from CKAN extras list or top-level package field by key.
+
+    Some harvesters (e.g. dati.gov.it harvesting from regional portals) promote
+    extras such as holder_name and identifier to top-level package fields instead
+    of storing them in the extras list. We check extras first, then fall back to
+    the top-level field.
+    """
     for item in metadata.get("extras", []):
         if item.get("key") == key:
             return (item.get("value") or "").strip()
-    return ""
+    # Fallback: top-level package field (harvester-promoted extras)
+    val = metadata.get(key, "")
+    return (val or "").strip()
 
 
 def detect_profile(metadata: dict, portal_url: str = "") -> str:

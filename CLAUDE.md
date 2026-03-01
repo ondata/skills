@@ -40,10 +40,10 @@ When asked, use the `skills` CLI (from [vercel-labs/skills](https://github.com/v
 
 ```bash
 # Install one skill for Claude Code + Codex, globally, no prompts
-npx skills add skills/<skill-name> --agent claude-code --agent codex --global --yes
+npx skills add ./skills/<skill-name> --agent claude-code --agent codex --global --yes
 
 # Install all skills at once
-npx skills add skills/ --skill '*' --agent claude-code --agent codex --global --yes
+npx skills add ./skills/ --skill '*' --agent claude-code --agent codex --global --yes
 ```
 
 This copies the skill to `~/.agents/skills/<skill-name>/` (canonical) and symlinks it into `~/.claude/skills/<skill-name>/` for Claude Code.

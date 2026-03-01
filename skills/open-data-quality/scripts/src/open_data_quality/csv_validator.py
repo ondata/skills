@@ -432,6 +432,29 @@ class CsvValidator:
             r.minor(p, "varchar_load_failed", "Could not load data for content checks")
             return
 
+        # ── Duplicate rows ───────────────────────────────────────────────
+        try:
+            dup_result = self._con.execute(f"""
+                WITH raw AS (
+                    SELECT * FROM {self._rcsv(path, 'all_varchar=true')} LIMIT {sample}
+                ),
+                deduped AS (SELECT DISTINCT * FROM raw)
+                SELECT
+                    (SELECT COUNT(*) FROM raw) AS total_rows,
+                    (SELECT COUNT(*) FROM raw) - (SELECT COUNT(*) FROM deduped) AS duplicate_rows
+            """).fetchone()
+        except Exception:
+            dup_result = None
+        if dup_result and dup_result[1] and dup_result[1] > 0:
+            total, dupes = dup_result
+            pct = dupes / total * 100 if total else 0
+            r.major(p, "duplicate_rows",
+                    f"{dupes} duplicate row(s) detected ({pct:.1f}% of sampled rows)",
+                    detail=f"{dupes} of {total} rows are exact duplicates of another row",
+                    fix="duckdb: SELECT DISTINCT * FROM read_csv_auto('data.csv')  — or: mlr --csv uniq -a data.csv")
+        else:
+            r.ok(p, "no_duplicate_rows", "No exact duplicate rows detected")
+
         # ── Comma decimal separator ──────────────────────────────────────
         try:
             comma_rows = self._con.execute(f"""
@@ -559,6 +582,51 @@ class CsvValidator:
                     fix="trim() all string columns before publishing: UPDATE … SET col = TRIM(col)")
         else:
             r.ok(p, "no_trailing_whitespace", "No leading/trailing whitespace in category values")
+
+        # ── Statistical outliers (IQR method) ───────────────────────────
+        numeric_types = {"BIGINT", "INTEGER", "SMALLINT", "TINYINT", "HUGEINT",
+                         "DOUBLE", "FLOAT", "REAL", "DECIMAL", "NUMERIC"}
+        num_cols = [
+            c["name"] for c in self._duckdb_columns
+            if any(c["type"].upper().startswith(t) for t in numeric_types)
+        ]
+        outlier_cols: list[str] = []
+        for col in num_cols[:10]:
+            try:
+                row = self._con.execute(f"""
+                    WITH data AS (
+                        SELECT "{col}"::DOUBLE AS v
+                        FROM {self._rcsv(path)}
+                        WHERE "{col}" IS NOT NULL
+                        LIMIT {sample}
+                    ),
+                    bounds AS (
+                        SELECT
+                            percentile_cont(0.25) WITHIN GROUP (ORDER BY v) AS q1,
+                            percentile_cont(0.75) WITHIN GROUP (ORDER BY v) AS q3
+                        FROM data
+                    )
+                    SELECT
+                        (SELECT COUNT(*) FROM data) AS total,
+                        (SELECT COUNT(*) FROM data, bounds
+                         WHERE (q3 - q1) > 0
+                           AND (v < q1 - 1.5*(q3-q1) OR v > q3 + 1.5*(q3-q1))) AS n_out,
+                        (SELECT MAX(v) FROM data, bounds
+                         WHERE (q3 - q1) > 0
+                           AND v > q3 + 1.5*(q3-q1)) AS high_ex
+                    FROM bounds
+                """).fetchone()
+            except Exception:
+                continue
+            if row and row[0] and row[0] >= 100 and row[1] and row[1] > 0:
+                ex = f" (e.g. {row[2]})" if row[2] is not None else ""
+                outlier_cols.append(f"{col}: {row[1]}/{row[0]} values{ex}")
+        if outlier_cols:
+            r.minor(p, "outlier_values",
+                    f"{len(outlier_cols)} numeric column(s) with statistical outliers (IQR method)",
+                    detail="; ".join(outlier_cols[:3]))
+        else:
+            r.ok(p, "no_outlier_values", "No statistical outliers detected in numeric columns")
 
         # ── Fuzzy near-duplicate category values ─────────────────────────
         fuzzy_issues: list[tuple[str, list]] = []
@@ -720,4 +788,6 @@ class CsvValidator:
         if "invalid_reference_codes" in codes: content -= 4
         if "numeric_as_varchar"      in codes: content -= 2
         if "fuzzy_category_values"   in codes: content -= 2
+        if "duplicate_rows"          in codes: content -= 3
+        if "outlier_values"          in codes: content -= 2
         r.dimensions.append(ScoreDimension("Data content quality", 25, max(0, content)))

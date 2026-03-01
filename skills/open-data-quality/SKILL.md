@@ -113,6 +113,76 @@ aggregate rows, decimal separators, date formats, units in cells, placeholders, 
 detection, metadata completeness, per-resource format/license/URL, HTTP accessibility,
 declared vs actual encoding, update frequency consistency.
 
+**Qualitative assessment** (LLM, after scripts, requires data content): title
+discoverability, title ↔ description coherence, description ↔ content coherence,
+content ↔ declared update frequency, dataset usefulness, unit of observation,
+column name semantics, provenance and methodology, joinability.
+
+---
+
+## Qualitative Assessment (LLM-only, after scripts)
+
+After running the scripts, perform a qualitative assessment using the data content
+and metadata already read. This step applies only when data content is available
+(local CSV, or CKAN with `--download`). It is done by the LLM — not by a script —
+and produces observations, not scores.
+
+Run these five checks in order:
+
+**1. Title discoverability**
+Read the dataset title and the column names + a sample of values. Ask: would someone
+searching for this data find it with the title as written? Does the title use clear,
+domain-relevant keywords, or is it vague/internal jargon (e.g. "Export_2024_v2_final")?
+
+**2. Title ↔ description coherence**
+Read title and description together. Do they describe the same subject? Flag if the
+description contradicts the title, is a copy-paste of it, or adds no meaningful context.
+
+**3. Description ↔ content coherence**
+Compare the description text with the actual column names and sample values. Does the
+description accurately reflect what the data contains? Flag mismatches (e.g. description
+says "hospital admissions" but columns are about road accidents).
+
+**4. Content ↔ declared update frequency**
+If update frequency is declared in metadata, look at date columns in the data. Does
+the latest date in the data match what you would expect for the declared cadence
+(daily, monthly, annual…)? Flag if the data looks stale or if the date range is
+inconsistent with the declared frequency.
+
+**5. Dataset usefulness**
+Consider: does the combination of row count, descriptive columns, and update cadence
+make this dataset genuinely useful? Flag if the dataset is too sparse (too few rows or
+columns for the declared scope), if descriptive fields are mostly codes with no labels,
+or if the data sample suggests the published extract is incomplete.
+
+**6. Unit of observation**
+From column names and sample values, can you immediately tell what one row represents
+(a municipality? a transaction? a person? a time period?)? Flag if the unit is ambiguous
+or mixed (e.g. some rows are totals, others are details), as this is one of the most
+common and costly usability problems in open data.
+
+**7. Column name semantics**
+Are column names self-explanatory to an external user, or are they internal
+acronyms/codes (e.g. `FL_ATT`, `IMP_NET_PRG`, `cod_val_2`)? Flag columns whose meaning
+cannot be inferred without a data dictionary. This is particularly common in Italian PA
+data and is a real barrier to reuse.
+
+**8. Provenance and methodology**
+From the metadata and description, is it clear how the data was collected or produced
+(administrative records, survey, sensor, aggregation…)? Without provenance, data cannot
+be trusted even if technically well-formed. Flag if the origin is absent or vague.
+
+**9. Joinability**
+Does the dataset contain reference codes (NUTS, ISTAT municipality codes, CIG, CUP,
+fiscal codes, ISO country codes…) that allow joining it to other datasets? Note which
+codes are present and whether they appear well-formed. Joinability is a core value
+proposition of open data as an ecosystem.
+
+**How to report**: add a `## Qualitative Assessment` section to the report (see template
+below). For each check, write one sentence: what you observed and whether it raises a
+concern. Use **Good** / **Acceptable** / **Poor** — not blocker/major/minor. If data
+content is not available (metadata-only run), skip this section entirely.
+
 ---
 
 ## Report Template
@@ -142,6 +212,20 @@ declared vs actual encoding, update frequency consistency.
 | File format compliance | /15 | |
 | Data structure quality | /20 | |
 | Data content quality | /25 | |
+
+## Qualitative Assessment
+*(skip if data content not available)*
+| Check | Observation | Rating |
+|-------|-------------|--------|
+| Title discoverability | | Good / Acceptable / Poor |
+| Title ↔ description | | Good / Acceptable / Poor |
+| Description ↔ content | | Good / Acceptable / Poor |
+| Content ↔ update frequency | | Good / Acceptable / Poor |
+| Dataset usefulness | | Good / Acceptable / Poor |
+| Unit of observation | | Good / Acceptable / Poor |
+| Column name semantics | | Good / Acceptable / Poor |
+| Provenance and methodology | | Good / Acceptable / Poor |
+| Joinability | | Good / Acceptable / Poor |
 
 ## Recommended Actions
 [Numbered, by severity, with code examples]

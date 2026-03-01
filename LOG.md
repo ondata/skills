@@ -1,5 +1,11 @@
 # LOG
 
+## 2026-03-01
+
+- `open-data-quality`: add qualitative assessment section to SKILL.md — 9 LLM-only checks (title discoverability, title↔description, description↔content, content↔update frequency, dataset usefulness); runs after scripts, requires data content; Good/Acceptable/Poor rating; added to report template
+- `open-data-quality`: add `outlier_values` check (phase3_content) — IQR method on numeric columns (≥100 rows); severity MINOR, -2 pts; no fix suggestion (signal only); new fixture `outlier_values.csv`; 36/36 tests pass
+- `open-data-quality`: add `duplicate_rows` check (phase3_content) — detects exact duplicate rows via DuckDB `SELECT DISTINCT *`; severity MAJOR, -3 pts on data content quality; new fixture `duplicate_rows.csv`; 35/35 tests pass
+
 ## 2026-02-26
 
 - `open-data-quality`: fix IT holder label — `dcatapit:datasetHolder` → `dct:rightsHolder` in code and all reference docs (confirmed from real dati.gov.it data)

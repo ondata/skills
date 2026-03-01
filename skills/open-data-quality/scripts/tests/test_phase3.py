@@ -34,6 +34,18 @@ def test_datetime_col_no_fuzzy_false_positive(fx):
     assert "fuzzy_category_values" not in codes
 
 
+def test_duplicate_rows(fx):
+    report = CsvValidator(fx("duplicate_rows.csv")).run()
+    codes = {f.code for f in report.findings}
+    assert "duplicate_rows" in codes
+
+
+def test_outlier_values(fx):
+    report = CsvValidator(fx("outlier_values.csv")).run()
+    codes = {f.code for f in report.findings}
+    assert "outlier_values" in codes
+
+
 def test_ok_no_content_issues(fx):
     report = CsvValidator(fx("ok.csv")).run()
     codes = {f.code for f in report.findings}
@@ -41,3 +53,5 @@ def test_ok_no_content_issues(fx):
     assert "non_iso_date" not in codes
     assert "placeholder_values" not in codes
     assert "fuzzy_category_values" not in codes
+    assert "duplicate_rows" not in codes
+    assert "outlier_values" not in codes

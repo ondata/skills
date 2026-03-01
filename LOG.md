@@ -2,6 +2,8 @@
 
 ## 2026-03-01
 
+- `open-data-quality`: ZIP-wrapped CSV support — if resource declared as CSV is actually a ZIP, extract largest CSV to /tmp and proceed with full analysis; report MINOR `zip_wrapped_csv` instead of BLOCKER; uses Python `zipfile` (no DuckDB/Polars ZIP support); score 40→86 on Liguria air quality dataset
+
 - `open-data-quality`: fix `_extras_value` — also check top-level package fields; some harvesters (dati.gov.it from regional portals) promote holder_name/identifier to top-level instead of extras; fixes false-positive MAJORs; score 83→97 on test dataset
 - `open-data-quality`: add qualitative assessment section to SKILL.md — 9 LLM-only checks (title discoverability, title↔description, description↔content, content↔update frequency, dataset usefulness); runs after scripts, requires data content; Good/Acceptable/Poor rating; added to report template
 - `open-data-quality`: add `outlier_values` check (phase3_content) — IQR method on numeric columns (≥100 rows); severity MINOR, -2 pts; no fix suggestion (signal only); new fixture `outlier_values.csv`; 36/36 tests pass

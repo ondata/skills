@@ -1,5 +1,11 @@
 # LOG
 
+## 2026-03-03
+
+- `evals/openalex`: add `run_evals.sh` — runs prompts via `claude -p`, saves outputs to `runs/YYYY-MM-DD/`, auto-checks 4 pitfall patterns (relevance_sort, title.search scope, multi-line curl, API key printed)
+- `openalex`: never print API key to verify presence — use `[[ -n "${OPENALEX_API_KEY:-}" ]]`; added to Quick Start and Common Pitfalls in SKILL.md
+- `evals/openalex`: add 20 synthetic test prompts (test-09–test-28) targeting 11 known pitfall zones (relevance_sort_no_search, title_search_standalone, entity_name_filter, sequential_batch, nested_select, missing_api_key, default_per_page, multi_line_curl, null_csv_field, pdf_fallback_chain, wrong_search_scope); add corresponding pitfall checks to `checks.md`
+
 ## 2026-03-01
 
 - `open-data-quality`: ZIP-wrapped CSV support — if resource declared as CSV is actually a ZIP, extract largest CSV to /tmp and proceed with full analysis; report MINOR `zip_wrapped_csv` instead of BLOCKER; uses Python `zipfile` (no DuckDB/Polars ZIP support); score 40→86 on Liguria air quality dataset

@@ -1,5 +1,6 @@
 tmp/
 evals/*/runs/
+skills/*-workspace/
 .claude/
 *:Zone.Identifier
 *.Zone.Identifier

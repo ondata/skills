@@ -1,0 +1,80 @@
+{
+  "skill_name": "openalex",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use the openalex skill to find papers about open government data published after 2022",
+      "expected_output": "A readable list of results showing title, year, and citation count. curl uses --data-urlencode, includes api_key, uses select= and jq. Single-line curl.",
+      "files": [],
+      "expectations": [
+        "Output includes at least 5 paper titles as readable text (not raw JSON)",
+        "Output includes publication year for each paper",
+        "Output includes citation count for each paper",
+        "curl command uses --data-urlencode for parameters (not manual URL concatenation)",
+        "api_key parameter included in the request",
+        "select= parameter used to restrict returned fields",
+        "jq used to format/parse output"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Find all academic papers that have 'open data' in the title, published between 2020 and 2024",
+      "expected_output": "Uses filter=title.search:\"open data\" (not a standalone title.search= parameter). Results show title, year, citations.",
+      "files": [],
+      "expectations": [
+        "Output includes paper titles with 'open data' in the title",
+        "Date range 2020-2024 is respected in the results",
+        "Uses title.search inside filter= parameter (not as a standalone query parameter)",
+        "title.search value is NOT passed as a standalone --data-urlencode 'title.search=...' parameter"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Find all papers published by researcher Ludo Waltman on bibliometrics",
+      "expected_output": "Performs two-step lookup: first resolves author name to OpenAlex ID, then uses that ID in a filter. Does NOT filter by name string directly.",
+      "files": [],
+      "expectations": [
+        "Output includes papers by Ludo Waltman related to bibliometrics",
+        "Results include VOSviewer paper (Waltman's most cited bibliometrics work)",
+        "Uses OpenAlex /authors endpoint to find author ID before filtering works",
+        "Works are filtered by author ID (authorships.author.id:...) not by name string"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Get title, year, and citation count for these three papers: DOI 10.1038/s41597-019-0033-6, 10.1371/journal.pone.0228621, and 10.1016/j.dib.2020.105824",
+      "expected_output": "Uses a single pipe-separated filter (doi:URL1|URL2|URL3) rather than three sequential curl calls. Results show title, year, citations.",
+      "files": [],
+      "expectations": [
+        "All three papers appear in the output",
+        "Output includes title, year, and citation count for each paper",
+        "Uses a single batch request with pipe-separated DOIs (doi:...|...|...) not three separate curl calls",
+        "Nobel laureates paper (10.1038/s41597-019-0033-6) is identified with 79+ citations"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "How many open access articles on climate change have been published per year from 2018 to 2023?",
+      "expected_output": "Uses group_by=publication_year. Does not use nested field paths in select=. Output shows year and count.",
+      "files": [],
+      "expectations": [
+        "Output shows article counts per year from 2018 to 2023",
+        "Years 2018 through 2023 are all represented in the output",
+        "Uses group_by=publication_year to aggregate (not manual counting across pages)",
+        "Counts show an increasing trend (2023 > 2018)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Search for papers about GDPR and data protection published after 2018 and save the results as a CSV with title, year, and DOI",
+      "expected_output": "Uses jq with @csv and -r flag. Includes // \"\" null guard for doi field. Header row matches data columns. Saves to a .csv file.",
+      "files": [],
+      "expectations": [
+        "A CSV file is created with at least 10 rows of paper data",
+        "CSV has a header row with title, year, and doi columns",
+        "CSV uses proper quoting (jq @csv format)",
+        "DOI field uses null guard (// \"\") to avoid jq errors on null values"
+      ]
+    }
+  ]
+}

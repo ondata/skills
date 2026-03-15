@@ -6,6 +6,8 @@ These notes are **not part of any skill** and are never installed alongside skil
 
 Notes can capture anything useful that doesn't belong in the skill itself: background decisions, known limitations, pitfalls discovered during testing, ideas for future work, or useful external references.
 
+Unless explicitly stated otherwise in an individual file, all content under `notes/` and `notes/assets/` is licensed under the same terms as the rest of this repository; see `LICENSE.md` at the repository root for details.
+
 ## How to use
 
 Create one Markdown file per skill, named after the skill (matching the `name` field in its `SKILL.md` frontmatter). Example: `notes/openalex.md` for the `openalex` skill.

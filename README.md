@@ -32,6 +32,14 @@ Or install manually:
 2. Copy the skill folder (e.g. `skills/openalex/`) into your AI tool's skills directory
 3. Enable the skill in your tool's settings
 
+### Claude Desktop
+
+If you use Claude Desktop, you can install supported skills directly from the UI using `.skill` files — pre-packaged ZIP archives attached (when available) to each [GitHub Release](https://github.com/ondata/skills/releases) for skills that have a `.skill` asset:
+
+1. Download the `.skill` file for the skill you want from the release assets (e.g. `openalex.skill`).
+2. In Claude Desktop, open the skill installation wizard and load the file.
+3. After installation, open the skill settings and add any required domains to the **Domain allowlist** (see the skill's page for details).
+
 ### About the install tool
 
 The `npx skills add` commands above use [skills.sh](https://skills.sh/docs), a shell tool and currently the most convenient way to install and manage Agent Skills across AI tools.
@@ -50,6 +58,8 @@ During installation you'll be asked:
 
 | Skill | Description | Category | Eval |
 |---|---|---|---|
+| [ipa](skills/ipa/) | Look up PEC addresses and contacts for Italian public administrations via the IPA registry | Italy / PA | — |
+| [open-data-quality](skills/open-data-quality/) | Validate open data quality for CSV files and CKAN datasets; produces severity-ranked reports with a quality score | Open Data | — |
 | [openalex](skills/openalex/) | Query OpenAlex API for scholarly works, authors, and PDF retrieval | Research | [🟡 78/100](evals/openalex/) |
 
 ---

@@ -4,7 +4,7 @@
 
 To use this skill in Claude Desktop:
 
-1. Create a ZIP archive of the `skills/openalex/` folder.
+1. Create a ZIP archive that contains the `openalex/` folder at the top level, with `SKILL.md` directly inside that folder.
 2. In Claude Desktop, open the skill installation wizard and load the ZIP file.
 3. After installation, open the skill settings and add the required domains to the **Domain allowlist**.
 

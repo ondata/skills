@@ -41,6 +41,6 @@ jobs:
             fi
             output="${skill}.skill"
             (cd "$dir" && zip -r "../../$output" .)
-            gh release upload "${{ github.event.release.tag_name }}" "$output"
+            gh release upload "${{ github.event.release.tag_name }}" "$output" --clobber
             echo "Uploaded $output"
           done < release-skills.txt

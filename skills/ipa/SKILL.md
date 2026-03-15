@@ -1,5 +1,11 @@
 ---
 name: ipa
+compatibility: Requires curl, python3, bash, IPA_auth_id environment variable, and internet access.
+license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
+metadata:
+  version: "0.1"
+  author: "Andrea Borruso <aborruso@gmail.com>"
+  tags: [api, italy, public-administration, ipa, pec, fatturazione-elettronica, agid]
 description: >
   Query the IPA registry (Italian Public Administration digital domiciles index) on behalf
   of an Italian citizen. USE THIS SKILL whenever the user wants to: find the PEC (certified

@@ -15,7 +15,7 @@ The project follows an open source model: public repo, open contributions, organ
 Skills follow the [Agent Skills](https://agentskills.io) open standard. If you're new to skills, start with a single one to get familiar with how they work:
 
 ```bash
-npx skills add ondata/skills --skill openalex
+npx skills install github:ondata/skills --skill openalex
 ```
 
 Once installed, open your AI tool and try it: `use $openalex skill to find recent papers on urban heat islands with open access PDFs` — you'll get a list of works with titles, authors, DOIs, and direct PDF links.
@@ -23,7 +23,7 @@ Once installed, open your AI tool and try it: `use $openalex skill to find recen
 Once comfortable, you can install the full collection:
 
 ```bash
-npx skills add ondata/skills
+npx skills install github:ondata/skills
 ```
 
 Or install manually:
@@ -42,7 +42,7 @@ If you use Claude Desktop, you can install some skills directly from the UI usin
 
 ### About the install tool
 
-The `npx skills add` commands above use [skills.sh](https://skills.sh/docs), a shell tool and currently the most convenient way to install and manage Agent Skills across AI tools.
+The `npx skills install` commands above use [skills.sh](https://skills.sh/docs), a shell tool and currently the most convenient way to install and manage Agent Skills across AI tools.
 
 Skills work best with CLI-based AI tools (Claude Code, Gemini CLI, OpenAI Codex, etc.) — the command-line context gives the agent full access to your environment and makes skill workflows faster and richer.
 

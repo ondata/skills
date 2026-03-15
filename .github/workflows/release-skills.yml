@@ -1,0 +1,31 @@
+name: Release skills
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and upload .skill files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          while IFS= read -r skill || [[ -n "$skill" ]]; do
+            [[ -z "$skill" || "$skill" == \#* ]] && continue
+            dir="skills/$skill"
+            if [[ ! -d "$dir" ]]; then
+              echo "WARNING: $dir not found, skipping"
+              continue
+            fi
+            output="${skill}.skill"
+            (cd "$dir" && zip -r "../../$output" .)
+            gh release upload "${{ github.event.release.tag_name }}" "$output"
+            echo "Uploaded $output"
+          done < release-skills.txt

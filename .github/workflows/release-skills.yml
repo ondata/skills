@@ -19,6 +19,21 @@ jobs:
         run: |
           while IFS= read -r skill || [[ -n "$skill" ]]; do
             [[ -z "$skill" || "$skill" == \#* ]] && continue
+            # Validate skill name to prevent path traversal and unexpected uploads.
+            # Enforce: lowercase letters, numbers, and hyphens only; no '/' or '..';
+            # and no leading/trailing whitespace.
+            if [[ "$skill" =~ ^[[:space:]] || "$skill" =~ [[:space:]]$ ]]; then
+              echo "WARNING: Invalid skill name (leading/trailing whitespace): '$skill', skipping"
+              continue
+            fi
+            if [[ "$skill" == *"/"* || "$skill" == *".."* ]]; then
+              echo "WARNING: Invalid skill name (contains '/' or '..'): '$skill', skipping"
+              continue
+            fi
+            if [[ ! "$skill" =~ ^[a-z0-9-]+$ ]]; then
+              echo "WARNING: Invalid skill name (must match [a-z0-9-]+): '$skill', skipping"
+              continue
+            fi
             dir="skills/$skill"
             if [[ ! -d "$dir" ]]; then
               echo "WARNING: $dir not found, skipping"

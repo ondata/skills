@@ -1,0 +1,46 @@
+name: Release skills
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and upload .skill files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          while IFS= read -r skill || [[ -n "$skill" ]]; do
+            [[ -z "$skill" || "$skill" == \#* ]] && continue
+            # Validate skill name to prevent path traversal and unexpected uploads.
+            # Enforce: lowercase letters, numbers, and hyphens only; no '/' or '..';
+            # and no leading/trailing whitespace.
+            if [[ "$skill" =~ ^[[:space:]] || "$skill" =~ [[:space:]]$ ]]; then
+              echo "WARNING: Invalid skill name (leading/trailing whitespace): '$skill', skipping"
+              continue
+            fi
+            if [[ "$skill" == *"/"* || "$skill" == *".."* ]]; then
+              echo "WARNING: Invalid skill name (contains '/' or '..'): '$skill', skipping"
+              continue
+            fi
+            if [[ ! "$skill" =~ ^[a-z0-9-]+$ ]]; then
+              echo "WARNING: Invalid skill name (must match [a-z0-9-]+): '$skill', skipping"
+              continue
+            fi
+            dir="skills/$skill"
+            if [[ ! -d "$dir" ]]; then
+              echo "WARNING: $dir not found, skipping"
+              continue
+            fi
+            output="${skill}.skill"
+            (cd "$dir" && zip -r "../../$output" .)
+            gh release upload "${{ github.event.release.tag_name }}" "$output" --clobber
+            echo "Uploaded $output"
+          done < release-skills.txt

@@ -1,0 +1,77 @@
+{
+  "skill_name": "ipa",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Voglio trovare la PEC ufficiale del Comune di Milano, dove posso inviare comunicazioni ufficiali?",
+      "expected_output": "La PEC ufficiale del Comune di Milano, presentata in modo leggibile con nome ente, indirizzo e PEC evidenziata.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "contiene-indirizzo-pec",
+          "description": "La risposta contiene almeno un indirizzo PEC (deve contenere '@pec.' o '@cert.')"
+        },
+        {
+          "name": "menziona-comune-milano",
+          "description": "La risposta menziona 'Milano' o 'Comune di Milano' come ente trovato"
+        },
+        {
+          "name": "no-json-grezzo",
+          "description": "La risposta NON mostra JSON grezzo ({, }, cod_err, num_items) al cittadino"
+        },
+        {
+          "name": "risposta-in-italiano",
+          "description": "La risposta è scritta in italiano, non in inglese"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Devo fare una fattura elettronica all'INPS. Il loro codice fiscale è 80078750587. Qual è il codice destinatario da mettere?",
+      "expected_output": "Il/i codice/i destinatario/i (cod_uni_ou) degli uffici INPS abilitati alla fatturazione elettronica, con spiegazione su dove inserirlo in fattura.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "contiene-codice-destinatario",
+          "description": "La risposta contiene almeno un codice alfanumerico di 6 caratteri maiuscoli (cod_uni_ou, es. 'A1B2C3')"
+        },
+        {
+          "name": "spiega-dove-inserire-codice",
+          "description": "La risposta spiega dove inserire il codice (campo fattura, codice ufficio, codice destinatario SDI o simile)"
+        },
+        {
+          "name": "menziona-inps",
+          "description": "La risposta menziona 'INPS' come ente destinatario della fattura"
+        },
+        {
+          "name": "no-json-grezzo",
+          "description": "La risposta NON mostra JSON grezzo al cittadino"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Ho ricevuto un'email da protocollo@pec.agid.gov.it. È un indirizzo ufficiale di una PA? Di quale ente?",
+      "expected_output": "Conferma che l'indirizzo è ufficiale e appartiene ad AGID, con i dettagli dell'ente.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "conferma-ufficialita",
+          "description": "La risposta afferma esplicitamente che l'indirizzo è ufficiale/registrato/verificato in IPA"
+        },
+        {
+          "name": "identifica-agid",
+          "description": "La risposta identifica AGID (Agenzia per l'Italia Digitale) come l'ente proprietario"
+        },
+        {
+          "name": "spiega-tipo-entita",
+          "description": "La risposta spiega a che tipo di struttura appartiene l'email (ente principale, AOO o ufficio/UO)"
+        },
+        {
+          "name": "no-json-grezzo",
+          "description": "La risposta NON mostra JSON grezzo al cittadino"
+        }
+      ]
+    }
+  ]
+}

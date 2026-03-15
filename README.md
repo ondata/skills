@@ -34,7 +34,7 @@ Or install manually:
 
 ### Claude Desktop
 
-If you use Claude Desktop, you can install supported skills directly from the UI using `.skill` files — pre-packaged ZIP archives attached (when available) to each [GitHub Release](https://github.com/ondata/skills/releases) for skills that have a `.skill` asset:
+If you use Claude Desktop, you can install some skills directly from the UI using `.skill` files. Not all skills are available this way — we publish `.skill` packages only for skills that have been tested and confirmed to work on Claude Desktop. Check the [latest release](https://github.com/ondata/skills/releases/latest) to see which ones are available.
 
 1. Download the `.skill` file for the skill you want from the release assets (e.g. `openalex.skill`).
 2. In Claude Desktop, open the skill installation wizard and load the file.

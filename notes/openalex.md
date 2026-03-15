@@ -14,7 +14,10 @@ Under *Additional allowed domains*, add:
 
 - `openalex.org`
 - `api.openalex.org`
+- `content.openalex.org`
 
 ![Domain allowlist in Claude Desktop](assets/openalex-claude-desktop-domain-allowlist.png)
 
-Without these domains, the sandbox will block all API calls and the skill will not work.
+Without at least these domains, the sandbox will block core OpenAlex API calls and the skill will not work correctly.
+
+Note: OpenAlex PDF downloads may also use additional hosts (for example, publisher sites or aggregators such as Europe PMC). If you need PDF retrieval to work, you may need to add those specific PDF host domains to the allowlist as well.

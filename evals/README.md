@@ -6,6 +6,7 @@ Evaluation results for each skill in the collection.
 
 | Skill | Prompts | Last run | Score | Status |
 |---|---|---|---|---|
+| [istat-sdmx-explorer](istat-sdmx-explorer/) | 8 | — | — | — |
 | [openalex](openalex/) | 8 | 2026-02-14 | 78/100 | 🟡 |
 
 ## How to add evals for a skill

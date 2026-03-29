@@ -1,0 +1,9 @@
+id,should_trigger,prompt
+test-01,true,"Use the $istat-sdmx-explorer skill to find an ISTAT dataflow about employment"
+test-02,true,"I need to understand the dimensions of an ISTAT SDMX flow before querying it"
+test-03,true,"Which values are valid for the territorial dimension in this ISTAT dataset?"
+test-04,true,"Decode these ISTAT SDMX codes before I try to build filters"
+test-05,true,"Show me a small sample of an ISTAT SDMX dataflow, but first help me understand the structure"
+test-06,false,"Validate the quality of this CKAN dataset"
+test-07,false,"Download all rows from this ISTAT dataset into CSV immediately"
+test-08,false,"Find open government papers on OpenAlex"

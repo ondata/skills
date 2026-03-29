@@ -59,6 +59,7 @@ During installation you'll be asked:
 | Skill | Description | Category | Eval |
 |---|---|---|---|
 | [ipa](skills/ipa/) | Look up PEC addresses and contacts for Italian public administrations via the IPA registry | Italy / PA | — |
+| [istat-sdmx-explorer](skills/istat-sdmx-explorer/) | Explore ISTAT SDMX dataflows step by step before querying or downloading data | Italy / Statistics | — |
 | [open-data-quality](skills/open-data-quality/) | Validate open data quality for CSV files and CKAN datasets; produces severity-ranked reports with a quality score | Open Data | — |
 | [openalex](skills/openalex/) | Query OpenAlex API for scholarly works, authors, and PDF retrieval | Research | [🟡 78/100](evals/openalex/) |
 

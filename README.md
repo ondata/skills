@@ -40,6 +40,23 @@ If you use Claude Desktop, you can install some skills directly from the UI usin
 2. In Claude Desktop, open the skill installation wizard and load the file.
 3. After installation, open the skill settings and add any required domains to the **Domain allowlist** (see the skill's page for details).
 
+### Update
+
+To update already installed skills to the latest version:
+
+```bash
+npx skills update          # update all installed skills
+npx skills update openalex # update a specific skill
+```
+
+To check which skills are outdated without updating:
+
+```bash
+npx skills check
+```
+
+Scope flags: `--global` (user-level skills only) or `--project` (project-level only). Add `--yes` for non-interactive mode.
+
 ### About the install tool
 
 The `npx skills install` commands above use [skills.sh](https://skills.sh/docs), a shell tool and currently the most convenient way to install and manage Agent Skills across AI tools.

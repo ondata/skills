@@ -1,5 +1,9 @@
 # LOG
 
+## 2026-04-24
+
+- `openalex`: strengthen API key security — added prominent SECURITY callout at top of SKILL.md; expanded Common Pitfalls rule to cover all output contexts (text responses, echoed commands, logs), not just verification
+
 ## 2026-03-03
 
 - `evals/openalex`: add `run_evals.sh` — runs prompts via `claude -p`, saves outputs to `runs/YYYY-MM-DD/`, auto-checks 4 pitfall patterns (relevance_sort, title.search scope, multi-line curl, API key printed)

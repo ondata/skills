@@ -15,6 +15,8 @@ Use this skill to run reliable OpenAlex API workflows from shell.
 
 > **IMPORTANT:** Always write `curl` commands on a **single line**. Multi-line `\` continuation breaks argument parsing in agent environments and will cause errors.
 
+> **SECURITY:** Never expose the actual value of `OPENALEX_API_KEY` anywhere — not in text responses, not in echoed commands, not in logs. Always reference it as `$OPENALEX_API_KEY`. If the key appears in any output, stop immediately and do not repeat it.
+
 ## Definition of Done
 
 A task is complete when:
@@ -213,7 +215,7 @@ Use `select=` and `per-page=200` to minimize request count.
 - Always write `curl` commands on a single line — multi-line `\` continuation breaks argument parsing in agent environments.
 - `title.search` is NOT a valid standalone parameter — always pass it inside `filter=`: `filter=title.search:"your query"`.
 - Always include `api_key=$OPENALEX_API_KEY` in every request.
-- Never print or echo `$OPENALEX_API_KEY` to verify it is set — use `[[ -n "${OPENALEX_API_KEY:-}" ]]` instead.
+- **Never expose the actual key value** — not in text output, not in echoed commands, not in any form. Always use the variable reference `$OPENALEX_API_KEY`. To verify it is set: `[[ -n "${OPENALEX_API_KEY:-}" ]] && echo "key is set" || echo "ERROR: OPENALEX_API_KEY not set"`.
 
 ## Resources
 

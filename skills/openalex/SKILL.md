@@ -53,7 +53,7 @@ export OPENALEX_API_KEY='...'
 2. Run list query (works):
 
 ```bash
-curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data quality" AND "open government data"' --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=relevance_score:desc' --data-urlencode 'per-page=200' --data-urlencode 'select=id,display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year, cited_by:.cited_by_count, doi}'
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search="data quality" AND "open government data"' --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=relevance_score:desc' --data-urlencode 'per-page=200' --data-urlencode 'select=display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year, cited_by:.cited_by_count, doi}'
 ```
 
 ## Workflow
@@ -205,6 +205,8 @@ Use `select=` and `per-page=200` to minimize request count.
 
 ## Common Pitfalls
 
+- Do not use `.id` or `.doi` as the title field in jq output — `.id` is an OpenAlex URL, `.doi` is a DOI URL; always use `.display_name` for human-readable titles.
+- Do not include `id` in `select=` unless you need the OpenAlex URL for follow-up lookups — it is a URL, not a title, and confuses output.
 - Do not sort by `relevance_score` without a search query.
 - Do not use nested fields in `select` (example: use `open_access`, then parse `.open_access.is_oa` with `jq`).
 - Do not filter by entity names directly — use the two-step entity lookup to get the ID first.

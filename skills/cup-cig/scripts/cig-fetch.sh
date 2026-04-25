@@ -90,7 +90,7 @@ run 3 agent-browser eval "(() => {
   return 'clicked';
 })()"
 
-run 8 agent-browser wait --text "Informazioni Gara"
+run 30 agent-browser wait --text "Informazioni Gara"
 
 # Click "Esporta in JSON" via JS (match parziale su "JSON")
 run 3 agent-browser eval "(() => {

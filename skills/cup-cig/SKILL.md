@@ -1,7 +1,7 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables.
+compatibility: Requires curl, jq, bash, internet access. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. scripts/cig-fetch.sh requires agent-browser and timeout (GNU coreutils; macOS: brew install coreutils).
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
   version: "0.1"
@@ -31,10 +31,12 @@ User has a CUP
        └─ ANAC BDNCP bulk (authoritative CUP↔CIG join)
 
 User has a CIG
+  ├─ Full detail (participants, awards, subcontracts, financials) — any CIG type?
+  │    └─ ANAC dettaglio-cig → scripts/cig-fetch.sh (requires agent-browser)
   ├─ Starts with Z (e.g. Z063947806)?
-  │    └─ Below-threshold direct award → ANAC BDNCP bulk only
-  └─ Alphanumeric (e.g. 8874674CA7)?
-       └─ SCP-MIT API (published tenders)
+  │    └─ Below-threshold direct award → ANAC BDNCP bulk (no live API)
+  └─ Alphanumeric (e.g. 8874674CA7) — basic tender list / outcomes?
+       └─ SCP-MIT API
 ```
 
 ---
@@ -161,6 +163,41 @@ duckdb -c "SELECT * FROM read_csv_auto('cup.csv', HEADER=TRUE) WHERE cig = 'Z063
 
 - Find CIG(s) associated with a CUP: filter `cup` column.
 - Find details of a Z-prefix CIG (direct award): filter `cig` column.
+
+---
+
+## Source 5 — ANAC dettaglio-cig: Full CIG Detail
+
+**Portal:** `https://dettaglio-cig.anticorruzione.it/cig/{CIG}`
+**Method:** Browser automation via `scripts/cig-fetch.sh`
+**Requires:** `agent-browser`, `jq`
+**Coverage:** All CIG types (Z-prefix and alphanumeric). Returns 20+ sections.
+
+The payload is far richer than SCP-MIT: includes `bando`, `stazioneAppaltante`,
+`partecipanti`, `incaricati`, `aggiudicazione`, `quadroEconomico`, `subappalti`,
+`varianti`, `categorieOpera`, `pubblicazioni`, and more.
+
+### Fetch full detail for a single CIG
+
+```bash
+bash scripts/cig-fetch.sh 8874674CA7
+# → ./8874674CA7.json
+```
+
+```bash
+bash scripts/cig-fetch.sh 8874674CA7 /tmp
+# → /tmp/8874674CA7.json
+```
+
+### Troubleshooting
+
+If the script fails with `Invalid response: EOF`:
+
+```bash
+agent-browser close
+```
+
+Then rerun the script.
 
 ---
 

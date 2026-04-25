@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scarica il JSON completo di un CIG dal portale ANAC dettaglio-cig.
 # Gist: https://gist.github.com/aborruso/183e93419b5d3528af69a6617e97a3f1
-# Richiede: agent-browser (https://github.com/vercel-labs/agent-browser), jq
+# Richiede: agent-browser (https://github.com/vercel-labs/agent-browser), jq, timeout (GNU coreutils)
 set -euo pipefail
 
 if ! command -v agent-browser >/dev/null 2>&1; then
@@ -12,6 +12,11 @@ fi
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "Errore: 'jq' non installato." >&2
+  exit 127
+fi
+
+if ! command -v timeout >/dev/null 2>&1; then
+  echo "Errore: 'timeout' non trovato (GNU coreutils richiesto; su macOS: brew install coreutils)." >&2
   exit 127
 fi
 
@@ -27,10 +32,10 @@ OUT="${OUTDIR%/}/${CIG}.json"
 
 mkdir -p "$OUTDIR"
 
-# Sessione dedicata per non interferire con altre istanze agent-browser
-export AGENT_BROWSER_SESSION="cig-fetch"
+# Sessione univoca per evitare race condition tra run concorrenti
+export AGENT_BROWSER_SESSION="cig-fetch-${CIG}-$$"
 
-# Chiudi eventuali sessioni rimaste appese da run precedenti
+# Chiudi eventuali sessioni rimaste appese da run precedenti con lo stesso nome
 agent-browser close >/dev/null 2>&1 || true
 sleep 1
 
@@ -115,8 +120,8 @@ fi
 
 printf '%s' "$RAW" | jq -r '.data.result' > "$OUT"
 
-if ! jq -e . "$OUT" >/dev/null 2>&1; then
-  echo "Errore: output non è JSON valido ($OUT)" >&2
+if ! jq 'if type == "object" or type == "array" then true else error end' "$OUT" >/dev/null 2>&1; then
+  echo "Errore: output non è un oggetto/array JSON valido ($OUT)" >&2
   exit 3
 fi
 

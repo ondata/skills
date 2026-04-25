@@ -1,7 +1,7 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. scripts/cig-fetch.sh requires agent-browser.
+compatibility: Requires curl, jq, bash, internet access. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. scripts/cig-fetch.sh requires agent-browser and timeout (GNU coreutils; macOS: brew install coreutils).
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
   version: "0.1"
@@ -31,13 +31,12 @@ User has a CUP
        └─ ANAC BDNCP bulk (authoritative CUP↔CIG join)
 
 User has a CIG
+  ├─ Full detail (participants, awards, subcontracts, financials) — any CIG type?
+  │    └─ ANAC dettaglio-cig → scripts/cig-fetch.sh (requires agent-browser)
   ├─ Starts with Z (e.g. Z063947806)?
-  │    └─ Below-threshold direct award → ANAC BDNCP bulk only
-  └─ Alphanumeric (e.g. 8874674CA7)?
-       ├─ Basic tender list / award outcomes?
-       │    └─ SCP-MIT API
-       └─ Full detail (participants, awards, subcontracts, financials)?
-            └─ ANAC dettaglio-cig → scripts/cig-fetch.sh (requires agent-browser)
+  │    └─ Below-threshold direct award → ANAC BDNCP bulk (no live API)
+  └─ Alphanumeric (e.g. 8874674CA7) — basic tender list / outcomes?
+       └─ SCP-MIT API
 ```
 
 ---

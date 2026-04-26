@@ -234,6 +234,8 @@ The `{p}` is replaced by the page number → one PNG per slide.
 
 **Story 9:16**: center the content vertically, use larger fonts, avoid corners.
 
+**Footer/edge content never clips**: any text near the page borders — footer, slide counter (`ctr`), source URL, page number — must be fully visible, no half-cut letters. If clipping occurs, increase the page bottom margin (`#set page(margin: (x: ..., y: ...))`) or reduce the footer font size. This is a must-check in Phase 4.
+
 ---
 
 ## Known pitfalls

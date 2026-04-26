@@ -248,7 +248,19 @@ The `{p}` is replaced by the page number → one PNG per slide.
 
 **Logo with transparent background**: prefer SVG when possible. PNG with alpha works but requires that the slide background does not contrast badly with it.
 
-**The `<` symbol in Typst content**: it is interpreted as a label opening and causes an error. Replace with words ("less than", "lower than") or use `$lt$` in math mode.
+**Special characters in content mode**: several characters open syntactic constructs in Typst content mode and cause "unclosed delimiter" errors when used literally. Escape with a backslash or rephrase:
+
+| Char | What it opens in content | How to escape |
+|------|---------------------------|----------------|
+| `$` | math mode | `\$` |
+| `//` | line comment | `\/\/` or split with a space `/ /` |
+| `_` (adjacent to a word) | emphasis (italic) | `\_` |
+| `*` (before a word) | strong (bold) | `\*` |
+| `@` | reference | `\@` |
+| `<` | label | use words ("less than") or `$lt$` in math mode |
+| `~` | non-breaking space (silent, rarely a problem) | `\~` if you need it as literal output |
+
+Typical contexts where you trip on this: terminal-style strings (`$ command`, `~$`, `exit_`), paths like `MIT // license`, identifiers with `_`. Typst usually reports the error far from the actual cause, so when you see "unclosed delimiter" scan for these characters first.
 
 **`leading` is not a parameter of `text()`**: it belongs to `par()`. To control line height of a text block:
 ```typst

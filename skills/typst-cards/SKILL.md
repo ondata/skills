@@ -290,7 +290,11 @@ The `{p}` is replaced by the page number → one PNG per slide.
 
 ## Phase 4 — Review and iteration
 
-1. Compile with `typst compile` and read the resulting PNGs with the Read tool
-2. Show the generated slides to the user
-3. Ask for feedback: colors, text sizes, layout, content
-4. Typst recompiles in <1s: iterate quickly until satisfied
+After every compile:
+
+1. **Read** the PNGs with the Read tool — look at each slide, don't just confirm the file exists
+2. **Evaluate** against the design principles above: hierarchy, white space, contrast, text overflow/clipping, counter visibility, image quality
+3. **Report and propose**: list what works, what doesn't, and propose concrete fixes (e.g. "slide 3 title clips on the right — reduce from 44pt to 38pt", "increase top margin from 0.58in to 0.75in")
+4. **Wait** for user feedback before applying any change — do not auto-iterate
+
+Typst recompiles in <1s, so iteration is cheap; each round must still be driven by an explicit user decision.

@@ -2,6 +2,7 @@
 
 ## 2026-04-26
 
+- `typst-cards`: tighten Phase 4 — explicit read → evaluate → report+propose → wait flow; AI must look at PNGs (not just check existence), evaluate against design principles, propose concrete fixes, wait for user decision before iterating
 - `typst-cards`: new skill — generates PNG images for online communication (social posts, carousels, infographics) using Typst; brand-materials interview, supported formats (1:1, 4:5, 9:16, 16:9, 1.91:1), three reference starters (`theme-starter.typ`, `slides-1x1-starter.typ`, `slides-16x9-starter.typ`), known pitfalls
 
 ## 2026-04-24

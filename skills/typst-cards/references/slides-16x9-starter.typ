@@ -1,9 +1,9 @@
 // ─── slides-16x9-starter.typ ──────────────────────────────────────────────
 // LinkedIn / Twitter / YouTube 16:9 slide template (1920×1080px).
 // Copy to <project>/carousel/slides.typ and adapt the content.
-// Requires theme.typ in the same folder.
+// Requires theme-starter.typ in the same folder.
 
-#import "theme.typ": *
+#import "theme-starter.typ": *
 
 // ── format: Landscape 16:9 → 1920×1080px ──────────────────────────────────
 #set page(width: 13.33in, height: 7.5in, margin: (x: 0.85in, y: 0.62in))

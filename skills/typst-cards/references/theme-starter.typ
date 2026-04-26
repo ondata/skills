@@ -1,6 +1,7 @@
 // ─── theme-starter.typ ────────────────────────────────────────────────────
 // Starter template. Adjust values to the context or DESIGN.md.
-// Import in slides.typ with: #import "theme.typ": *
+// Copy or rename this file to `theme.typ` in the same folder, then import it
+// in slides.typ with: #import "theme.typ": *
 
 // ── palette ────────────────────────────────────────────────────────────────
 // Edit these values based on user palette or DESIGN.md.

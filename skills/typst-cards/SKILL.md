@@ -3,6 +3,8 @@ name: typst-cards
 description: Generate PNG images for online communication — social media, carousels, infographics, posts — using Typst. Use this skill whenever the user wants to create slides, cards, visual posts or any digital graphic content, even if they don't explicitly mention Typst. The skill drives an interview about brand materials (logo, palette, fonts, DESIGN.md), proposes the formats best suited to the context (Instagram 1:1, Stories 9:16, LinkedIn 16:9, etc.) and produces ready-to-use PNGs.
 ---
 
+# Typst Cards
+
 ## Purpose
 
 Turn a textual context and optional brand materials into professional PNG images for online communication, using Typst as the rendering engine. The skill manages the full flow: interview → theme → generation → review.
@@ -18,8 +20,10 @@ typst --version
 If not available, install it like this (Linux/WSL x86_64):
 
 ```bash
-curl -fsSL https://github.com/typst/typst/releases/latest/download/typst-x86_64-unknown-linux-musl.tar.xz -o /tmp/typst.tar.xz && tar -xf /tmp/typst.tar.xz -C /tmp/ && mv /tmp/typst-x86_64-unknown-linux-musl/typst ~/.local/bin/
+curl -fsSL https://github.com/typst/typst/releases/latest/download/typst-x86_64-unknown-linux-musl.tar.xz -o /tmp/typst.tar.xz && tar -xf /tmp/typst.tar.xz -C /tmp/ && mkdir -p ~/.local/bin && mv /tmp/typst-x86_64-unknown-linux-musl/typst ~/.local/bin/
 ```
+
+> **Note**: `~/.local/bin` must be in your `PATH` for `typst` to be found. Add `export PATH="$HOME/.local/bin:$PATH"` to your shell profile if needed.
 
 ---
 
@@ -120,9 +124,10 @@ Adapt colors to the materials gathered. This is a starting point:
 ```typst
 // — palette —
 #let BG-DARK  = rgb("#0d1117")
-#let BG-LIGHT = rgb("#ffffff")
-#let ACC-DARK  = rgb("#58a6ff")   // accent on dark background
-#let ACC-LIGHT = rgb("#0969da")   // accent on light background
+#let BG-LIGHT = rgb("#f6f8fa")   // light background
+#let BG-WHITE = rgb("#ffffff")   // pure white
+#let ACC      = rgb("#58a6ff")   // accent on dark background
+#let ACC-L    = rgb("#0969da")   // accent on light background
 #let FG-DARK  = rgb("#e6edf3")    // text on dark
 #let FG-LIGHT = rgb("#1c2128")    // text on light
 #let MUTED-D  = rgb("#8b949e")    // secondary on dark
@@ -139,7 +144,7 @@ Adapt colors to the materials gathered. This is a starting point:
 // — helper: section label —
 #let lbl(body, dark: false) = text(
   size: 9pt, weight: "bold", tracking: 2pt,
-  fill: if dark { ACC-DARK } else { ACC-LIGHT },
+  fill: if dark { ACC } else { ACC-L },
 )[#upper(body)]
 
 // — helper: slide counter (for carousels) —

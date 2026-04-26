@@ -1,7 +1,7 @@
 // ─── slides-1x1-starter.typ ───────────────────────────────────────────────
 // Instagram 1:1 carousel template (1080×1080px).
 // Copy to <project>/carousel/slides.typ and adapt the content.
-// Requires theme-starter.typ in the same folder.
+// Uses theme-starter.typ from the same folder (imported below).
 
 #import "theme-starter.typ": *
 

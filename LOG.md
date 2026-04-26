@@ -1,5 +1,9 @@
 # LOG
 
+## 2026-04-26
+
+- `typst-cards`: new skill — generates PNG images for online communication (social posts, carousels, infographics) using Typst; brand-materials interview, supported formats (1:1, 4:5, 9:16, 16:9, 1.91:1), three reference starters (`theme-starter.typ`, `slides-1x1-starter.typ`, `slides-16x9-starter.typ`), known pitfalls
+
 ## 2026-04-24
 
 - `openalex`: strengthen API key security — added prominent SECURITY callout at top of SKILL.md; expanded Common Pitfalls rule to cover all output contexts (text responses, echoed commands, logs), not just verification

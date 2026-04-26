@@ -1,13 +1,21 @@
 // ─── slides-16x9-starter.typ ──────────────────────────────────────────────
 // LinkedIn / Twitter / YouTube 16:9 slide template (1920×1080px).
 // Copy to <project>/carousel/slides.typ and adapt the content.
-// Uses theme-starter.typ from the same folder (imported below).
+// Requires theme-starter.typ in the same folder (or rename it to theme.typ).
 
 #import "theme-starter.typ": *
 
 // ── format: Landscape 16:9 → 1920×1080px ──────────────────────────────────
-#set page(width: 13.33in, height: 7.5in, margin: (x: 0.85in, y: 0.62in))
+// Keep `bottom` margin >= 0.65in so the footer line + 9pt text fit fully.
+#set page(
+  width: 13.33in, height: 7.5in,
+  margin: (x: 0.85in, top: 0.55in, bottom: 0.72in),
+  footer-descent: 20pt,
+)
 #set text(font: SANS, size: 16pt, fill: FG-LIGHT)
+
+// Footer URL — edit once for the whole deck. Counter is auto-numbered.
+#let URL = "github.com/<org>/<repo>"
 
 // Compilation:
 //   typst compile slides.typ "output/slide-{p}.png" --ppi 144
@@ -21,7 +29,7 @@
 // ══════════════════════════════════════════════════════════════════════════
 // SLIDE 1 · Cover (dark background, editorial layout)
 // ══════════════════════════════════════════════════════════════════════════
-#set page(fill: BG-DARK)
+#set page(fill: BG-DARK, footer: footer-block(URL, dark: true))
 
 #v(1fr)
 #lbl(dark: true)[category · section]
@@ -29,9 +37,9 @@
 #divider(dark: true)
 #v(0.25in)
 #text(
-  font: DISPLAY,    // if you have a display font in DESIGN.md, use it here
+  font: DISPLAY,
   size: 52pt,
-  weight: 400,      // serif display fonts work well at normal weight
+  weight: 400,
   fill: FG-DARK,
 )[
   Main title\
@@ -43,12 +51,11 @@
   explain the context in two lines.
 ]
 #v(1fr)
-#ctr(1, 3, dark: true)
 
 // ══════════════════════════════════════════════════════════════════════════
 // SLIDE 2 · Structured content (light background, two columns)
 // ══════════════════════════════════════════════════════════════════════════
-#set page(fill: BG-LIGHT)
+#set page(fill: BG-LIGHT, footer: footer-block(URL, dark: false))
 #set text(fill: FG-LIGHT)
 
 #lbl[01 · details]
@@ -84,13 +91,11 @@
                      the section.],
   ),
 )
-#v(1fr)
-#ctr(2, 3)
 
 // ══════════════════════════════════════════════════════════════════════════
 // SLIDE 3 · Numbers / impact (dark background, 3 horizontal stats)
 // ══════════════════════════════════════════════════════════════════════════
-#set page(fill: BG-DARK)
+#set page(fill: BG-DARK, footer: footer-block(URL, dark: true))
 #set text(fill: FG-DARK)
 
 #v(0.3in)
@@ -120,5 +125,3 @@
 #text(size: 16pt, fill: MUTED-D)[
   Closing line — call to action or final link.
 ]
-#v(1fr)
-#ctr(3, 3, dark: true)

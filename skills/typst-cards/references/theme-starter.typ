@@ -21,6 +21,7 @@
 
 #let CODE-BG  = rgb("#161b22")   // code block background
 #let CODE-BR  = rgb("#30363d")   // code block border
+#let RULE-L   = rgb("#d0d7de")   // separator line on light bg
 
 // ── fonts ──────────────────────────────────────────────────────────────────
 // If DESIGN.md specifies separate fonts for display vs body, define both
@@ -46,10 +47,23 @@
   fill: if dark { ACC } else { ACC-L },
 )[#upper(body)]
 
-// ── helper: slide counter (carousels) ─────────────────────────────────────
-// Usage: #ctr(2, 6) → "2 / 6" at bottom right
-#let ctr(n, total, dark: false) = align(right)[
-  #text(size: 9pt, fill: if dark { MUTED-D } else { MUTED-L }, font: SANS)[#n / #total]
+// ── helper: page footer (URL on the left, slide counter on the right) ─────
+// Uses Typst's NATIVE page counter — no manual N/total, robust to add/remove
+// slides. Apply via `#set page(footer: footer-block("github.com/me/repo"))`.
+// For mixed light/dark slides, re-apply per slide with `dark: true|false`.
+#let footer-block(url, dark: false) = context [
+  #line(
+    length: 100%,
+    stroke: 0.5pt + if dark { CODE-BR } else { RULE-L },
+  )
+  #v(0.06in)
+  #grid(
+    columns: (1fr, auto),
+    text(font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L })[#url],
+    text(font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L })[
+      \# #counter(page).display() / #counter(page).final().first()
+    ],
+  )
 ]
 
 // ── helper: code block ────────────────────────────────────────────────────

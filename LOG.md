@@ -2,6 +2,7 @@
 
 ## 2026-04-26
 
+- `typst-cards`: refactor starter templates to native page-level footer — `#set page(footer: footer-block(URL, dark: ...))` with Typst's `counter(page).display()` / `.final().first()`; replaces fragile `#v(1fr) + #ctr(n,total)` last-row pattern that produced silent ghost slides on dense content; new `footer-block` helper in theme; new pitfall entry; sub-case on literal helper params under special-chars table; smoke-tested both starters (5+3 PNGs, footer fully visible)
 - `typst-cards`: add "Footer/edge content never clips" design rule — footer, counter, source URL must be fully visible; fix via larger page bottom margin or smaller footer font; must-check in Phase 4
 - `typst-cards`: expand "Special characters in content mode" pitfall — table covering `$`, `//`, `_`, `*`, `@`, `<`, `~` (replaces the previous single bullet on `<`); typical contexts where these characters break compilation with "unclosed delimiter" errors
 - `typst-cards`: tighten Phase 4 — explicit read → evaluate → report+propose → wait flow; AI must look at PNGs (not just check existence), evaluate against design principles, propose concrete fixes, wait for user decision before iterating

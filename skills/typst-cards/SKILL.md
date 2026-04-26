@@ -104,7 +104,7 @@ Always create this structure in the project directory:
 
 Instead of writing from scratch, **copy one of the reference templates** from the skill folder and adapt it:
 
-- `references/theme-starter.typ` → palette, fonts, helpers (`lbl`, `ctr`, `codebox`, `divider`)
+- `references/theme-starter.typ` → palette, fonts, helpers (`lbl`, `footer-block`, `codebox`, `divider`)
 - `references/slides-1x1-starter.typ` → 5 Instagram 1:1 slides (cover + 3 content + outro)
 - `references/slides-16x9-starter.typ` → 3 LinkedIn 16:9 slides (cover + two-column + 3 stat)
 
@@ -147,9 +147,17 @@ Adapt colors to the materials gathered. This is a starting point:
   fill: if dark { ACC } else { ACC-L },
 )[#upper(body)]
 
-// — helper: slide counter (for carousels) —
-#let ctr(n, total, dark: false) = align(right)[
-  #text(size: 9pt, fill: if dark { MUTED-D } else { MUTED-L })[#n / #total]
+// — helper: page footer (URL + native page counter) —
+// Apply via #set page(footer: footer-block("github.com/me/repo"))
+#let footer-block(url, dark: false) = context [
+  #line(length: 100%, stroke: 0.5pt + if dark { CODE-BR } else { rgb("#d0d7de") })
+  #v(0.06in)
+  #grid(columns: (1fr, auto),
+    text(font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L })[#url],
+    text(font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L })[
+      \# #counter(page).display() / #counter(page).final().first()
+    ],
+  )
 ]
 
 // — helper: code block —
@@ -167,17 +175,21 @@ Adapt colors to the materials gathered. This is a starting point:
 ```typst
 #import "theme.typ": *
 
-// Pick the format (only one active line):
-#set page(width: 7.5in,   height: 7.5in,   margin: (x: 0.62in, y: 0.58in))  // 1:1
-// #set page(width: 7.5in, height: 9.375in, margin: (x: 0.62in, y: 0.58in)) // 4:5
-// #set page(width: 7.5in, height: 13.33in, margin: (x: 0.62in, y: 0.70in)) // 9:16
-// #set page(width: 13.33in, height: 7.5in, margin: (x: 0.80in, y: 0.58in)) // 16:9
-// #set page(width: 8.33in, height: 4.36in, margin: (x: 0.62in, y: 0.45in)) // 1.91:1
+// Pick the format (only one active line). Keep `bottom` margin generous
+// (~0.7in) so the footer line + 9pt text fit fully without clipping.
+#set page(width: 7.5in,   height: 7.5in,   margin: (x: 0.55in, top: 0.5in, bottom: 0.7in), footer-descent: 18pt)  // 1:1
+// #set page(width: 7.5in, height: 9.375in, margin: (x: 0.55in, top: 0.5in, bottom: 0.7in), footer-descent: 18pt) // 4:5
+// #set page(width: 7.5in, height: 13.33in, margin: (x: 0.55in, top: 0.6in, bottom: 0.75in), footer-descent: 20pt) // 9:16
+// #set page(width: 13.33in, height: 7.5in, margin: (x: 0.85in, top: 0.55in, bottom: 0.72in), footer-descent: 20pt) // 16:9
+// #set page(width: 8.33in, height: 4.36in, margin: (x: 0.55in, top: 0.4in, bottom: 0.6in), footer-descent: 16pt) // 1.91:1
 
 #set text(font: SANS, size: 15pt, fill: FG-LIGHT)
 
-// — SLIDE 1 (dark background) —
-#set page(fill: BG-DARK)
+// Footer URL — edit once for the deck. Counter is auto-numbered.
+#let URL = "github.com/<org>/<repo>"
+
+// — SLIDE 1 (dark) — set fill + matching dark footer together
+#set page(fill: BG-DARK, footer: footer-block(URL, dark: true))
 #v(1fr)
 #lbl(dark: true)[tag · topic]
 #v(0.15in)
@@ -188,22 +200,21 @@ Adapt colors to the materials gathered. This is a starting point:
 #v(0.2in)
 #text(size: 14pt, fill: MUTED-D)[Short subtitle or description]
 #v(1fr)
-#ctr(1, 6, dark: true)
 
-// — SLIDE 2 (light background) — different settings → automatic page break
-#set page(fill: BG-LIGHT)
+// — SLIDE 2 (light) — switch fill → new page automatically
+#set page(fill: BG-LIGHT, footer: footer-block(URL, dark: false))
 #lbl[02 · section]
 #v(0.2in)
 #text(size: 31pt, weight: 900)[Section title]
 #v(0.2in)
 #text(size: 14pt, fill: MUTED-L)[Slide body text.]
-#v(1fr)
-#ctr(2, 6)
 
 // — SLIDE 3 (same background as slide 2 → explicit pagebreak) —
 #pagebreak()
 // ... content ...
 ```
+
+**Why the footer goes through `#set page(footer: ...)` and not a manual `#ctr` at the end of each slide**: the page-level footer uses Typst's native page counter, so adding/removing slides requires no renumbering. It also lives in the `bottom` margin, so it cannot be pushed to the next page by dense content (see "fragile footer pattern" in pitfalls).
 
 ### Compilation
 
@@ -246,6 +257,13 @@ The `{p}` is replaced by the page number → one PNG per slide.
 
 **`#set page(fill: X)` does not create a new page if X doesn't change**: between slides with the same fill, use an explicit `#pagebreak()`.
 
+**Fragile footer pattern — `#v(1fr)` + `#ctr(n, total)` as the last row of each slide**: when content saturates the page, the `1fr` space collapses to 0 and the counter slides onto the next page — you get a "ghost slide" with only the counter visible, no error. Prefer Typst's native page-level footer:
+```typst
+#set page(footer: footer-block(URL, dark: true))
+// content of the slide — no v(1fr)+ctr at the end
+```
+The counter lives in the `bottom` margin and cannot be pushed by content. Overflow now manifests as a real extra page (immediately diagnosable) instead of a silent ghost slide.
+
 **`v(1fr)` works at page level**: it splits the leftover space. If you place two of them, the space is split evenly between the two points.
 
 **Logo with transparent background**: prefer SVG when possible. PNG with alpha works but requires that the slide background does not contrast badly with it.
@@ -263,6 +281,8 @@ The `{p}` is replaced by the page number → one PNG per slide.
 | `~` | non-breaking space (silent, rarely a problem) | `\~` if you need it as literal output |
 
 Typical contexts where you trip on this: terminal-style strings (`$ command`, `~$`, `exit_`), paths like `MIT // license`, identifiers with `_`. Typst usually reports the error far from the actual cause, so when you see "unclosed delimiter" scan for these characters first.
+
+> **Sub-case — strings passed as helper parameters are literal**: when you call something like `#item("$ command", "...")` or `#text(...)[#param]` with a string variable, the string is treated literally — backslash escapes are NOT resolved. So `"\$ command"` outputs `\$ command` (with the visible backslash), while `"$ command"` outputs `$ command` correctly. The escape rule applies only inside content/markup, not inside string-typed parameter values.
 
 **`leading` is not a parameter of `text()`**: it belongs to `par()`. To control line height of a text block:
 ```typst

@@ -121,6 +121,22 @@ curl -s "https://api.datawrapper.de/v3/charts/$CHART_ID/export/png?unit=px&width
 
 Always read the exported PNG visually to verify it looks correct before reporting success.
 
+### 6. Offer to delete the chart
+
+After verifying the PNG, ask the user:
+
+> "The PNG has been saved locally. Do you want to delete the chart from Datawrapper?"
+
+If yes:
+
+```bash
+curl -s -X DELETE "https://api.datawrapper.de/v3/charts/$CHART_ID" \
+  -H "Authorization: Bearer $DATAWRAPPER_API"
+```
+
+If no, remind the user the chart is available at:
+`https://app.datawrapper.de/chart/<CHART_ID>/visualize`
+
 ---
 
 ## Add descriptive metadata (recommended for all types)

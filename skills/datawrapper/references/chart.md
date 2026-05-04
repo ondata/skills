@@ -188,6 +188,196 @@ which distort the stack and make segments impossible to read.
 
 ---
 
+## Range annotations — vertical colored bands (line charts)
+
+Use `range-annotations` to highlight time periods as colored vertical bands.
+
+**Critical fields** — all required, wrong values silently break rendering:
+
+| Field | Value |
+|---|---|
+| `type` | `"x"` (vertical band on x-axis) |
+| `display` | `"range"` |
+| `opacity` | integer **0–100** (NOT 0–1) |
+| `position.x0` / `position.x1` | date string `"YYYY/MM/DD HH:mm"` (slashes, not dashes) |
+| `position.y0` / `position.y1` | y-axis extent, e.g. `"0"` and `"15"` for full height |
+| `strokeWidth` | `0` to hide border |
+
+```json
+{
+  "metadata": {
+    "visualize": {
+      "range-annotations": [
+        {
+          "id": "band-1",
+          "type": "x",
+          "display": "range",
+          "color": "#2980b9",
+          "opacity": 12,
+          "position": {
+            "x0": "2014/02/01 00:00",
+            "x1": "2016/12/01 00:00",
+            "y0": "0",
+            "y1": "15"
+          },
+          "strokeType": "solid",
+          "strokeWidth": 0
+        }
+      ]
+    }
+  }
+}
+```
+
+**Common mistakes that break rendering silently:**
+- Using `"x0"/"x1"` at top level instead of inside `position` → ignored
+- Using dashes in dates (`"2014-02-01"`) instead of slashes (`"2014/02/01 00:00"`) → ignored
+- Using `opacity: 0.12` (float) instead of `opacity: 12` (integer 0-100) → too transparent or ignored
+- Omitting `"type": "x"` or `"display": "range"` → not rendered
+
+**Readability rule: colored bands without labels are unreadable.**
+Always pair every range annotation with a matching `text-annotation` that names the period.
+Place the label at a fixed low y value (e.g. `"0.6"`) centered in the band, italic, no connector, color matching the band:
+
+```json
+{
+  "id": "lbl-period",
+  "text": "Period name",
+  "align": "bc",
+  "size": 11,
+  "italic": true,
+  "bg": false,
+  "color": "#1a5276",
+  "dx": 0,
+  "dy": 0,
+  "position": { "x": "2015-07-01", "y": "0.6" },
+  "connectorLine": { "enabled": false },
+  "showMobile": true,
+  "showDesktop": true
+}
+```
+
+`x` = midpoint of the band; `y` = value safely below all data (check the actual data minimum first).
+
+---
+
+## Text annotations with arrows (line charts)
+
+Point to a specific data value with a callout box and arrow.
+
+```json
+{
+  "metadata": {
+    "visualize": {
+      "text-annotations": [
+        {
+          "id": "ann-1",
+          "text": "Label with <b>bold</b>",
+          "align": "tl",
+          "size": 13,
+          "color": "#494949",
+          "bg": true,
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "dx": 8,
+          "dy": -30,
+          "position": {
+            "x": "2014-11-01",
+            "y": "13.29"
+          },
+          "connectorLine": {
+            "enabled": true,
+            "arrowHead": "triangle",
+            "type": "straight",
+            "stroke": 1,
+            "inheritColor": false,
+            "targetPadding": 6
+          },
+          "showMobile": true,
+          "showDesktop": true
+        }
+      ]
+    }
+  }
+}
+```
+
+- `position.x`: ISO date string matching the data (`"YYYY-MM-DD"`)
+- `position.y`: string of the data value at that point
+- `dx`/`dy`: pixel offset of the text box from the arrow tip
+- `align`: text anchor — `"tl"` top-left, `"br"` bottom-right, `"tr"` top-right, `"bl"` bottom-left
+- `bg`: `true` adds a white background behind the text
+
+---
+
+## Text annotations on bar charts (d3-bars)
+
+Bar charts use a **completely different `position` format** — row-based, not coordinate-based.
+Using `position.x = "CategoryName"` or `position.y = "value"` silently fails.
+
+```json
+{
+  "id": "ann-bar",
+  "text": "My annotation",
+  "align": "tl",
+  "size": 13,
+  "color": "#494949",
+  "bg": true,
+  "dx": -5,
+  "dy": -30,
+  "position": {
+    "x": "-1.3600",
+    "yAxis": "y",
+    "rowIndex": 4,
+    "rowOffset": -2
+  },
+  "connectorLine": {
+    "enabled": true,
+    "arrowHead": "lines",
+    "type": "straight",
+    "stroke": 1,
+    "inheritColor": false,
+    "targetPadding": 4
+  },
+  "showMobile": true,
+  "showDesktop": true
+}
+```
+
+- `position.x`: the data value of the bar as a string (e.g. `"-1.3600"`) — determines horizontal position of arrow tip
+- `position.rowIndex`: 0-based index of the bar **from the top** of the chart
+- `position.rowOffset`: small integer offset in pixels (usually `-2`)
+- `position.yAxis`: always `"y"`
+- `arrowHead`: `"lines"` (two-line arrow) or `"triangle"` — both work on bar charts
+
+**To find `rowIndex`**: count bars from top, starting at 0. If bars are in CSV order, row 0 = first CSV row.
+
+---
+
+## Colored title words
+
+The `title` field supports inline HTML `<span>` for partial coloring:
+
+```json
+{
+  "title": "Unemployment at <span style=\"color:#c0392b\">historic lows</span>"
+}
+```
+
+---
+
+## Readability: always spell out abbreviations
+
+Any abbreviation used in labels, axes, or annotations must be spelled out **at least once** in the chart — in the intro or in the notes. A chart with unexplained abbreviations is not self-contained.
+
+- Wrong: axis label `pp/anno`, notes say nothing → reader doesn't know what `pp` means
+- Right: intro says *"in punti percentuali (pp)"* or notes say *"pp = punti percentuali"*
+
+Apply this to any unit shorthand: `pp`, `Mm³`, `k`, `M`, `idx`, etc.
+
+---
+
 ## Discover property names
 
 The most reliable way to find visualization property names is to configure the

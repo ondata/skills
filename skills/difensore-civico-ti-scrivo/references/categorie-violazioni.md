@@ -259,3 +259,72 @@ inadempienza da parte di [ENTE].
 **Remedy to request:** "accerti lo stato della precedente segnalazione (prot. [N.]) e, ove
 [ENTE] non abbia ancora ottemperato, eserciti i poteri di cui all'art. 18-bis del CAD,
 compresi, se del caso, i poteri sanzionatori ivi previsti."
+
+---
+
+## Category G — Mancata pubblicazione di dataset ad alto valore (HVD)
+
+**When:** A PA responsible for one or more High Value Dataset (HVD) categories defined in
+Reg. (UE) 2023/138 has not published the required datasets — i.e., the datasets are entirely
+absent from the national open data catalog (dati.gov.it) and/or not accessible via API, past
+the 9 June 2024 deadline.
+
+Distinct from Category A (wrong format) and Category B (access barriers): here the data
+does not exist at all in the catalog.
+
+**Additional questions to ask the user:**
+- Which HVD category is affected? (geospaziale / osservazione della terra e ambiente /
+  meteorologica / statistica / imprese e proprietà societaria / mobilità)
+- Which specific PA is responsible? Note: multiple PAs may hold obligations per category.
+  For "imprese": Camere di Commercio / Unioncamere; for "mobilità": MIT + Regioni.
+  Draft one *segnalazione* per PA.
+- Have you verified on dati.gov.it filtering by the `hvd_category` field? What result?
+- Have you cross-checked on data.europa.eu for Italian datasets in this category?
+
+**Articles to cite:** Reg. (UE) 2023/138 artt. 3 co. 1 and 4 co. 2–3; D.Lgs. 36/2006 artt.
+12-bis co. 1, 9 co. 2, and 12 ult. co.
+
+**Adaptable legal language (Italian):**
+
+```
+[ENTE] non ha reso disponibile alcuna serie di dati rientrante nella categoria
+"[CATEGORIA HVD]" prevista dall'allegato del Regolamento di esecuzione (UE) 2023/138 della
+Commissione, del 21 dicembre 2022 [1], né sul catalogo nazionale dei dati aperti
+(dati.gov.it) né tramite API accessibili pubblicamente.
+
+Tale inadempienza perdura da oltre [N MESI] rispetto alla scadenza del 9 giugno 2024, data
+dalla quale il Regolamento è applicabile ai sensi del suo articolo 6 (pubblicato in GUUE
+L 19/43 del 20 gennaio 2023, entrato in vigore il 9 febbraio 2023, applicabile dal 9 giugno
+2024). L'assenza è stata verificata direttamente su dati.gov.it tramite filtro sul campo
+hvd_category e confermata su data.europa.eu.
+
+Ciò contrasta con:
+
+- l'art. 3, paragrafo 1, del Reg. (UE) 2023/138 [1], che impone agli enti pubblici che
+  detengono serie di dati di elevato valore di garantirne la messa a disposizione "in
+  formati leggibili meccanicamente tramite API corrispondenti alle ragionevoli esigenze dei
+  riutilizzatori";
+- l'art. 4, paragrafo 2, del medesimo Regolamento [1], che estende l'obbligo alle serie di
+  dati esistenti create prima della data di applicazione;
+- l'art. 4, paragrafo 3, del medesimo Regolamento [1], che impone licenza CC0 o CC BY 4.0;
+- l'art. 12-bis, comma 1, del D.Lgs. 24 gennaio 2006, n. 36 [2], che recepisce
+  nell'ordinamento nazionale tali obblighi, disponendo che le serie di dati di elevato
+  valore siano rese disponibili gratuitamente, leggibili meccanicamente, fornite mediante
+  API e come download in blocco;
+- l'art. 9, comma 2, del medesimo D.Lgs. 36/2006 [3], che impone l'utilizzo del catalogo
+  nazionale dei dati aperti gestito da AgID (dati.gov.it) come "punto di accesso unico alle
+  serie di dati";
+- l'art. 12, ultimo comma, del D.Lgs. 36/2006 [4], che prevede esplicitamente il ricorso
+  al difensore civico per il digitale in caso di violazione delle disposizioni del decreto.
+
+Il Regolamento (UE) 2023/138 è direttamente applicabile negli Stati membri ai sensi
+dell'art. 288, secondo comma, del TFUE, senza necessità di recepimento nazionale.
+[ENTE] rientra nell'ambito soggettivo di applicazione ai sensi [dell'art. 1, comma 2, del
+D.Lgs. 36/2006 / dell'art. 2, comma 2, del CAD — eliminare la variante non applicabile].
+```
+
+**Remedy to request:** "pubblichi le serie di dati ad alto valore della categoria
+"[CATEGORIA HVD]" in formati leggibili meccanicamente tramite API pubblica con licenza CC0
+o CC BY 4.0, le renda disponibili come download in blocco ove applicabile, e le cataloghi
+su dati.gov.it con il campo hvd_category valorizzato, nel rispetto del Reg. (UE) 2023/138
+e dell'art. 12-bis del D.Lgs. 36/2006."

@@ -8,7 +8,7 @@ description: >
   write to the Difensore Civico per il Digitale; complain about open data violations,
   non-machine-readable public data, inaccessible PA portals, missing or restrictive licenses
   on public data, captchas blocking automated access, unanswered data reuse requests (D.Lgs.
-  36/2006 art. 5), failure to publish mandatory High Value Datasets (HVD, Reg. UE 2023/138),
+  36/2006 art. 5), failure to publish mandatory High Value Datasets (HVD, Reg. (UE) 2023/138),
   or a prior DCD complaint that got no response. Trigger even if the user does not name the
   skill — any Italian digital-rights complaint targeting a PA is a candidate.
 ---

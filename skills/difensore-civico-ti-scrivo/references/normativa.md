@@ -200,7 +200,7 @@ Pubblicato in GUUE L 19/43 del 20 gennaio 2023. Entrato in vigore il 9 febbraio 
 
 URL testo integrale: <https://eur-lex.europa.eu/eli/reg_impl/2023/138/oj>
 
-### Art. 3, comma 1 — Obbligo di pubblicazione via API per tutte le categorie HVD
+### Art. 3, paragrafo 1 — Obbligo di pubblicazione via API per tutte le categorie HVD
 
 > "Gli enti pubblici che detengono serie di dati di elevato valore elencate nell'allegato
 > garantiscono che le serie di dati descritte o cui si fa riferimento nell'allegato siano
@@ -208,14 +208,14 @@ URL testo integrale: <https://eur-lex.europa.eu/eli/reg_impl/2023/138/oj>
 > ragionevoli esigenze dei riutilizzatori. Se indicato nell'allegato, le serie di dati sono
 > rese disponibili anche come download in blocco."
 
-### Art. 4, commi 2 e 3 — Ambito (anche dati preesistenti) e licenza
+### Art. 4, paragrafi 2 e 3 — Ambito (anche dati preesistenti) e licenza
 
-> **Co. 2** — "Al fine di agevolare la disponibilità di serie di dati per il riutilizzo su
+> **Par. 2** — "Al fine di agevolare la disponibilità di serie di dati per il riutilizzo su
 > periodi di tempo prolungati, gli obblighi imposti dal presente regolamento si applicano
 > anche alle serie di dati di elevato valore esistenti, leggibili meccanicamente, che sono
 > state create prima della data di applicazione del presente regolamento."
 
-> **Co. 3** — "Le serie di dati di elevato valore sono rese disponibili per il riutilizzo
+> **Par. 3** — "Le serie di dati di elevato valore sono rese disponibili per il riutilizzo
 > alle condizioni della licenza Creative Commons Public Domain Dedication (CC0) o, in
 > alternativa, della licenza Creative Commons BY 4.0, o di qualsiasi licenza aperta
 > equivalente o meno restrittiva [...]"

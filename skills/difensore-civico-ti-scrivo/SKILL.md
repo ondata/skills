@@ -8,8 +8,9 @@ description: >
   write to the Difensore Civico per il Digitale; complain about open data violations,
   non-machine-readable public data, inaccessible PA portals, missing or restrictive licenses
   on public data, captchas blocking automated access, unanswered data reuse requests (D.Lgs.
-  36/2006 art. 5), or a prior DCD complaint that got no response. Trigger even if the user
-  does not name the skill — any Italian digital-rights complaint targeting a PA is a candidate.
+  36/2006 art. 5), failure to publish mandatory High Value Datasets (HVD, Reg. (UE) 2023/138),
+  or a prior DCD complaint that got no response. Trigger even if the user does not name the
+  skill — any Italian digital-rights complaint targeting a PA is a candidate.
 ---
 
 # difensore-civico-ti-scrivo
@@ -24,6 +25,11 @@ the DCD's main function. If the user describes an accessibility complaint (recla
 dichiarazione di accessibilità, L. 4/2004 — Funzione B), redirect them: the correct channel
 is *exclusively* the link on the reported entity's own website, not AGID. Do not draft a
 Funzione B complaint through this skill.
+
+**Covered norms.** In addition to the CAD, this skill covers D.Lgs. 36/2006 (open data and
+reuse) and EU regulations directly applicable in Italy — in particular **Reg. (UE) 2023/138**
+(High Value Datasets — HVD), which requires publication of six dataset categories via
+machine-readable API; obligations have been enforceable since 9 June 2024.
 
 **One complaint per PA.** If multiple administrations are involved, produce one *segnalazione*
 per administration.

@@ -152,6 +152,84 @@ procedimento entro 90 giorni, la segnalazione si intende archiviata senza comuni
 
 ---
 
+## D.Lgs. 24 gennaio 2006, n. 36 — Articoli aggiuntivi
+
+### Art. 9, comma 2 — Obbligo di catalogazione su dati.gov.it
+
+> "Per la ricerca di dati in formato aperto, le pubbliche amministrazioni, gli organismi di
+> diritto pubblico, le imprese pubbliche e le imprese private di cui all'articolo 1, comma
+> 2-quater, utilizzano il catalogo nazionale dei dati aperti gestito dall'Agenzia per
+> l'Italia digitale, come punto di accesso unico alle serie di dati, ad eccezione dei set di
+> dati territoriali che sono disponibili anche nel Repertorio Nazionale dei dati Territoriali."
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2006-01-24;36~art9>
+
+---
+
+### Art. 12, ultimo comma — Competenza del DCD per violazioni open data
+
+> "In caso di violazione delle disposizioni introdotte dalle Linee guida, il soggetto
+> interessato può rivolgersi al difensore civico per il digitale di cui all'articolo 17,
+> comma 1-quater, del Codice dell'amministrazione digitale e si applicano le sanzioni
+> previste dall'articolo 18-bis, comma 5, dello stesso Codice."
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2006-01-24;36~art12>
+
+---
+
+### Art. 12-bis — Serie specifiche di dati di elevato valore (HVD)
+
+> **Co. 1** — "Alle specifiche serie di dati di elevato valore individuate dalla Commissione
+> europea ai sensi dell'articolo 14, paragrafo 1, della direttiva UE n. 1024/2019 all'interno
+> delle categorie previste dall'articolo 13 e dall'allegato I della medesima direttiva, si
+> applicano le seguenti disposizioni:
+> a) sono rese disponibili gratuitamente [...];
+> b) sono rese leggibili meccanicamente;
+> c) sono fornite mediante API;
+> d) sono fornite come download in blocco, se del caso."
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2006-01-24;36~art12bis>
+
+---
+
+## Reg. di esecuzione (UE) 2023/138 — High Value Datasets (HVD)
+
+Direttamente applicabile negli Stati membri ai sensi dell'art. 288, co. 2, TFUE.
+Pubblicato in GUUE L 19/43 del 20 gennaio 2023. Entrato in vigore il 9 febbraio 2023.
+**Applicabile dal 9 giugno 2024** (16 mesi dall'entrata in vigore, ai sensi dell'art. 6).
+
+URL testo integrale: <https://eur-lex.europa.eu/eli/reg_impl/2023/138/oj>
+
+### Art. 3, paragrafo 1 — Obbligo di pubblicazione via API per tutte le categorie HVD
+
+> "Gli enti pubblici che detengono serie di dati di elevato valore elencate nell'allegato
+> garantiscono che le serie di dati descritte o cui si fa riferimento nell'allegato siano
+> messe a disposizione in formati leggibili meccanicamente tramite API corrispondenti alle
+> ragionevoli esigenze dei riutilizzatori. Se indicato nell'allegato, le serie di dati sono
+> rese disponibili anche come download in blocco."
+
+### Art. 4, paragrafi 2 e 3 — Ambito (anche dati preesistenti) e licenza
+
+> **Par. 2** — "Al fine di agevolare la disponibilità di serie di dati per il riutilizzo su
+> periodi di tempo prolungati, gli obblighi imposti dal presente regolamento si applicano
+> anche alle serie di dati di elevato valore esistenti, leggibili meccanicamente, che sono
+> state create prima della data di applicazione del presente regolamento."
+
+> **Par. 3** — "Le serie di dati di elevato valore sono rese disponibili per il riutilizzo
+> alle condizioni della licenza Creative Commons Public Domain Dedication (CC0) o, in
+> alternativa, della licenza Creative Commons BY 4.0, o di qualsiasi licenza aperta
+> equivalente o meno restrittiva [...]"
+
+### Art. 6 — Entrata in vigore e data di applicazione
+
+> "Il presente regolamento entra in vigore il ventesimo giorno successivo alla pubblicazione
+> nella Gazzetta ufficiale dell'Unione europea. Esso si applica a decorrere da 16 mesi dopo
+> la sua entrata in vigore."
+
+Calcolo: pubblicato 20 gen 2023 → in vigore 9 feb 2023 → **applicabile dal 9 giugno 2024**.
+
+---
+
 ## DPR 28 dicembre 2000, n. 445 — Dichiarazione di responsabilità
 
 Standard declaration to include in every complaint:

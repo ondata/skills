@@ -40,8 +40,15 @@ These are the most frequent reasons a *segnalazione* fails or is dismissed. Chec
 drafting.
 
 **Inadmissibility — complaint is not processed at all (art. 4 co. 3 Regolamento DCD)**
-- Missing sender identity (full name + email/PEC): without these the complaint is inadmissible
-  regardless of its merit. Remedy: always collect Group A in full before drafting.
+- Missing sender identity (full name and contact details): art. 4 co. 3 requires "dati
+  identificativi del segnalante"; without them the complaint is inadmissible. Remedy: always
+  collect Group A in full before drafting.
+- Missing reply PEC/email in the complaint body: the DCD sends all communications to the
+  address stated in the segnalazione (Regolamento art. 10). If the sender's PEC is not
+  included in the complaint text, official responses may be lost or delivered without legal
+  value. Remedy: always include the sender's PEC (preferred) or email explicitly in the
+  sender block, even when submitting via PEC — the transmission address and the reply
+  address must both appear in the document.
 - Missing DPR 445/2000 declaration: the statutory self-certification is a formal requirement.
   Remedy: always include the standard block; never omit it even if the user objects.
 
@@ -207,8 +214,8 @@ After the draft, tell the user:
   proof. PEC is preferred over the form because it leaves a traceable paper trail in the
   sender's hands.
 - **Alternative — AGID web form:** <https://www.agid.gov.it/it/form/difensore-civico-digitale>
-  (requires SPID or CIE login). The form collects the same information but provides no
-  receipt to the sender.
+  (requires SPID or CIE login). The form collects the same information but does not produce
+  PEC-style delivery receipts; save any confirmation page or protocol number the form displays.
 - The DCD has **90 days** to conclude the procedure (Regolamento art. 8). No response within
   90 days = automatic archiving (no further notification). The clock is suspended: up to 20
   days if AgID consults internal structures; during **10–20 August** and **25 December–1
@@ -221,7 +228,8 @@ Tell the user what happens next, to set realistic expectations:
 
 1. **Pre-istruttoria (art. 5 Regolamento):** The DCD reviews admissibility. If the complaint
    is inadmissible or irricevibile (too vague, wrong channel, duplicate), it is archived
-   silently with no notification.
+   without examination on the merits. The Regolamento does not guarantee a notification in
+   this case; the only explicit "no notification" rule is the 90-day non-avvio in art. 8.
 
 2. **Istruttoria (art. 6):** If the complaint passes, the DCD may request information from
    both the sender and the PA, with a 15-day peremptory deadline. Cooperate promptly.

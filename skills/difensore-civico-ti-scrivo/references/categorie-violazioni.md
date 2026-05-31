@@ -119,7 +119,7 @@ available that are actually inaccessible.
 
 **Common weaknesses for this category:**
 - Transient outage: if the issue was intermittent or already resolved at filing time, the DCD
-  will likely archive as irrilevante (art. 5c Regolamento). Collect dated evidence of
+  will likely archive under art. 5 lett. c Regolamento (carenza di elementi informativi). Collect dated evidence of
   persistence — screenshots with dates spanning several weeks, or a public status notice from
   the PA. Without this, the complaint is unlikely to proceed.
 

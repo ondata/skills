@@ -145,10 +145,32 @@ Conseguenze se mancanti: il DCD dichiara l'*inammissibilità* della segnalazione
 **Co. 5** — Eventuali specifiche e motivate esigenze di riservatezza/anonimato vanno
 dichiarate all'atto della segnalazione.
 
+### Art. 5 — Preistruttoria / Irricevibilità
+
+Il DCD dichiara l'**irricevibilità** (archiviazione senza esame nel merito) nei seguenti casi:
+
+- **a.** Incompetenza del Difensore digitale (la violazione non riguarda il CAD né norme di digitalizzazione).
+- **b.** Segnalazione eccessivamente generica o indeterminata.
+- **c.** Carenza di elementi informativi (descrizione insufficiente a identificare la violazione).
+- **d.** Identità della segnalazione con altra per la quale è già stato emesso un provvedimento.
+
+---
+
 ### Art. 8 — Termini
 
 Il procedimento si conclude entro **90 giorni** dalla ricezione. In assenza di avvio del
 procedimento entro 90 giorni, la segnalazione si intende archiviata senza comunicazione.
+
+Il termine è sospeso:
+- fino a **20 giorni** se il DCD richiede informazioni o pareri ad altre strutture AgID;
+- nei periodi **10–20 agosto** e **25 dicembre–1 gennaio**.
+
+---
+
+### Art. 9 — Riunione di procedimenti
+
+Il DCD può aggregare più segnalazioni contro lo stesso soggetto e trasmetterle in forma
+congiunta. Segnalazioni successive sulla stessa PA possono essere trattate insieme.
 
 ---
 

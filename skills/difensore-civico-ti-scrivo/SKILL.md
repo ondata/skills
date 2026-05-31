@@ -34,6 +34,41 @@ machine-readable API; obligations have been enforceable since 9 June 2024.
 **One complaint per PA.** If multiple administrations are involved, produce one *segnalazione*
 per administration.
 
+## Common failure modes
+
+These are the most frequent reasons a *segnalazione* fails or is dismissed. Check each before
+drafting.
+
+**Inadmissibility — complaint is not processed at all (art. 4 co. 3 Regolamento DCD)**
+- Missing sender identity (full name + email/PEC): without these the complaint is inadmissible
+  regardless of its merit. Remedy: always collect Group A in full before drafting.
+- Missing DPR 445/2000 declaration: the statutory self-certification is a formal requirement.
+  Remedy: always include the standard block; never omit it even if the user objects.
+
+**Wrong channel — complaint reaches the wrong office**
+- Accessibility complaints (L. 4/2004, Funzione B) sent here are not processed by the DCD;
+  the user loses time and may miss the correct channel. Remedy: redirect immediately (see
+  *Scope and constraints*).
+
+**Premature complaint — DCD unlikely to proceed**
+- Art. 5 D.Lgs. 36/2006 (unanswered reuse request): the DCD expects evidence that the user
+  already sent a formal reuse request to the PA and received no response or a refusal. Without
+  this prior step the complaint will likely be archived as premature. Remedy: ask Group C before
+  drafting; if no prior request exists, advise the user to send it first.
+- Prior DCD *segnalazione* unresolved: if the user already filed for the same PA and received a
+  protocol number but no outcome, the new complaint must reference that number explicitly;
+  otherwise the DCD may treat it as a duplicate and archive it.
+
+**Weak evidence — complaint cannot be acted on**
+- Vague description without URLs, dates, or observable facts: the DCD cannot invite the PA to
+  remedy what it cannot identify. Remedy: insist on at least one URL and one specific date in
+  Group B; if the user cannot provide them, note the limitation explicitly in the complaint text.
+
+**Delivery failure — no legal proof of submission**
+- Sending via ordinary email (not PEC and not the AGID web form) produces no legal proof of
+  delivery; the DCD may never acknowledge receipt. Remedy: Step 4 covers the two valid channels;
+  always remind the user before they send.
+
 ## Step 1 — Interview
 
 Collect the required information before drafting. Ask in conversational turns — not all at
@@ -167,11 +202,40 @@ render Markdown. Apply these rules strictly:
 
 After the draft, tell the user:
 
-- **Official channel:** submit via the AGID form at
-  <https://www.agid.gov.it/it/form/difensore-civico-digitale> (requires SPID or CIE login).
-  The form collects the same information as this complaint.
-- **PEC alternative:** send to `protocollo@pec.agid.gov.it`. Keep both the *ricevuta di
-  accettazione* and *ricevuta di avvenuta consegna* as proof.
+- **Recommended channel — PEC:** send to `protocollo@pec.agid.gov.it`. Keep both the
+  *ricevuta di accettazione* and *ricevuta di avvenuta consegna* as legally valid delivery
+  proof. PEC is preferred over the form because it leaves a traceable paper trail in the
+  sender's hands.
+- **Alternative — AGID web form:** <https://www.agid.gov.it/it/form/difensore-civico-digitale>
+  (requires SPID or CIE login). The form collects the same information but provides no
+  receipt to the sender.
 - The DCD has **90 days** to conclude the procedure (Regolamento art. 8). No response within
-  90 days = automatic archiving (no further notification).
+  90 days = automatic archiving (no further notification). The clock is suspended: up to 20
+  days if AgID consults internal structures; during **10–20 August** and **25 December–1
+  January**.
 - One *segnalazione* per PA. If multiple PAs are involved, send separately.
+
+## What to expect after submission
+
+Tell the user what happens next, to set realistic expectations:
+
+1. **Pre-istruttoria (art. 5 Regolamento):** The DCD reviews admissibility. If the complaint
+   is inadmissible or irricevibile (too vague, wrong channel, duplicate), it is archived
+   silently with no notification.
+
+2. **Istruttoria (art. 6):** If the complaint passes, the DCD may request information from
+   both the sender and the PA, with a 15-day peremptory deadline. Cooperate promptly.
+
+3. **Transmission to Direttore Generale (art. 18-bis CAD):** If the DCD finds the complaint
+   "non manifestamente infondata", it forwards the file to AgID's Direttore Generale, who can:
+   - assign a peremptory deadline to the PA to comply;
+   - report the violation to the PA's disciplinary office and performance evaluation body;
+   - impose a fine of **€10,000–€100,000** (art. 18-bis co. 5).
+
+4. **Realistic outcome:** In most cases the PA receives a formal invitation to comply and
+   does so within the assigned deadline. Monetary sanctions are the exception, not the rule.
+   The procedure does not give the user an enforceable right to the data — it is an
+   administrative oversight channel, not a court order.
+
+5. **No news = archived:** If 90 days pass with no communication, the complaint was archived.
+   The user can file a new complaint (Category F) if the violation persists.

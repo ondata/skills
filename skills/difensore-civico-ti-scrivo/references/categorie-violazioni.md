@@ -5,6 +5,20 @@ legal arguments and adaptable Italian language into the complaint.
 
 Categories are not mutually exclusive — a single case can combine several.
 
+## Category disambiguation
+
+| Scenario | Category |
+|---|---|
+| Data published but in non-machine-readable format (PDF, HTML, map) | **A** |
+| Data nominally published but technically inaccessible (CAPTCHA, broken API, mandatory login) | **B** |
+| Data published but with a restrictive or missing license | **D** |
+| Data completely absent from the catalog | **G** |
+| Formal reuse request sent and unanswered past 30 days | **E** (requires delivery proof) |
+| Prior DCD complaint unacted on | **F** (requires prior protocol number) |
+
+A and B can overlap — cite both if wrong format AND access barrier coexist.
+G requires verifying absence on both dati.gov.it AND data.europa.eu before claiming total absence.
+
 ---
 
 ## Category A — Dati non in formato aperto / non machine-readable
@@ -103,6 +117,12 @@ available that are actually inaccessible.
 - Is the issue documented anywhere (no notice on the site)?
 - HTTP or HTTPS? What browser warning appears?
 
+**Common weaknesses for this category:**
+- Transient outage: if the issue was intermittent or already resolved at filing time, the DCD
+  will likely archive as irrilevante (art. 5c Regolamento). Collect dated evidence of
+  persistence — screenshots with dates spanning several weeks, or a public status notice from
+  the PA. Without this, the complaint is unlikely to proceed.
+
 **Articles to cite:** CAD art. 7 co. 1 (qualità servizi online); Linee guida di design AgID
 (TLS/HTTPS obbligatorio); CAD art. 17 co. 1-quater.
 
@@ -192,6 +212,13 @@ not provided the data, and not issued a motivated refusal.
 - Did the PA acknowledge receipt or request an extension?
 - Was a previous DCD complaint already filed about this?
 
+**Common weaknesses for this category:**
+- No PEC delivery receipts (ricevuta di accettazione + ricevuta di avvenuta consegna): without
+  these the user cannot prove the request was sent; the DCD will archive under art. 5c
+  Regolamento (carenza di elementi informativi). If receipts are unavailable, advise resending
+  the request via PEC and waiting out the 30-day deadline before filing.
+- Request sent via ordinary email, not PEC: produces no legal delivery proof; same consequence.
+
 **Articles to cite:** D.Lgs. 36/2006 art. 5 co. 1, 3; CAD art. 17 co. 1-quater.
 
 **Adaptable legal language (Italian):**
@@ -233,6 +260,14 @@ not remedied the violation.
 - Date of the previous segnalazione. Protocol number assigned by AGID?
 - Did you receive any response from the DCD?
 - Is the PA's conduct still the same as described in the original complaint?
+
+**Common weaknesses for this category:**
+- No protocol number: without it the DCD cannot link the two complaints and may treat the
+  follow-up as a fresh case. If the number is unavailable, use the submission date and PEC
+  delivery receipt as identifiers; note the gap explicitly in the complaint.
+- 90-day clock not yet expired: verify that 90 calendar days have passed, accounting for the
+  legal suspensions (10–20 agosto, 25 dicembre–1 gennaio, plus up to 20 days for internal
+  AgID consultation). Filing too early weakens the urgency argument.
 
 **Articles to cite:** CAD art. 17 co. 1-quater; Regolamento DCD art. 8; CAD art. 18-bis.
 
@@ -280,6 +315,14 @@ does not exist at all in the catalog.
   Draft one *segnalazione* per PA.
 - Have you verified on dati.gov.it filtering by the `hvd_category` field? What result?
 - Have you cross-checked on data.europa.eu for Italian datasets in this category?
+
+**Common weaknesses for this category:**
+- Not verified on data.europa.eu: if the dataset exists on the EU portal but not on dati.gov.it,
+  the violation is cataloging failure (weaker, closer to Category A) rather than total absence.
+  Always verify on both portals and document the search results in the complaint.
+- PA outside the HVD obligation scope: verify the PA is an "ente pubblico" under D.Lgs. 36/2006
+  art. 1 co. 2 and actually holds datasets in the claimed HVD category. Publicly owned but
+  private-law entities may not be obligated. If scope is uncertain, note it in the complaint.
 
 **Articles to cite:** Reg. (UE) 2023/138 artt. 3 par. 1 e 4 parr. 2–3; D.Lgs. 36/2006 artt.
 12-bis co. 1, 9 co. 2 e 12 ult. co.

@@ -53,6 +53,26 @@ fix broken curl example in query-recipes
 3. Copy evals template: `cp -r evals/_template/ evals/<skill-name>/` and fill in the three files.
 4. Open a PR.
 
+### Writing good skill content
+
+Use the [`skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator)
+skill to draft, test, and iterate on new skills. It covers the full loop: draft → run test
+prompts → review outputs → improve → optimize the `description` field for triggering accuracy.
+
+When writing the skill body, prioritize these three content dimensions — empirically validated
+as the strongest predictors of downstream skill utility (Huang et al. 2026,
+[arXiv:2605.23899](https://arxiv.org/abs/2605.23899)):
+
+| Dimension | What it means |
+|---|---|
+| **Failure Mechanism Encoding** | Name specific failure modes with executable remedies, not generic warnings |
+| **Actionable Specificity** | Concrete, executable instructions — not process-level advice like "be careful" |
+| **High-Risk Action Blacklist** | Explicit list of actions the agent must never do in this domain |
+
+Note: skill *format* (ordered list, bullets, prose) has no measurable effect on utility —
+only the content matters. Optimizing for clarity or completeness without grounding in these
+three dimensions does not improve performance and may hurt it.
+
 ## Developer notes
 
 ### Local development with open-data-quality scripts

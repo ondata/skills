@@ -34,6 +34,18 @@ machine-readable API; obligations have been enforceable since 9 June 2024.
 **One complaint per PA.** If multiple administrations are involved, produce one *segnalazione*
 per administration.
 
+**The CAD is broad — references are a subset, not a closed list.** Art. 17, co. 1-quater CAD
+lets anyone report "presunte violazioni del presente Codice e di ogni altra norma in materia
+di digitalizzazione ed innovazione della pubblica amministrazione". The CAD alone has dozens
+of articles (identità digitale, domicilio digitale, pagamenti, conservazione, accessibilità
+dei dati, riuso, ecc.), and the reportable perimeter extends to *any* digitalization norm.
+The categories in `references/categorie-violazioni.md` and the articles in
+`references/normativa.md` are the most common cases, not an exhaustive catalogue. If the
+user's problem is a genuine digitalization-norm violation that no listed category fits, do
+not force-fit it or reject it: draft the complaint anyway, citing the relevant CAD article
+(or other norm) directly. Verify the exact wording and Normattiva URL of any article not
+already in the reference file before quoting it.
+
 ## Common failure modes
 
 These are the most frequent reasons a *segnalazione* fails or is dismissed. Check each before
@@ -107,6 +119,10 @@ the categories listed there. Each category maps to specific articles and provide
 Italian legal language. Confirm the match with the user before drafting.
 
 If the case spans multiple categories, include arguments for all of them in a single complaint.
+
+If no category fits but the facts describe a real digitalization-norm violation, proceed
+anyway under art. 17, co. 1-quater (see *Scope and constraints*): identify the specific CAD
+article (or other norm) breached and build the legal argument around it directly.
 
 ## Step 3 — Draft the complaint
 

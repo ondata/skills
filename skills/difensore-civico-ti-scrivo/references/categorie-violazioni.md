@@ -5,6 +5,11 @@ legal arguments and adaptable Italian language into the complaint.
 
 Categories are not mutually exclusive — a single case can combine several.
 
+These categories are a **non-exhaustive subset**. The CAD is a wide-ranging code and art. 17
+co. 1-quater opens the DCD to *any* digitalization-norm violation. If a case does not map to
+a category below but is a genuine breach, draft the complaint anyway, citing the relevant CAD
+article (or other norm) directly — do not force-fit it into the nearest category.
+
 ## Category disambiguation
 
 | Scenario | Category |

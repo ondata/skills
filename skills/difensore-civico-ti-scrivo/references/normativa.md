@@ -3,6 +3,11 @@
 Compact reference for complaint drafting. Use these texts and URLs when citing articles.
 Source: D.Lgs. 7 marzo 2005, n. 82 (CAD), vigency 2026-05-29.
 
+This is a **curated subset** of the most frequently cited articles, not the full CAD. The
+code spans dozens of articles and art. 17 co. 1-quater extends the reportable perimeter to
+any digitalization norm. When a case requires an article not listed here, look up its exact
+wording and Normattiva URL on <https://www.normattiva.it/> before quoting it.
+
 ---
 
 ## CAD — D.Lgs. 7 marzo 2005, n. 82

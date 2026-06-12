@@ -97,7 +97,7 @@ comunque con cadenza almeno semestrale, secondo le indicazioni dell'AgID. La man
 comunicazione degli elementi necessari [...] e del loro aggiornamento è valutata ai fini
 della responsabilità dirigenziale e dell'attribuzione della retribuzione di risultato ai
 dirigenti responsabili." È l'obbligo principale violato quando un ente lascia dati IPA errati
-o stantii (Category H).
+o stantii.
 
 URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art6ter>
 

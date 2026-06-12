@@ -399,8 +399,8 @@ concerns the official records the PA is legally required to maintain *inside the
 its website works fine.
 
 **Additional questions to ask the user:**
-- Which entity? Capture its **Codice IPA** (univocal identifier) and the URL of its IPA public
-  page (https://www.indicepa.gov.it/ ... — the entity detail page).
+- Which entity? Capture its **Codice IPA** (unique identifier) and the URL of its IPA public
+  page (the entity detail page on https://www.indicepa.gov.it/).
 - Which datum is wrong or missing? (PEC del protocollo / domicilio digitale di una AOO /
   email / dominio web non risolvente / altro). Be specific.
 - What is the **data di ultima verifica** shown on the IPA public page? Is it older than 6
@@ -410,7 +410,7 @@ its website works fine.
 
 **Common weaknesses for this category:**
 - No specific datum identified: the DCD cannot invite the PA to fix "the IPA in general".
-  Pin down the exact field, the exact wrong value, and the correct expected behaviour.
+  Pin down the exact field, the exact wrong value, and the correct expected behavior.
 - No evidence the datum is actually wrong: a PEC that bounces, a `dig`/`nslookup` showing an
   NXDOMAIN, a screenshot of the IPA page with the stale verification date. Without dated proof
   the complaint risks archiviazione under art. 5 lett. c Regolamento (carenza di elementi).

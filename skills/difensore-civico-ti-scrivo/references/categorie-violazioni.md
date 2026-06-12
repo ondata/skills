@@ -15,8 +15,14 @@ Categories are not mutually exclusive — a single case can combine several.
 | Data completely absent from the catalog | **G** |
 | Formal reuse request sent and unanswered past 30 days | **E** (requires delivery proof) |
 | Prior DCD complaint unacted on | **F** (requires prior protocol number) |
+| Entity's data in the IPA registry is outdated, wrong, or never verified (wrong/missing PEC or email, dead domain) | **H** |
 
 A and B can overlap — cite both if wrong format AND access barrier coexist.
+H differs from C: C is about the PA's website/service being broken; H is about the PA's
+official records *inside the IPA registry* (indicepa.gov.it) being wrong or stale — even if
+the PA's own site works. One *segnalazione* per PA: a systemic problem across many entities
+is still filed entity by entity to the DCD, never to the IPA Gestore (AgID-as-administrator
+is not a tutela channel; CAD violations go only to the DCD).
 G requires verifying absence on both dati.gov.it AND data.europa.eu before claiming total absence.
 
 ---
@@ -371,3 +377,85 @@ D.Lgs. 36/2006 / dell'art. 2, comma 2, del CAD — eliminare la variante non app
 o CC BY 4.0, le renda disponibili come download in blocco ove applicabile, e le cataloghi
 su dati.gov.it con il campo hvd_category valorizzato, nel rispetto del Reg. (UE) 2023/138
 e dell'art. 12-bis del D.Lgs. 36/2006."
+
+---
+
+## Category H — Dati nell'IPA non aggiornati, incompleti o errati
+
+**When:** A PA's records in the IPA — Indice dei domicili digitali delle pubbliche
+amministrazioni e dei gestori di pubblici servizi (indicepa.gov.it) — are wrong, incomplete,
+or stale: missing or invalid PEC/email, a non-PEC address where a domicilio digitale is
+required, a web domain that no longer resolves, or a "data di ultima verifica" older than six
+months. The CAD obliges every entity to keep its IPA data current and to verify it at least
+every six months; failing to do so is a CAD violation reportable to the DCD.
+
+This is distinct from Category C: C concerns the PA's own website/service being degraded; H
+concerns the official records the PA is legally required to maintain *inside the IPA*, even if
+its website works fine.
+
+**Additional questions to ask the user:**
+- Which entity? Capture its **Codice IPA** (univocal identifier) and the URL of its IPA public
+  page (https://www.indicepa.gov.it/ ... — the entity detail page).
+- Which datum is wrong or missing? (PEC del protocollo / domicilio digitale di una AOO /
+  email / dominio web non risolvente / altro). Be specific.
+- What is the **data di ultima verifica** shown on the IPA public page? Is it older than 6
+  months?
+- How was the error observed? (es. PEC che rimbalza, dominio che non risolve, contatto
+  inesistente). A dated, reproducible observation is essential.
+
+**Common weaknesses for this category:**
+- No specific datum identified: the DCD cannot invite the PA to fix "the IPA in general".
+  Pin down the exact field, the exact wrong value, and the correct expected behaviour.
+- No evidence the datum is actually wrong: a PEC that bounces, a `dig`/`nslookup` showing an
+  NXDOMAIN, a screenshot of the IPA page with the stale verification date. Without dated proof
+  the complaint risks archiviazione under art. 5 lett. c Regolamento (carenza di elementi).
+- Confusing the channel: the fix is requested from the DCD, which then invites the PA (the
+  data owner) to correct its own record. Do not address AgID-as-Gestore IPA: it administers
+  the registry but is not a tutela channel, and the responsibility for the data lies with each
+  entity (art. 6-ter co. 3 CAD).
+- Systemic phenomenon: if many entities are affected, this is still filed one *segnalazione*
+  per PA. Note the systemic context if useful, but the complaint must target one identified
+  entity with one identified error.
+
+**Articles to cite:** CAD art. 6-ter co. 3 (obbligo di aggiornamento e verifica almeno
+semestrale dei dati in IPA); CAD art. 47 co. 3 (PEC del protocollo da pubblicare in IPA per
+ciascuna AOO) ove rilevi una PEC errata/mancante; CAD art. 6-quinquies (IPA consultabile in
+formato aperto) ove rilevi sul dato pubblico; CAD art. 17 co. 1-quater.
+
+**Adaptable legal language (Italian):**
+
+```
+I dati di [ENTE] (Codice IPA: [CODICE]) pubblicati nell'Indice dei domicili digitali delle
+pubbliche amministrazioni e dei gestori di pubblici servizi (IPA) risultano [errati /
+incompleti / non aggiornati] nei seguenti termini:
+
+[DESCRIVERE il dato specifico: es. la PEC associata all'AOO [NOME] / il domicilio digitale /
+l'indirizzo email / il dominio web — con il valore attualmente presente in IPA]
+
+In particolare:
+- [CRITICITÀ 1 con evidenza e data di rilevazione: es. la PEC [indirizzo] restituisce errore
+  di mancata consegna in data [data]]
+- [CRITICITÀ 2: es. il dominio [dominio] non risolve (NXDOMAIN) alla data [data]]
+- [se applicabile] la "data di ultima verifica" riportata nella scheda pubblica dell'Ente è
+  [data], anteriore di oltre sei mesi rispetto alla data odierna.
+
+Ciò contrasta con:
+
+- l'art. 6-ter, comma 3, del CAD, che impone a ciascun soggetto iscritto di aggiornare
+  tempestivamente i propri dati nell'IPA e di verificarli almeno ogni sei mesi secondo le
+  indicazioni di AgID;
+[SE PEC ERRATA/MANCANTE:] - l'art. 47, comma 3, del CAD, che impone alle pubbliche
+  amministrazioni di pubblicare nell'IPA gli indirizzi di posta elettronica certificata a cui
+  inviare le comunicazioni e le istanze, per ciascun registro di protocollo;
+[SE RILEVA SUL DATO PUBBLICO:] - l'art. 6-quinquies del CAD, che configura l'IPA come elenco
+  pubblico consultabile da chiunque e realizzato in formato aperto, presupponendo dati
+  corretti e fruibili.
+
+L'impatto concreto è il seguente: [DESCRIVERE: impossibilità per cittadini, professionisti o
+altre PA di inviare comunicazioni valide a tutti gli effetti di legge al domicilio digitale
+dell'Ente, con pregiudizio per [istanze / notifiche / fatturazione elettronica / ...]].
+```
+
+**Remedy to request:** "inviti [ENTE] ad aggiornare e correggere senza ritardo i dati
+pubblicati nell'IPA — in particolare [DATO SPECIFICO] — e a procedere alla verifica periodica
+almeno semestrale prevista dall'art. 6-ter, comma 3, del CAD."

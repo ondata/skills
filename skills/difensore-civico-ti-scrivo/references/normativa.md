@@ -3,6 +3,11 @@
 Compact reference for complaint drafting. Use these texts and URLs when citing articles.
 Source: D.Lgs. 7 marzo 2005, n. 82 (CAD), vigency 2026-05-29.
 
+This is a **curated subset** of the most frequently cited articles, not the full CAD. The
+code spans dozens of articles and art. 17 co. 1-quater extends the reportable perimeter to
+any digitalization norm. When a case requires an article not listed here, look up its exact
+wording and Normattiva URL on <https://www.normattiva.it/> before quoting it.
+
 ---
 
 ## CAD — D.Lgs. 7 marzo 2005, n. 82
@@ -75,6 +80,51 @@ URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2
 diritto di rivolgersi al difensore civico digitale di cui all'art. 17.
 
 URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art7>
+
+---
+
+### Art. 6-ter — Indice dei domicili digitali delle PA e dei gestori di pubblici servizi (IPA)
+
+> "[...] è istituito il pubblico elenco di fiducia denominato Indice dei domicili digitali
+> delle pubbliche amministrazioni e dei gestori di pubblici servizi, nel quale sono indicati i
+> domicili digitali da utilizzare per le comunicazioni e per lo scambio di informazioni e per
+> l'invio di documenti a tutti gli effetti di legge tra i soggetti di cui all'articolo 2,
+> comma 2, [...] e i privati."
+
+**Co. 3** — "Le amministrazioni di cui all'articolo 2, comma 2, lettere a) e b), e i gestori
+di pubblici servizi aggiornano gli indirizzi e i contenuti dell'Indice tempestivamente e
+comunque con cadenza almeno semestrale, secondo le indicazioni dell'AgID. La mancata
+comunicazione degli elementi necessari [...] e del loro aggiornamento è valutata ai fini
+della responsabilità dirigenziale e dell'attribuzione della retribuzione di risultato ai
+dirigenti responsabili." È l'obbligo principale violato quando un ente lascia dati IPA errati
+o stantii.
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art6ter>
+
+---
+
+### Art. 6-quinquies — Consultazione e accesso agli elenchi
+
+> "La consultazione on-line degli elenchi di cui agli articoli 6-bis, 6-ter e 6-quater è
+> consentita a chiunque senza necessità di autenticazione. Gli elenchi sono realizzati in
+> formato aperto [...]."
+
+Rileva quando l'errore riguarda il dato pubblicamente consultabile in IPA.
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art6quinquies>
+
+---
+
+### Art. 47, comma 3 — PEC del protocollo da pubblicare in IPA
+
+> "Le pubbliche amministrazioni e i gestori di pubblici servizi pubblicano, nell'Indice di cui
+> all'articolo 6-ter, gli indirizzi di posta elettronica certificata a cui inviare le istanze
+> e le dichiarazioni di cui all'articolo 65, e i documenti di cui al presente articolo, per
+> ciascun registro di protocollo."
+
+Da citare quando la criticità è una PEC del protocollo / di una AOO errata o mancante in IPA.
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art47>
 
 ---
 

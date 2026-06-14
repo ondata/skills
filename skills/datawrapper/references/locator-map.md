@@ -112,7 +112,9 @@ curl -s -X PUT "https://api.datawrapper.de/v3/charts/<ID>/data" \
   --data-binary @markers.json
 ```
 
-`markers.json` contains every marker on the map (one PUT = full replace).
+`markers.json` is the full `{"markers":[...]}` object — every marker on the map
+(one PUT = full replace). The snippets below show a single marker each; put them
+as entries inside the `markers` array, do not PUT a bare object.
 
 ### Point markers
 ```json
@@ -261,4 +263,3 @@ that shows all of them, or use `fit` to define the bounding box.
 
 **Flows / movement** (migration, trade, routes): add `arrow` markers, one per
 origin→destination pair. Use `arrowType: "flow"` + `flowWeight` to encode volume.
-```

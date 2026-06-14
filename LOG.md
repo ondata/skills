@@ -1,5 +1,11 @@
 # LOG
 
+## 2026-06-14
+
+- `datawrapper`: document arrow markers in locator maps (new Datawrapper feature). Tested end-to-end via pure API: arrows are writable (line + flow types, triangle/lines heads, bidirectional, gradient, taper, curve). Full JSON schema + per-field table added to `references/locator-map.md`
+- `datawrapper`: fix wrong marker storage in `references/locator-map.md` — there is NO `/markers` endpoint (404); points, areas and arrows are all stored in the chart data via `PUT /v3/charts/<ID>/data` as `{"markers":[...]}` (full replace each PUT). Corrected point (needs `icon` block) and area (colors in top-level `properties`, GeoJSON-style keys) examples
+- `datawrapper`: document counterintuitive `curve.angle` behaviour — values near 0 produce huge looping arcs; gentle curves need larger magnitudes that scale with arrow length (`|angle| ≈ km/2.5`); recommend tuning in GUI then reading back via API (verified by hand-edit round-trip)
+
 ## 2026-04-26
 
 - `typst-cards`: refactor starter templates to native page-level footer — `#set page(footer: footer-block(URL, dark: ...))` with Typst's `counter(page).display()` / `.final().first()`; replaces fragile `#v(1fr) + #ctr(n,total)` last-row pattern that produced silent ghost slides on dense content; new `footer-block` helper in theme; new pitfall entry; sub-case on literal helper params under special-chars table; smoke-tested both starters (5+3 PNGs, footer fully visible)

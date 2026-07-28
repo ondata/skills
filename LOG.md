@@ -1,5 +1,9 @@
 # LOG
 
+## 2026-07-28
+
+- `scrivi-chiaro-pa`: new skill — write, rewrite, or review Italian PA content in plain language, based on the Designers Italia *Guida al linguaggio della Pubblica Amministrazione* (CC-BY 4.0). Three modes (draft / rewrite / review), tone-of-voice scenarios, final glossary pass + checklist. References: style/grammar/numbers, structure/usability/SEO/accessibility, tone of voice (9 scenarios), social/newsletter/images/editorial management, A–Z glossary (~90 terms in two tables). Content harvested from the published "bozza" on docs.italia.it (suggerimenti + tono di voce sections exist only there) and from the `italia/writing-toolkit` repo (glossary RST sources)
+
 ## 2026-06-14
 
 - `datawrapper`: document arrow markers in locator maps (new Datawrapper feature). Tested end-to-end via pure API: arrows are writable (line + flow types, triangle/lines heads, bidirectional, gradient, taper, curve). Full JSON schema + per-field table added to `references/locator-map.md`

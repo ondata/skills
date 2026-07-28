@@ -87,7 +87,7 @@ Apply the style, structure, and tone rules. When rewriting:
 - [ ] The first sentence answers the reader's main question or states the required action
 - [ ] Sentences and paragraphs are short; no information is duplicated
 - [ ] Verbs are active and direct; no impersonal or passive bureaucratic forms
-- [ ] No unexplained acronyms: full name first, acronym after (only first letter capitalized, salvo exceptions: PA, UE, IVA, SPID, GU, MEPA, IRPEF, PM)
+- [ ] No unexplained acronyms: full name first, acronym after (only first letter capitalized, with exceptions: PA, UE, IVA, SPID, GU, MEPA, IRPEF, PM)
 - [ ] Numbers, dates, times, percentages follow the rules in `references/stile-di-scrittura.md`
 - [ ] Normative references are summarized in the text and cited precisely in notes with links
 - [ ] Language is inclusive (feminine forms, "persone con disabilità", no stereotypes)

@@ -393,6 +393,13 @@ The page count must equal the number of `#slide(...)` calls, and Phase 4 must ac
 
 Typical contexts where you trip on this: terminal-style strings (`$ command`, `~$`, `exit_`), paths like `MIT // license`, identifiers with `_`. Typst usually reports the error far from the actual cause, so when you see "unclosed delimiter" scan for these characters first.
 
+**`\n` is not a line break.** A backslash escapes the character after it, so `[short\ndescription]` renders as `shortndescription` — no error, just a wrong word. A line break is a backslash at the **end of a line**:
+
+```typst
+#text(...)[short \
+description]      // correct — two lines
+```
+
 > **Sub-case — strings passed as helper parameters are literal**: when you call something like `#item("$ command", "...")` or `#text(...)[#param]` with a string variable, the string is treated literally — backslash escapes are NOT resolved. So `"\$ command"` outputs `\$ command` (with the visible backslash), while `"$ command"` outputs `$ command` correctly. The escape rule applies only inside content/markup, not inside string-typed parameter values.
 
 > **Sub-case — smart quotes do not reach string values**: the same split hits apostrophes, and this one is silent. Typst turns `'` into a typographic `’` in markup only. A string keeps the straight `'`, and interpolating it into content does not rescue it:

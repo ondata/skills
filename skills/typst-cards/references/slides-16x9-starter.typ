@@ -111,15 +111,18 @@
   column-gutter: 0.3in,
   stack(dir: ttb, spacing: 8pt,
     text(size: 48pt, weight: 900, fill: ACC)[N°],
-    text(size: 14pt, fill: MUTED-D)[short\ndescription],
+    text(size: 14pt, fill: MUTED-D)[short \
+    description],
   ),
   stack(dir: ttb, spacing: 8pt,
     text(size: 48pt, weight: 900, fill: ACC)[N°],
-    text(size: 14pt, fill: MUTED-D)[short\ndescription],
+    text(size: 14pt, fill: MUTED-D)[short \
+    description],
   ),
   stack(dir: ttb, spacing: 8pt,
     text(size: 48pt, weight: 900, fill: ACC)[N°],
-    text(size: 14pt, fill: MUTED-D)[short\ndescription],
+    text(size: 14pt, fill: MUTED-D)[short \
+    description],
   ),
 )
 #v(0.4in)

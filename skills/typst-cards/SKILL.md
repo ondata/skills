@@ -395,6 +395,18 @@ Typical contexts where you trip on this: terminal-style strings (`$ command`, `~
 
 > **Sub-case — strings passed as helper parameters are literal**: when you call something like `#item("$ command", "...")` or `#text(...)[#param]` with a string variable, the string is treated literally — backslash escapes are NOT resolved. So `"\$ command"` outputs `\$ command` (with the visible backslash), while `"$ command"` outputs `$ command` correctly. The escape rule applies only inside content/markup, not inside string-typed parameter values.
 
+> **Sub-case — smart quotes do not reach string values**: the same split hits apostrophes, and this one is silent. Typst turns `'` into a typographic `’` in markup only. A string keeps the straight `'`, and interpolating it into content does not rescue it:
+>
+> ```typst
+> A contenuto diretto: l'investimento          // → l’investimento
+> B #text("l'investimento")                    // → l'investimento
+> C #helper("l'investimento")                  // → l'investimento
+> D #helper[l'investimento]                    // → l’investimento
+> E #{let s = "l'investimento"; [#s]}          // → l'investimento
+> ```
+>
+> A deck that mixes prose and helper calls therefore comes out with two different apostrophes and no error anywhere. It bites hardest in Italian and French. Fix: pass content `[...]` instead of `"..."`, or type `’` directly in the string. Worth a grep for `'` in string arguments before the final compile.
+
 **`leading` is not a parameter of `text()`**: it belongs to `par()`. To control line height of a text block:
 ```typst
 // WRONG — error "unexpected argument: leading"

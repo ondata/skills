@@ -38,8 +38,8 @@
 //
 // `bleed` takes content drawn BEFORE the padded block, so it measures against
 // the page and can reach the edges. Anything placed inside `body` is measured
-// against the padded block instead and will stop at the inset — that is the
-// most common mistake with this pattern.
+// against the padded block instead and will stop at the inset, so a band drawn
+// there comes out framed instead of full-bleed.
 #let slide(fill: BG-WHITE, dark: false, bleed: none, body) = page(fill: fill, {
   set text(fill: if dark { FG-DARK } else { FG-LIGHT })
 

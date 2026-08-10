@@ -4,24 +4,33 @@
 // in slides.typ with: #import "theme.typ": *
 
 // ── palette ────────────────────────────────────────────────────────────────
-// Edit these values based on user palette or DESIGN.md.
-// If DESIGN.md has named tokens (primary, secondary...), map them here.
+// PLACEHOLDER PALETTE — neutral on purpose, so it does not look like a design
+// decision that was already made. Replace it with the user's palette or the
+// tokens in their DESIGN.md. If DESIGN.md has named tokens (primary,
+// secondary...), map them onto the names below rather than renaming these.
+//
+// Surfaces and text are neutral greys, with no colour cast. All the pairings
+// below clear 4.5:1, so every token is usable for body text, not just for
+// decoration — keep that true after swapping in the brand colours.
 
-#let BG-DARK  = rgb("#0d1117")   // primary dark background
-#let BG-LIGHT = rgb("#f6f8fa")   // light background
-#let BG-WHITE = rgb("#ffffff")   // pure white
+#let BG-DARK  = rgb("#17191c")   // dark surface       — 15.9:1 with FG-DARK
+#let BG-LIGHT = rgb("#f0efed")   // light surface, bands, boxes
+#let BG-WHITE = rgb("#fbfbfa")   // lightest surface   — 16.5:1 with FG-LIGHT
 
-#let ACC      = rgb("#58a6ff")   // accent on dark background  ← change first
-#let ACC-L    = rgb("#0969da")   // accent on light background ← change second
+// The accent is the ONE colour in the deck, and the first value to replace.
+// ACC and ACC-L are the SAME colour at two lightnesses, one per background —
+// not two brand colours. A DESIGN.md "primary" maps onto both.
+#let ACC-L    = rgb("#2f5d8a")   // accent on light bg — 6.6:1  ← replace first
+#let ACC      = rgb("#8fb8dd")   // accent on dark bg  — 8.4:1  ← same hue, lighter
 
-#let FG-DARK  = rgb("#e6edf3")   // text on dark
-#let FG-LIGHT = rgb("#1c2128")   // text on light
-#let MUTED-D  = rgb("#8b949e")   // secondary on dark
-#let MUTED-L  = rgb("#656d76")   // secondary on light
+#let FG-DARK  = rgb("#f2f3f4")   // text on dark
+#let FG-LIGHT = rgb("#1a1c1e")   // text on light
+#let MUTED-D  = rgb("#a0a4a8")   // secondary on dark  — 7.0:1
+#let MUTED-L  = rgb("#5f6368")   // secondary on light — 5.8:1
 
-#let CODE-BG  = rgb("#161b22")   // code block background
-#let CODE-BR  = rgb("#30363d")   // code block border
-#let RULE-L   = rgb("#d0d7de")   // separator line on light bg
+#let CODE-BG  = rgb("#202225")   // code block background
+#let CODE-BR  = rgb("#34373b")   // code block border
+#let RULE-L   = rgb("#d6d4d1")   // separator line on light bg (decorative)
 
 // ── fonts ──────────────────────────────────────────────────────────────────
 // If DESIGN.md specifies separate fonts for display vs body, define both

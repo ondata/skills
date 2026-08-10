@@ -1,9 +1,10 @@
 // ─── slides-16x9-starter.typ ──────────────────────────────────────────────
 // LinkedIn / Twitter / YouTube 16:9 slide template (1920×1080px).
 // Copy to <project>/carousel/slides.typ and adapt the content.
-// Requires theme-starter.typ in the same folder (or rename it to theme.typ).
+// Requires theme.typ in the same folder: copy references/theme-starter.typ to
+// <project>/carousel/theme.typ, as Phase 3 of SKILL.md prescribes.
 
-#import "theme-starter.typ": *
+#import "theme.typ": *
 
 // ── format: Landscape 16:9 → 1920×1080px ──────────────────────────────────
 // Keep `bottom` margin >= 0.65in so the footer line + 9pt text fit fully.
@@ -110,15 +111,18 @@
   column-gutter: 0.3in,
   stack(dir: ttb, spacing: 8pt,
     text(size: 48pt, weight: 900, fill: ACC)[N°],
-    text(size: 14pt, fill: MUTED-D)[short\ndescription],
+    text(size: 14pt, fill: MUTED-D)[short \
+    description],
   ),
   stack(dir: ttb, spacing: 8pt,
     text(size: 48pt, weight: 900, fill: ACC)[N°],
-    text(size: 14pt, fill: MUTED-D)[short\ndescription],
+    text(size: 14pt, fill: MUTED-D)[short \
+    description],
   ),
   stack(dir: ttb, spacing: 8pt,
     text(size: 48pt, weight: 900, fill: ACC)[N°],
-    text(size: 14pt, fill: MUTED-D)[short\ndescription],
+    text(size: 14pt, fill: MUTED-D)[short \
+    description],
   ),
 )
 #v(0.4in)

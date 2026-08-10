@@ -1,6 +1,6 @@
 ---
 name: typst-cards
-description: Generate PNG images for online communication — social media, carousels, infographics, posts — using Typst. Use this skill whenever the user wants to create slides, cards, visual posts or any digital graphic content, even if they don't explicitly mention Typst. The skill drives an interview about brand materials (logo, palette, fonts, DESIGN.md), proposes the formats best suited to the context (Instagram 1:1, Stories 9:16, LinkedIn 16:9, etc.) and produces ready-to-use PNGs.
+description: Generate PNG images and PDF carousels for online communication — social media, carousels, infographics, posts — using Typst. Use this skill whenever the user wants to create slides, cards, visual posts or any digital graphic content, even if they don't explicitly mention Typst. The skill drives an interview about brand materials (logo, palette, fonts, DESIGN.md), proposes the formats best suited to the context (Instagram 1:1, Stories 9:16, LinkedIn 16:9, etc.) and produces ready-to-use PNGs, plus a single PDF for LinkedIn document posts.
 ---
 
 # Typst Cards
@@ -41,6 +41,8 @@ Before creating any file, ask these questions to the user **in a single message*
 - What is the topic or content of the cards?
 - How many slides or cards? (a single image or a carousel?)
 - Which formats do you need? (propose those best suited to the context, see table below)
+- Where will it be published? (this decides the deliverable: PNGs for Instagram and most feeds, a single PDF for a LinkedIn document post — see "Compilation")
+- Should the design reach the edges of the card (full-bleed colour bands, photos) or sit inside a margin? (see "Two layout patterns")
 
 If the user has no brand materials, propose a palette consistent with the context and ask for a quick confirmation before proceeding.
 
@@ -72,6 +74,18 @@ For carousels, always use the same format for every slide.
 
 Do not collapse everything into a single font — the display/body distinction is part of the brand.
 
+**Font availability — two tiers.** Only four faces are embedded in the Typst binary and are therefore identical on every machine, in a clean container and in CI:
+
+```bash
+typst fonts --ignore-system-fonts
+# Libertinus Serif · New Computer Modern · New Computer Modern Math · DejaVu Sans Mono
+```
+
+Everything else — including `DejaVu Sans`, `Liberation Sans`, `Arial` — is a **system** font: present on the machine you are working on, possibly missing elsewhere, with the fallback kicking in silently and changing the look. Note the gap: **there is no embedded sans-serif**, so a fully portable body font is not available. Two consequences:
+
+- If the deck must rebuild identically anywhere (CI, another contributor, a container), the only safe pairing is `Libertinus Serif` (or `New Computer Modern`) for display and body, `DejaVu Sans Mono` for code.
+- Otherwise use the brand fonts, always with a fallback chain, and check with `fc-list | grep -i "name"` on the machine that will do the rendering.
+
 **With logo**: note the path. You'll include it in Typst with:
 ```typst
 #image("path/to/logo.png", height: 0.5in)   // fixed height
@@ -94,10 +108,11 @@ Always create this structure in the project directory:
 <project>/carousel/
 ├── theme.typ       # design tokens and helper functions
 ├── slides.typ      # content (imports theme.typ)
-└── output/         # generated PNGs
+└── output/         # generated files
     ├── slide-1.png
     ├── slide-2.png
-    └── ...
+    ├── ...
+    └── deck.pdf    # whole deck in one file (LinkedIn document post)
 ```
 
 ### Recommended starting point
@@ -105,8 +120,9 @@ Always create this structure in the project directory:
 Instead of writing from scratch, **copy one of the reference templates** from the skill folder and adapt it:
 
 - `references/theme-starter.typ` → palette, fonts, helpers (`lbl`, `footer-block`, `codebox`, `divider`)
-- `references/slides-1x1-starter.typ` → 5 Instagram 1:1 slides (cover + 3 content + outro)
-- `references/slides-16x9-starter.typ` → 3 LinkedIn 16:9 slides (cover + two-column + 3 stat)
+- `references/slides-1x1-starter.typ` → 5 Instagram 1:1 slides (cover + 3 content + outro), **margined** pattern
+- `references/slides-16x9-starter.typ` → 3 LinkedIn 16:9 slides (cover + two-column + 3 stat), **margined** pattern
+- `references/slides-fullbleed-starter.typ` → 5 1:1 cards, **full-bleed** pattern (`slide()` helper, no page margin)
 
 The templates are **already tested and compile cleanly**. They give you a proven structure; you change colors, fonts, content.
 
@@ -116,6 +132,45 @@ cp <SKILL_DIR>/references/theme-starter.typ <project>/carousel/theme.typ
 cp <SKILL_DIR>/references/slides-1x1-starter.typ <project>/carousel/slides.typ
 # then edit content in slides.typ and tokens in theme.typ
 ```
+
+### Two layout patterns
+
+Pick one **before** writing any content — they are not mixable inside the same deck.
+
+| | **Margined** (default) | **Full-bleed** |
+|---|---|---|
+| Page | `margin: (x: 0.55in, top: 0.5in, bottom: 0.7in)` | `margin: 0in` |
+| Padding | from the page margin | from a `slide()` helper's `inset` |
+| Furniture (URL, counter) | native page `footer`, in the bottom margin | `place()`, out of the content flow |
+| Background reaches the edges | no — always a white frame | yes |
+| Starter | `slides-1x1-starter.typ`, `slides-16x9-starter.typ` | `slides-fullbleed-starter.typ` |
+
+**Choose full-bleed** when the design needs colour, photos or bands touching the edges — a coloured cover, a full-card image, a top band. **Choose margined** for text-first cards with a footer rule and a source URL: it is simpler and it is what the two long-standing starters implement.
+
+The full-bleed pattern is one helper. Each call is one card:
+
+```typst
+#set page(width: 7.5in, height: 7.5in, margin: 0in)   // 1:1 → 1080×1080 at 144ppi
+
+#let slide(fill: BG-WHITE, dark: false, bleed: none, body) = page(fill: fill, {
+  set text(fill: if dark { FG-DARK } else { FG-LIGHT })
+  bleed                                                // edge-to-edge decoration
+  place(left + top, rect(width: 0.16in, height: 100%, fill: ACC))   // accent rail
+  place(top + right, dx: -0.55in, dy: 0.55in, context text(
+    font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L },
+    [#counter(page).display() / #counter(page).final().first()],
+  ))
+  block(width: 100%, height: 100%, inset: (left: 0.9in, right: 0.55in, y: 0.55in), body)
+})
+
+#slide(fill: BG-DARK, dark: true, { ... })   // one call = one card
+```
+
+Three things to keep straight:
+
+- **Keep the geometry in inches**, not centimetres: `7.5in × 144ppi` is exactly 1080px, while a 21cm square at 144ppi gives 1191px.
+- `inset.left` must clear the rail, otherwise the text runs over it.
+- The counter goes through `place`, which is **out of flow** — content cannot push it onto a following page. This is the same guarantee the margined pattern gets from the native page footer, so the "fragile footer pattern" pitfall below does not apply here. What *does* apply is the silent clipping of the padded block: see the pitfall of the same name.
 
 ### theme.typ — design tokens
 
@@ -175,6 +230,12 @@ Adapt colors to the materials gathered. This is a starting point:
 ```typst
 #import "theme.typ": *
 
+// Metadata — ends up in the PDF (title of the document post, author credit)
+#set document(title: "Carousel title", author: "Author or organisation")
+
+// Language — drives hyphenation. Set "it" for Italian decks, "en" for English.
+#set text(lang: "it")
+
 // Pick the format (only one active line). Keep `bottom` margin generous
 // (~0.7in) so the footer line + 9pt text fit fully without clipping.
 #set page(width: 7.5in,   height: 7.5in,   margin: (x: 0.55in, top: 0.5in, bottom: 0.7in), footer-descent: 18pt)  // 1:1
@@ -220,10 +281,23 @@ Adapt colors to the materials gathered. This is a starting point:
 
 ```bash
 cd <project>/carousel
+
+# one PNG per card — for Instagram, X, previews, review
 typst compile slides.typ "output/slide-{p}.png" --ppi 144
+
+# one PDF for the whole deck — this is what you upload to LinkedIn
+typst compile slides.typ output/deck.pdf
 ```
 
 The `{p}` is replaced by the page number → one PNG per slide.
+
+**A LinkedIn carousel is a PDF, not a set of images**: it is uploaded as a single *document post* and the feed turns the pages into swipeable cards. Produce both — the PDF to publish, the PNGs to review in Phase 4 and to reuse on other platforms. Neither export needs an extra tool.
+
+Optional, only if the user asks for an animated preview (requires ImageMagick, an external dependency):
+
+```bash
+magick -delay 250 -loop 0 output/slide-*.png output/deck.gif
+```
 
 ---
 
@@ -242,6 +316,13 @@ The `{p}` is replaced by the page number → one PNG per slide.
 - Label/tag: 9–10pt bold uppercase with tracking
 
 **Carousels**: counter at bottom right of every slide (`1 / 6`, `2 / 6`, ...).
+
+**Deck arc** — decide the sequence before writing any card:
+- Five to seven cards. Fewer says too little, more loses the reader mid-swipe.
+- Cover → content → closing call to action. The cover carries one claim, not a summary.
+- One card with an inverted background (dark among light, or the accent colour) to break the rhythm — one, not three.
+- One visual idea per deck: a palette, a font pairing, a single recurring motif. Do not restate the same idea on every card.
+- Do not clone the previous deck's layout. Consistency lives in the palette and typography, not in repeating the composition.
 
 **Story 9:16**: center the content vertically, use larger fonts, avoid corners.
 
@@ -263,6 +344,28 @@ The `{p}` is replaced by the page number → one PNG per slide.
 // content of the slide — no v(1fr)+ctr at the end
 ```
 The counter lives in the `bottom` margin and cannot be pushed by content. Overflow now manifests as a real extra page (immediately diagnosable) instead of a silent ghost slide.
+
+This pitfall is about the **margined** pattern. In the full-bleed pattern there is no bottom margin to put a footer in, and the equivalent guarantee comes from `place`: placed content is out of the layout flow, so no amount of body text can move it. Either mechanism is fine; a manual `#v(1fr)` + counter as the last row of the body is not.
+
+**Full-bleed: `height: 100%` clips silently on overflow.** Verified on typst 0.14.2 — a `block(width: 100%, height: 100%, inset: ...)` whose content does not fit produces **one page with the text cut off at the edge**: no warning, no extra page, exit code 0. Remove `height: 100%` and the same content spills into six real pages. The fixed height is not optional (it is what makes `v(1fr)` centre anything), so treat this as a diagnostic step rather than something to design around:
+
+```bash
+# suspect a card is overfull? temporarily drop `height: 100%` from the helper
+# and recompile: if the deck grows extra pages, that card is over capacity
+typst compile slides.typ "output/slide-{p}.png" --ppi 144 && ls output/*.png | wc -l
+```
+
+The page count must equal the number of `#slide(...)` calls, and Phase 4 must actually look at the images — this failure mode is invisible to any check that only counts files.
+
+**Full-bleed: `width: 100%` inside the body is the padded column, not the page.** A rectangle placed inside `body` is measured against the inset block, so it stops short of the edges and the "full-bleed" band comes out framed. Edge-to-edge decoration must be a sibling of the padded block, which is what the `bleed` parameter is for:
+
+```typst
+// WRONG — the band inherits the block's inset
+#slide({ place(top + left, rect(width: 100%, height: 1.4in, fill: BG-LIGHT)) ... })
+
+// CORRECT — drawn before the padded block, measured against the page
+#slide(bleed: place(top + left, rect(width: 100%, height: 1.4in, fill: BG-LIGHT)), { ... })
+```
 
 **`v(1fr)` works at page level**: it splits the leftover space. If you place two of them, the space is split evenly between the two points.
 
@@ -326,9 +429,16 @@ Typical contexts where you trip on this: terminal-style strings (`$ command`, `~
 
 After every compile:
 
-1. **Read** the PNGs with the Read tool — look at each slide, don't just confirm the file exists
-2. **Evaluate** against the design principles above: hierarchy, white space, contrast, text overflow/clipping, counter visibility, image quality
-3. **Report and propose**: list what works, what doesn't, and propose concrete fixes (e.g. "slide 3 title clips on the right — reduce from 44pt to 38pt", "increase top margin from 0.58in to 0.75in")
-4. **Wait** for user feedback before applying any change — do not auto-iterate
+1. **Count** the generated PNGs — the total must equal the number of cards you wrote. More pages means overflow; the same number is not by itself proof that nothing was cut (see the silent-clipping pitfall)
+2. **Read** the PNGs with the Read tool — look at each slide, don't just confirm the file exists
+3. **Evaluate** against the design principles above: hierarchy, white space, contrast, text overflow/clipping, counter visibility, image quality
+4. **Report and propose**: list what works, what doesn't, and propose concrete fixes (e.g. "slide 3 title clips on the right — reduce from 44pt to 38pt", "increase top margin from 0.58in to 0.75in")
+5. **Wait** for user feedback before applying any change — do not auto-iterate
 
 Typst recompiles in <1s, so iteration is cheap; each round must still be driven by an explicit user decision.
+
+---
+
+## Credits
+
+The full-bleed pattern (`margin: 0` plus a `slide()` helper that adds the padding back, with the repeated furniture drawn via `place`) is adapted from [Build LinkedIn Carousels with Typst: the `slide` Layout](https://mickael.canouil.fr/posts/2026-05-28-typst-linkedin-carousels/) by Mickaël Canouil. The mechanism is reused here; the palette, typography and card compositions are not.

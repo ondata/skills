@@ -1,5 +1,14 @@
 # LOG
 
+## 2026-08-10
+
+- `typst-cards`: new full-bleed layout pattern — `margin: 0` + a `slide()` helper that adds the padding back via `inset`, with rail, page counter and URL drawn through `place` (out of flow, so content cannot push them). Enables backgrounds, colour bands and images reaching every edge, which the margined pattern cannot do. New `references/slides-fullbleed-starter.typ` (5 cards, 1:1); the two existing starters are unchanged. New "Two layout patterns" section with the rule for choosing. Adapted from Mickaël Canouil's post on Typst LinkedIn carousels (credited in SKILL.md); geometry kept in inches — `7.5in × 144ppi` = exactly 1080px, while his 21cm square gives 1191px
+- `typst-cards`: PDF output alongside PNG — a LinkedIn carousel is uploaded as a single PDF document post, so `typst compile slides.typ output/deck.pdf` is now part of the flow; frontmatter `description` updated accordingly; optional ImageMagick one-liner for an animated GIF preview
+- `typst-cards`: new pitfall — `block(width: 100%, height: 100%, inset: ...)` **clips silently** on overflow (one page, text cut at the edge, no warning, exit 0); the same content without `height: 100%` spills into 6 real pages. Diagnostic recipe + page-count check added to Phase 4. Verified on typst 0.14.2
+- `typst-cards`: new pitfall — inside `body`, `width: 100%` is the padded column, not the page, so "full-bleed" decoration drawn there comes out framed; the `slide()` helper takes a `bleed` argument for content that must be measured against the page
+- `typst-cards`: font availability documented as two tiers — only `Libertinus Serif`, `New Computer Modern` (+ Math) and `DejaVu Sans Mono` are embedded in the binary (`typst fonts --ignore-system-fonts`); `DejaVu Sans`, previously the skill's primary body font, is system-only and can silently fall back elsewhere. Stated plainly: there is no embedded sans-serif
+- `typst-cards`: `#set document(title:, author:)` for PDF metadata, `#set text(lang: "it")` for Italian hyphenation, and deck-level guidance (5–7 cards, cover → content → CTA, one inverted card, one visual idea per deck)
+
 ## 2026-07-28
 
 - `scrivi-chiaro-pa`: new skill — write, rewrite, or review Italian PA content in plain language, based on the Designers Italia *Guida al linguaggio della Pubblica Amministrazione* (CC-BY 4.0). Three modes (draft / rewrite / review), tone-of-voice scenarios, final glossary pass + checklist. References: style/grammar/numbers, structure/usability/SEO/accessibility, tone of voice (9 scenarios), social/newsletter/images/editorial management, A–Z glossary (~90 terms in two tables). Content harvested from the published "bozza" on docs.italia.it (suggerimenti + tono di voce sections exist only there) and from the `italia/writing-toolkit` repo (glossary RST sources)

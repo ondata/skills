@@ -1,7 +1,8 @@
 // ─── slides-fullbleed-starter.typ ─────────────────────────────────────────
 // Instagram/LinkedIn 1:1 carousel template (1080×1080px), FULL-BLEED variant.
 // Copy to <project>/carousel/slides.typ and adapt the content.
-// Requires theme-starter.typ in the same folder (or rename it to theme.typ).
+// Requires theme.typ in the same folder: copy references/theme-starter.typ to
+// <project>/carousel/theme.typ, as Phase 3 of SKILL.md prescribes.
 //
 // Difference from slides-1x1-starter.typ: the page has NO margin, so
 // backgrounds, colour bands and images reach every edge. The padding is added
@@ -12,7 +13,7 @@
 // Use slides-1x1-starter.typ when a classic margined page with a footer rule
 // is enough — see "Two layout patterns" in SKILL.md.
 
-#import "theme-starter.typ": *
+#import "theme.typ": *
 
 // ── document metadata (ends up in the PDF) ────────────────────────────────
 #set document(title: "Carousel title", author: "Author or organisation")

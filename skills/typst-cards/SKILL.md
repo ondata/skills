@@ -160,7 +160,15 @@ The full-bleed pattern is one helper. Each call is one card:
     font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L },
     [#counter(page).display() / #counter(page).final().first()],
   ))
-  block(width: 100%, height: 100%, inset: (left: 0.9in, right: 0.55in, y: 0.55in), body)
+  place(bottom + left, dx: 0.9in, dy: -0.5in, text(                  // source URL
+    font: MONO, size: 9pt, fill: if dark { MUTED-D } else { MUTED-L }, URL,
+  ))
+  // bottom inset larger than top: it must clear the URL placed above
+  block(
+    width: 100%, height: 100%,
+    inset: (left: 0.9in, right: 0.55in, top: 0.55in, bottom: 0.85in),
+    body,
+  )
 })
 
 #slide(fill: BG-DARK, dark: true, { ... })   // one call = one card

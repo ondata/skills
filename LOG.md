@@ -7,6 +7,7 @@
 - `typst-cards`: new pitfall — `block(width: 100%, height: 100%, inset: ...)` **clips silently** on overflow (one page, text cut at the edge, no warning, exit 0); the same content without `height: 100%` spills into 6 real pages. Diagnostic recipe + page-count check added to Phase 4. Verified on typst 0.14.2
 - `typst-cards`: new pitfall — inside `body`, `width: 100%` is the padded column, not the page, so "full-bleed" decoration drawn there comes out framed; the `slide()` helper takes a `bleed` argument for content that must be measured against the page
 - `typst-cards`: font availability documented as two tiers — only `Libertinus Serif`, `New Computer Modern` (+ Math) and `DejaVu Sans Mono` are embedded in the binary (`typst fonts --ignore-system-fonts`); `DejaVu Sans`, previously the skill's primary body font, is system-only and can silently fall back elsewhere. Stated plainly: there is no embedded sans-serif
+- `typst-cards`: fix broken `cp` recipe — all three slide starters imported `theme-starter.typ` while Phase 3 tells you to copy the theme to `theme.typ`, so following the documented recipe failed with "file not found". Imports now point at `theme.typ`; verified end-to-end on all three starters (5 / 3 / 5 pages + PDF). Reported by the Copilot review on PR #27
 - `typst-cards`: `#set document(title:, author:)` for PDF metadata, `#set text(lang: "it")` for Italian hyphenation, and deck-level guidance (5–7 cards, cover → content → CTA, one inverted card, one visual idea per deck)
 
 ## 2026-07-28

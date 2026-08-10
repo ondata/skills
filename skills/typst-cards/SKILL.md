@@ -398,14 +398,14 @@ Typical contexts where you trip on this: terminal-style strings (`$ command`, `~
 > **Sub-case — smart quotes do not reach string values**: the same split hits apostrophes, and this one is silent. Typst turns `'` into a typographic `’` in markup only. A string keeps the straight `'`, and interpolating it into content does not rescue it:
 >
 > ```typst
-> A contenuto diretto: l'investimento          // → l’investimento
-> B #text("l'investimento")                    // → l'investimento
-> C #helper("l'investimento")                  // → l'investimento
-> D #helper[l'investimento]                    // → l’investimento
-> E #{let s = "l'investimento"; [#s]}          // → l'investimento
+> A  plain markup: what's next        // → what’s next
+> B  #text("what's next")             // → what's next
+> C  #helper("what's next")           // → what's next
+> D  #helper[what's next]             // → what’s next
+> E  #{let s = "what's next"; [#s]}   // → what's next
 > ```
 >
-> A deck that mixes prose and helper calls therefore comes out with two different apostrophes and no error anywhere. It bites hardest in Italian and French. Fix: pass content `[...]` instead of `"..."`, or type `’` directly in the string. Worth a grep for `'` in string arguments before the final compile.
+> A deck that mixes prose and helper calls therefore comes out with two different apostrophes and no error anywhere. It bites hardest in languages where apostrophes are everywhere — Italian, French. Fix: pass content `[...]` instead of `"..."`, or type `’` directly in the string. Worth a grep for `'` in string arguments before the final compile.
 
 **`leading` is not a parameter of `text()`**: it belongs to `par()`. To control line height of a text block:
 ```typst

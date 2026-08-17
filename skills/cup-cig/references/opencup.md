@@ -29,26 +29,26 @@ curl -sS -X GET "https://api.sogei.it/rgs/opencup/o/extServiceApi/v1/opendataes/
 ```
 
 Response: `{totcount, CurrentPage, numpages, results[]}` — the same full per-CUP records, in a
-pagination envelope of **10 records per page**. All of it measured on 2026-08-15:
+pagination envelope of **10 records per page**.
 
-| Behaviour | Evidence |
+| Behaviour | What it means for you |
 |---|---|
-| `totcount` is trustworthy below 10.000 | COMUNE DI TORRECUSO (`00269510624`, 31 CUPs in the mirror) → `totcount: 31` |
-| **Only the first 10 records are retrievable** | 12 pagination params tested and **all ignored** (`CurrentPage`, `page`, `pagina`, `p`, `pageNum`, `pageSize`, `offset`, `start`, `skip`, `limit`, `size`, `rpp`): every call answers `CurrentPage: 1` with the same 10 CUPs (set-identical, verified comparing sorted lists). `numpages` is also arithmetically wrong: 31 CUPs → `numpages: 3`, which covers 30 |
-| **`totcount` appears capped at 10.000** | AGEA (1.557.932 CUPs in the mirror) and MIMIT (1.016.757) both answer exactly `totcount: 10000` |
-| Result order is not stable | repeated identical calls returned the same 10 CUPs in a different array order — deduplicate by `CUP`, never by position |
-| Unknown PIVA → HTTP 200 with an empty body | same guard as for CUPs; the **documentation's own example** PIVA `01206740324` behaves this way |
+| `totcount` is trustworthy below 10.000 | use it as the entity's project count, but only under that ceiling |
+| **Only the first 10 records are retrievable** | every documented and undocumented pagination parameter is ignored server-side: the response always says `CurrentPage: 1` and returns the same 10 CUPs. `numpages` is computed but meaningless — do not loop on it |
+| **`totcount` appears capped at 10.000** | the largest titolari hold orders of magnitude more, and all answer exactly `10000`. Read it as «≥ 10.000» |
+| Result order is not stable | identical calls return the same 10 CUPs in a different array order — deduplicate by `CUP`, never by position |
+| Unknown PIVA → HTTP 200 with an empty body | same guard as for CUPs; even the **documentation's own example** PIVA behaves this way |
 
-What survives is one question — «how many CUPs does this titolare own?» (up to 10.000) — plus a
-10-record sample, in ~1,4 s: per single call this route is actually **faster** than the mirror.
-The whole set is what it cannot serve: on Torrecuso the mirror's
-`WHERE PIVA_CODFISCALE_SOG_TITOLARE = '00269510624'` returned 31/31 in 4,9 s — one query; the API
-would need the pages it does not serve (4 pages × 1,4 s ≈ 5,6 s if paging worked). Note `PIVA` is
-not the sort key, so the mirror filters by scan (~5 s) instead of row-group pruning (~2 s).
+So this route answers exactly one question — «how many CUPs does this titolare own?», up to the
+cap — plus a 10-record sample. For a single call it is actually **faster** than the mirror; the
+whole set is what it cannot serve, at any speed, because the pages do not exist. Go to the mirror
+for that. Note `PIVA` is not the mirror's sort key, so filtering on it costs a full scan rather
+than row-group pruning — still one query, just not the cheap kind.
 
 ### What the response actually contains
 
-**69 fields per project**, of which the example above shows eight. The ones worth knowing:
+The record is wide — the example above projects a handful of fields out of it. The ones worth
+knowing:
 
 | Field | Why it matters |
 |---|---|
@@ -83,7 +83,7 @@ There is **no CIG here**: OpenCUP describes the project, not its tenders.
 
 Because it is the **registry** and not a monitoring system, OpenCUP is the one neutral entry
 point: it answers regardless of how the project is financed, and two of its fields tell you
-where the monitoring data will be. Measured across three samples:
+where the monitoring data will be:
 
 | `DESC_TIPO_COPERTURA` | `DESC_STRUMENTO` | Monitored in |
 |---|---|---|
@@ -91,20 +91,16 @@ where the monitoring data will be. Measured across three samples:
 | `COMUNITARIA` | no PNRR mission | **cohesion** → OpenCoesione |
 | `STATALE`, `REGIONALE`, `ALTRA PUBBLICA` | an ordinanza, a «PIANO TRIENNALE OO.PP.», a «PIANO OPERE PUBBLICHE», or `ASSENTE-` | **MOP**, if monitored at all |
 
-Evidence: 10 reconstruction CUPs, all `STATALE`/`REGIONALE`/`ALTRA PUBBLICA` with ordinanze
-or piani as instrument, scored **0/10 in ReGiS, 0/10 in OpenCoesione, 5/10 in MOP, 10/10 in
-ANAC `cup`**. Four CUPs taken from `PNRR_Gare` all came back `COMUNITARIA` with a PNRR
-mission in `DESC_STRUMENTO`.
-
-**Treat it as a hint that orders your queries, not as a verdict.** Half of the reconstruction
-CUPs were in no monitoring system at all while still having tenders in ANAC — so when the
-question is "which tenders", go to ANAC `cup` directly and skip the dispatch.
+**Treat it as a hint that orders your queries, not as a verdict.** Nationally funded projects
+routinely sit in **no monitoring system at all** while still having tenders in ANAC — so when
+the question is "which tenders", go to ANAC `cup` directly and skip the dispatch entirely.
 
 ### Coverage: is every CUP here?
 
-Almost. Measured on a **full** reconstruction dataset — every one of its 3.481 CUPs queried:
-**3.457 resolved (99,3%)**, 24 did not. Two random samples of 100 and 10 had come back
-100% earlier, which is why a small sample will tell you "always".
+Almost — but not quite, and the exceptions matter more than their number. A handful of
+well-formed CUPs do not resolve. Beware of concluding otherwise from a quick check: the
+failures are rare enough that **a small sample will tell you "always"**, so test coverage on a
+full set or not at all.
 
 OpenCUP is the **registry**, while MOP, ReGiS and OpenCoesione are *monitoring* systems each
 holding only their own share: absence from those says nothing, absence from OpenCUP is rare
@@ -119,9 +115,8 @@ published while surviving in documents and datasets. Publication decrees state i
 > «SISMA 2016 – Ordinanza Speciale … **CUP: B48E21000140001 (già B17H21003520001 –
 > B47H21004700001)**»
 
-Verified: `B48E21000140001` is in OpenCUP (Consorzio di Bonifica delle Marche, 13,9 M€),
-both superseded codes are not — **although ANAC still holds 13 CIG each** for them, because
-the tenders were run under the old codes.
+Verified: `B48E21000140001` is in OpenCUP, both superseded codes are not — **although ANAC
+still holds their CIG**, because the tenders were run under the old codes.
 
 Practical consequences:
 
@@ -131,16 +126,16 @@ Practical consequences:
   multi-code cell by pattern can turn one project into three;
 - historical CUPs remain the right key for the tenders of their own era.
 
-Of the 24 unresolved CUPs above, 4 are exactly this case. For the remaining 20 — 10 of which
-do have tenders in ANAC — no explanation was found; some have suspicious shapes
-(`G27B18000000000`) and may be transcription errors that still pass a format check. For one
-of them the OpenCUP **web page also answers «non disponibile»**, so it is not an API-only
-gap.
+This explains only part of the unresolved codes. For the rest no explanation was found, and
+some have suspicious shapes (`G27B18000000000`) — transcription errors that still pass a
+format check, since the format says nothing about whether the code was ever issued. When it
+happens, the OpenCUP **web page answers «non disponibile» too**, so it is not an API-only gap
+and re-querying will not help.
 
-One documented caveat from the source itself: not all project natures are said to be
-published as open data — some PNRR service-acquisition projects supposedly have no CUP here.
-**This appears superseded**: 8 of 8 CUPs from PNRR submeasure M1C1 «Infrastrutture digitali»
-resolved, all with nature «ACQUISTO O REALIZZAZIONE DI SERVIZI».
+One documented caveat from the source itself: not all project natures are said to be published
+as open data — some PNRR service-acquisition projects supposedly have no CUP here. **This
+appears superseded**: PNRR service-acquisition CUPs do resolve, nature «ACQUISTO O
+REALIZZAZIONE DI SERVIZI» included.
 
 ### Without API credentials (web page fallback)
 
@@ -159,24 +154,34 @@ Base: `https://data.source.coop/ondata/opencup/`
 
 The base URL is the HTTPS face of an **S3 bucket**: cloud URI `s3://eu-central-1.opendata.source.coop/ondata/opencup/`, endpoint `data.source.coop`. The HTTPS form used throughout this file is the verified recipe here; the `s3://` URI is the documented cloud address for tools speaking the S3 protocol. The mirror's own [README](https://source.coop/ondata/opencup/README.md) documents layout, examples and provenance — read it before trusting an aggregation.
 
-Two structural facts worth knowing: `CUP` is a **true primary key** in `progetti` — 11.942.784 rows, as many distinct values — and all four files cover the same 11.942.784 projects, none a subset of another. Each file is sorted on its own access key, so one lookup in `progetti` touches **one row group out of 120** (one of 228 in `fonti-copertura`) — this is why 1.000 random CUPs cost barely more than 10.
+Two structural facts worth knowing. `CUP` is a **true primary key** in `progetti`, and all four
+files cover the same projects — none is a subset of another, so a CUP missing from one is a
+finding, not a coverage gap. And each file is **sorted on its own access key**, so a lookup
+reads one row group instead of the file: this is why 1.000 CUPs cost barely more than 10.
 
+**The cost of a query here is the number of round-trips, not the bytes.** Filter on the sort
+key and it is nearly free; filter on anything else and the reader must check every row group's
+statistics — still one query, seconds instead of milliseconds. Write the `WHERE` accordingly.
 
-| File | Rows | Size | Sorted by | Content |
-|---|---:|---:|---|---|
-| `progetti.parquet` | 11.942.784 | 703 MB | `CUP` | the 62 columns of the projects archive |
-| `localizzazione.parquet` | 13.595.165 | 38 MB | territory | CUP × territory |
-| `fonti-copertura.parquet` | 22.806.427 | 29 MB | `CUP` | CUP × funding source |
-| `soggetti.parquet` | 54.323 | 2 MB | name | titolare × richiedente pairs |
+| File | Sorted by | Content |
+|---|---|---|
+| `progetti.parquet` | `CUP` | the projects archive, one row per CUP |
+| `localizzazione.parquet` | territory, then `CUP` | CUP × territory |
+| `fonti-copertura.parquet` | `CUP` | CUP × funding source |
+| `soggetti.parquet` | name | titolare × richiedente pairs |
+
+**Wildcards do not work over plain HTTP** — `.../opencup/*.parquet` fails. Name the file you
+want; `_manifest.json` at the same base URL lists them, and is the only way to enumerate the
+product programmatically.
 
 ```bash
-# one CUP, from a 703 MB remote file, in ~2,4 s
+# one CUP, straight out of the big remote file — filter on the sort key, so it is cheap
 duckdb -c "SELECT * FROM 'https://data.source.coop/ondata/opencup/progetti.parquet' WHERE CUP = 'J87G22000360002';"
 
-# set-wide question the API cannot answer: projects in a municipality (~1 s)
+# set-wide question the API cannot answer at all: projects in a municipality
 duckdb -c "SELECT count(*) FROM 'https://data.source.coop/ondata/opencup/localizzazione.parquet' WHERE CODICE_COMUNE = '082053';"
 
-# join two remote files: cost quartile in Rome, 223.788 projects (~4 s)
+# join two remote files: cost quartile in Rome
 duckdb -c "SELECT quantile_cont(p.COSTO_PROGETTO, 0.75) FROM 'https://data.source.coop/ondata/opencup/localizzazione.parquet' l JOIN 'https://data.source.coop/ondata/opencup/progetti.parquet' p USING (CUP) WHERE l.CODICE_COMUNE = '058091';"
 ```
 
@@ -191,37 +196,42 @@ duckdb -c "SELECT key::VARCHAR, value::VARCHAR FROM parquet_kv_metadata('https:/
 dropped — of the **2026-08-06 snapshot**. It is therefore *older than the API*: a CUP registered
 after that date is in the API and not here. Use it for set-wide work, use the API for freshness.
 
-**Five traps, all measured, all preserved from the source:**
+**Five traps, all preserved from the source:**
 
-- `localizzazione` is **1:N and carries no percentage shares**: 960.107 CUP (8%) span several
-  territories, so summing project costs by municipality counts them more than once;
+- `localizzazione` is **1:N and carries no percentage shares**: a project can span several
+  territories, so summing project costs by municipality counts it more than once, and there is
+  no legitimate way to apportion it — the source publishes no split;
 - when a project is supra-municipal the territorial codes are **`-1`** and the labels become
   `TUTTI` (comune) / **`TUTTE`** (provincia, regione) — note the gender, a filter on
-  `PROVINCIA = 'TUTTI'` returns nothing while 467.094 rows match `'TUTTE'`. Only 95,35% of rows
-  reach an actual municipality, and `-1` survives a cast to integer;
-- **all codes are strings**: 92% of province and municipality codes start with a zero, `021108` is
+  `PROVINCIA = 'TUTTI'` returns nothing at all. Not every row reaches an actual municipality,
+  and `-1` **survives a cast to integer**, so it slips into joins unnoticed;
+- **all codes are strings**: most province and municipality codes start with a zero, `021108` is
   not `21108`; same for the ATECO hierarchy, where `47.8` is a level and not a decimal;
-- **not every project is in Italy**: `STATO` has 195 distinct values and 33.904 rows (0,25%) are abroad (Spain, Germany, UK, France…) — filter by country too, or a per-region sum silently drops them;
-- `soggetti` is **not one row per body**: 54.323 rows for 28.851 distinct titolari, because it pairs
-  titolare with richiedente. Joining on `SOGGETTO_TITOLARE` multiplies rows by 1,88.
+- **not every project is in Italy** — filter by country too, or a per-region sum silently drops
+  the ones abroad;
+- `soggetti` is **not one row per body**: it pairs titolare with richiedente, so joining on
+  `SOGGETTO_TITOLARE` **multiplies rows** — deduplicate with
+  `SELECT DISTINCT * EXCLUDE (SOGGETTO_RICHIEDENTE)` before attaching anything to a project.
 
-### Measured — same question, API vs mirror (2026-08-15)
+### API vs mirror — which one, and why
 
-Compare **equal work**, not equal calls:
+Compare **equal work**, not equal calls.
 
-| Question | API | Parquet mirror |
-|---|---|---|
-| one CUP | ~2,0 s | ~2,4 s |
-| 10 CUPs | 18,0 s sequential; **17,9 s with 10 parallel calls — zero gain, the gateway serializes per credential** | 2,0 s, one query |
-| 1.000 CUPs | ~30 min at the measured 1,8 s/CUP | 3,1 s, one query (1000/1000 found) |
-| all 31 CUPs of a titolare (Torrecuso) | **unreachable**: pagination ignored, one call yields 10 of 31 in 1,4 s; had paging worked, 4 calls ≈ 5,6 s | 4,9 s, 31 of 31, one query |
-| aggregate the whole set | not expressible — no filters, no listing | 8,9 s, `GROUP BY` region over 13,6 M rows |
+For a single CUP the two are equivalent, and for a single titolare call the API is even faster.
+Everything else is decided by three asymmetries:
 
-At small N the API is not slower — for a single titolare call it is faster. The asymmetry is
-capability and marginal cost: the per-CUP route pays ~1,8 s **per CUP, always**, and the titolare
-route stops at 10 records; one SQL query goes 2,0 s → 3,1 s between 10 and 1.000 CUPs, because the
-file is sorted by `CUP` and DuckDB prunes row groups from the Parquet statistics. Break-even sits
-at N≈10 and the gap only widens. Rule: **one CUP and freshness → API; any set → mirror.**
+- **the API's cost is linear and unavoidable** — it pays its per-CUP latency once per CUP,
+  always, so a list of a thousand codes takes hours;
+- **one SQL query is nearly flat** between ten CUPs and a thousand, because the file is sorted
+  by `CUP` and DuckDB prunes row groups from the Parquet statistics;
+- **parallelising the API buys nothing**: the gateway serialises per credential, so ten
+  concurrent calls take as long as ten sequential ones. This is the one that surprises people.
+
+Add that the titolare route stops at 10 records and that aggregation is not expressible at all
+— no filters, no listing — and the rule falls out: break-even sits around **ten CUPs**, and past
+it the gap only widens.
+
+**One CUP and freshness → API; any set, or any aggregate → mirror.**
 
 ## Bulk open data — the whole archive, no credentials
 
@@ -235,16 +245,18 @@ plain HTTP.
 Files live in Liferay's document library, so URLs carry a UUID:
 `https://www.opencup.gov.it/portale/documents/{groupId}/{folderId}/{Name}.zip/{uuid}`.
 The `?t=…` query string on the page links is a cache-buster — **drop it**, the URL works
-without it. Verified with `HEAD` on 2026-08-15 (sizes are the `Content-Length` of the zip):
+without it.
 
 ### By entity — the four that matter
 
-| File | Size | Last-Modified | URL (append to `https://www.opencup.gov.it/portale/documents/21195/299152/`) |
-|---|---|---|---|
-| `OpendataProgetti.zip` | 2,20 GB | 2026-08-06 | `OpendataProgetti.zip/7384382b-679a-0380-c750-ce40779b59d7` |
-| `OpendataLocalizzazione.zip` | 249 MB | 2026-08-06 | `OpendataLocalizzazione.zip/ac230d13-23a0-5929-8778-d34c21c9a7a4` |
-| `OpendataFontiCopertura.zip` | 162 MB | 2026-08-06 | `OpendataFontiCopertura.zip/229bb5a8-cb28-cb64-dfd8-44ebac4b3693` |
-| `OpendataSoggetti.zip` | 3,2 MB | 2026-08-06 | `OpendataSoggetti.zip/411e1e80-bce0-d085-bb96-b8036deb590f` |
+Sizes are orders of magnitude, to decide whether a download is worth it at all:
+
+| File | Size | URL (append to `https://www.opencup.gov.it/portale/documents/21195/299152/`) |
+|---|---|---|
+| `OpendataProgetti.zip` | GB-scale | `OpendataProgetti.zip/7384382b-679a-0380-c750-ce40779b59d7` |
+| `OpendataLocalizzazione.zip` | hundreds of MB | `OpendataLocalizzazione.zip/ac230d13-23a0-5929-8778-d34c21c9a7a4` |
+| `OpendataFontiCopertura.zip` | hundreds of MB | `OpendataFontiCopertura.zip/229bb5a8-cb28-cb64-dfd8-44ebac4b3693` |
+| `OpendataSoggetti.zip` | a few MB | `OpendataSoggetti.zip/411e1e80-bce0-d085-bb96-b8036deb590f` |
 
 `Progetti` is the anagraphics — the bulk equivalent of what the API returns per CUP.
 `Localizzazione`, `FontiCopertura` and `Soggetti` are the 1:N satellites, and they are the
@@ -256,7 +268,7 @@ smaller than `Progetti` — it is the entity registry, not one row per project.
 
 | File | Size | URL |
 |---|---|---|
-| `OpendataComplessivo.zip` | **3,37 GB** | `documents/21195/299152/OpendataComplessivo.zip/e2ed40f1-54ef-9a36-6d49-a1349175e500` |
+| `OpendataComplessivo.zip` | **the largest of all** | `documents/21195/299152/OpendataComplessivo.zip/e2ed40f1-54ef-9a36-6d49-a1349175e500` |
 
 Also published per macro-area, in **two formats** — `OpendataCsv{Area}.zip` and
 `OpendataXml{Area}.zip`, with `{Area}` ∈ `Centro`, `Isole`, `NordEst`, `NordOvest`, `Sud`.
@@ -278,10 +290,10 @@ Plus thematic extracts, all one-off snapshots — not kept in step with the main
 
 ### Practical notes
 
-- **Update cadence**: the four entity files and `Complessivo` all carry the same
-  `Last-Modified` day (2026-08-06), so they are republished as one batch. Check
-  `Last-Modified` with `HEAD` before re-downloading — it is the only freshness signal, there
-  is no changelog and no version in the filename.
+- **Update cadence**: the four entity files and `Complessivo` always carry the same
+  `Last-Modified` day, so they are republished as one batch. Check it with `HEAD` before
+  re-downloading — it is the only freshness signal, there is no changelog and no version in
+  the filename.
 - `HEAD` works and `Content-Length` is honest, so you can size a download before starting it.
 - A browser `User-Agent` is safer than curl's default on this portal, as with ANAC.
 - **Not verified here**: the contents of the archives — encoding, delimiter, column names,

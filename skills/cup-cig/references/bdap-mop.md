@@ -34,13 +34,12 @@ CKAN-compatible API, so several habits from real CKAN portals do not carry over:
 
 - `package_show?id={dataset_name}` returns `success: false` and a null result — it only
   accepts the **package UUID**. Use `package_search` to go from name to UUID.
-- `package_list` works and returns 3.849 dataset names.
+- `package_list` works, and is the way to enumerate what exists.
 - `resource_show`, `site_read` and `status_show` are **not implemented** (Tomcat 404).
 - in `package_search`, `q=opere+pubbliche` works while longer multi-word queries return
   no results.
 
-Real CKAN endpoints, where the usual idioms do apply, are ANAC (`ckan_version` 2.6.8)
-and IPA (2.9.8).
+Real CKAN endpoints, where the usual idioms do apply, are ANAC and IPA.
 
 **Base URL (OData, Progetti MOP - Totale):**
 `https://bdap-opendata.rgs.mef.gov.it/ODataProxy/MdData('bda1676b-62ab-44b7-8f9a-ca93b8534488@rgs')/DataRows`
@@ -91,11 +90,11 @@ the same granularity: entity and accounting code, no CUP.
 > three feed the Banca Dati delle PA (art. 13 l. 196/2009), but that flow is internal to
 > RGS. A single monitoring system is being built and is not ready.
 >
-> Measured: of 100 random CUPs from a post-earthquake reconstruction dataset, **49 appear in
-> MOP**. Progress stage shifts the odds — 39,7% for projects still in design (phases 1-6),
-> 69,7% once works have started (phases 7-9) — but does not explain the rest. **Absence from
-> MOP is not absence of the project**: check ReGiS and OpenCoesione, and fall back to OpenCUP
-> for the anagraphics and to ANAC `cup` for the tenders.
+> Expect **roughly half** of an arbitrary set of CUPs to be missing from MOP — a miss is the
+> normal case, not an anomaly. Progress stage shifts the odds (projects whose works have
+> started are markedly better covered than those still in design) but does not explain the
+> rest. **Absence from MOP is not absence of the project**: check ReGiS and OpenCoesione, and
+> fall back to OpenCUP for the anagraphics and to ANAC `cup` for the tenders.
 
 ### Finding the right regional file for a CUP
 
@@ -113,16 +112,16 @@ curl -sS "https://bdap-opendata.rgs.mef.gov.it/ODataProxy/MdData('c4cce647-cec4-
 
 Three cases to handle explicitly:
 
-- **multi-region CUP** — 1.976 of 541.329 (0,365%), up to 20 regions: repeat step 2 for
-  each region returned;
-- **CUP not in Localizzazione** — 210 of 541.539 (0,04%): these are works with no
-  municipal localisation, look them up in the **`reg00` «Territorio Nazionale»** partition;
+- **multi-region CUP** — rare, but they exist and some span most of the country: repeat
+  step 2 for each region returned, never just the first;
+- **CUP not in Localizzazione** — a small residue of works with no municipal localisation:
+  look them up in the **`reg00` «Territorio Nazionale»** partition;
 - **`reg00` is not the national total** — a total exists only for `prg`, and it carries no
   territorial column at all.
 
-> A CUP spread over several municipalities is common — 27.982 CUP (5,17%), up to 93
-> municipalities. **No dataset splits the amount between them**: attributing a project's
-> cost to one municipality, or summing per municipality, double-counts.
+> A CUP spread over several municipalities is common, and some span dozens. **No dataset
+> splits the amount between them**: attributing a project's cost to one municipality, or
+> summing per municipality, double-counts.
 
 ### Query by CUP
 
@@ -198,8 +197,6 @@ Companion to the BDAP section of the skill. The Monitoraggio Opere Pubbliche (ME
 publishes **seven families** of datasets, all keyed on the **CUP**. Every family except
 Localizzazione is split into 21 territorial partitions.
 
-All facts below were verified live on 2026-08-11.
-
 ## How to reach a dataset
 
 Each dataset has **two non-interchangeable ids** (see the warning in SKILL.md):
@@ -236,27 +233,21 @@ curl -sS "https://bdap-opendata.rgs.mef.gov.it/SpodCkanApi/api/3/action/package_
 exceptions matter:
 
 - **`reg00` is not the national total.** It holds works with no municipal localisation —
-  large infrastructure. Measured on the `gar` family: 44.796 tender rows but only **165
-  distinct CUP**, of which 152 are absent from Localizzazione.
+  large infrastructure. It is a handful of CUPs spread over many tender rows, and most of
+  them are absent from Localizzazione, which is exactly why they land here.
 - **A national «Totale» dataset exists only for `prg`** (`spd_mop_prg_mon_opere_01_9999`),
-  and it carries **no territorial column** — 48 columns, none for region, province or
-  municipality.
+  and it carries **no territorial column at all** — not region, not province, not
+  municipality. Do not reach for it to answer a "where" question.
 
 **Localizzazione is the only unpartitioned dataset**, and this makes it the resolver:
 given a CUP you get its region in one query, and the region tells you which regional
-dataset to hit next. Coverage measured against the national `prg` dump: 541.539 CUP in
-projects, 541.329 in Localizzazione — only **210 CUP (0,04%) unresolvable**, and those
-are the `reg00` cases.
+dataset to hit next. It resolves nearly every CUP in the national `prg` dump; the few it
+misses are the `reg00` cases above.
 
-Cardinality measured on the full Localizzazione dump (666.153 rows, 541.329 CUP):
-
-| Case | Count | Share | Max |
-|---|---|---|---|
-| CUP over several municipalities | 27.982 | 5,17% | 93 municipalities |
-| CUP over several regions | 1.976 | 0,365% | 20 regions |
-
-A multi-region CUP means step 2 must be repeated for each region. **No dataset carries a
-split of the amount between territories**: never divide, never sum blindly.
+Two cardinality facts decide how you write the follow-up query: a CUP can span **several
+municipalities** (common, sometimes dozens) and **several regions** (rare, but up to most of
+the country). A multi-region CUP means step 2 must be repeated for each region. **No dataset
+carries a split of the amount between territories**: never divide, never sum blindly.
 
 ## OData field names
 

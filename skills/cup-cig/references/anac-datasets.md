@@ -14,25 +14,17 @@ catch it. Tested: `curl/8.0`, an empty UA, `python-requests/2.31` and even a bar
 requirement** — they serve any client, including a plain `curl`.
 
 > **But the same WAF also filters by client IP, and that rule hits the downloads too.**
-> The UA rule is not the only one: requests from Azure IP space get a **403 Forbidden**
-> (312-byte HTML page, `server: volt-adc`) on `/opendata/download/` regardless of
-> User-Agent. Measured 2026-08-13 on `…/dataset/cup/filesystem/cup_csv.zip`:
+> The UA rule is not the only one: requests from **Azure IP space get a 403 Forbidden** on
+> `/opendata/download/` regardless of User-Agent — recognisable by a short HTML body and a
+> `server: volt-adc` header. Since GitHub-hosted runners live in Azure, this is why
+> scheduled workflows that used to work fail from CI while the same command succeeds on a
+> laptop.
 >
-> | Client IP | F5 PoP seen by ANAC | wget bare | wget +Chrome UA | curl bare | curl +Chrome UA |
-> |---|---|---|---|---|---|
-> | GitHub Actions runner, Azure `westcentralus`, `172.208.154.2` | `dal3-dal` (Dallas) | 403 | 403 | 403 | 403 |
-> | Italian residential | `fr4-fra` (Frankfurt) | ok (exit 0, status not captured) | — | 206 | 206 |
-> | Cloudflare Worker, invoked **from that same runner** | `dc12-ash` (Ashburn) | — | — | **200** | — |
->
-> Two things follow. A Chrome-like UA does **not** rescue the download: varying the client
-> changes nothing. And **the rule is not geographic** — the Worker's own request left from
-> a US PoP (`cf-ray … -IAD`, ANAC logged `dc12-ash`) and was served 200, full 81,930,566-byte
-> ZIP, `unzip -t` clean. What is blocked is the IP range, not the continent: Azure out,
-> Cloudflare through.
->
-> This is the cause of the recurring failures of the `pnrr_cup_cig` workflow in
-> `ondata/liberiamoli-tutti` (identical 403 verified on the runs of 2026-07-06, 07-13,
-> 07-20, 07-27, 08-03, 08-10).
+> Two things follow, both counter-intuitive. A Chrome-like UA does **not** rescue the
+> download — varying the client changes nothing, because it is not the client being judged.
+> And **the rule is not geographic**: a Cloudflare Worker whose request also left from a US
+> point of presence was served normally. What is blocked is the IP range, not the continent —
+> Azure out, Cloudflare through.
 >
 > **Working fix, verified end-to-end from a runner:** fetch through a Cloudflare Worker
 > acting as a plain `?url=<target>` GET proxy. Keep the proxy URL out of the code — pass
@@ -53,7 +45,7 @@ instead of browsing the portal. Costs a few KB:
 curl -sS -H "User-Agent: ${ANAC_UA}" "https://dati.anticorruzione.it/opendata/api/3/action/package_show?id=cup" | jq -r '.result.resources[] | "\(.name) | \(.format) | \(.size) | \(.url)"'
 ```
 
-`package_list` returns the full catalogue (70+ datasets: `cig`, `cup`, `smartcig`,
+`package_list` returns the full catalogue (`cig`, `cup`, `smartcig`,
 `stazioni-appaltanti`, `aggiudicazioni`, `fonti-finanziamento`, `partecipanti`,
 `subappalti`, `varianti`, plus yearly series `cig-2007`…`cig-2025` and
 `ocds-appalti-ordinari-2018`…`2026`).
@@ -77,8 +69,8 @@ returns 404 (WSO2 `am:fault`) on every endpoint tried, including `version`, `rel
 
 ### Freshness before download
 
-Each dataset publishes a `*_logCsv.csv` (9-13 KB) listing date and row count of every
-release. Check how old the data is *before* pulling hundreds of megabytes:
+Each dataset publishes a small `*_logCsv.csv` listing date and row count of every release.
+Check how old the data is *before* pulling hundreds of megabytes:
 
 ```bash
 curl -sS -H "User-Agent: ${ANAC_UA}" "https://dati.anticorruzione.it/opendata/download/dataset/cup/filesystem/cup_csv_logCsv.csv" | tail -3
@@ -103,11 +95,11 @@ duckdb -c "SELECT * FROM read_csv_auto('cup_csv.csv') WHERE CIG = 'Z0B19B38F4';"
 
 ### Which dataset holds what
 
-| Dataset | Rows / size | Key columns | Has CUP? |
+| Dataset | Shape | Key columns | Has CUP? |
 |---|---|---|---|
-| `cup` | 7.167.369 rows, 196 MB | `CIG`, `CUP` — nothing else | **yes, this is the bridge** |
-| `cig` | incremental, ~200-550 MB per release | 61 cols: `importo_lotto`, `cod_cpv`, `tipo_scelta_contraente`, `stato`, `ESITO`, **`luogo_istat`** (6 digits), `codice_ausa`, `cf_amministrazione_appaltante`, `CUI_PROGRAMMA`, `CIG_COLLEGAMENTO`, `cig_accordo_quadro`, `FLAG_PNRR_PNC` | no |
-| `smartcig` | ~680k rows per release | 26 cols: `importo_lotto`, `tipo_scelta_contraente`, `tipo_fattispecie_contrattuale`, `stato`, `data_comunicazione`, **`istat_comune`** (9 digits), `codice_ausa`, `cf_amministrazione_appaltante` | no |
+| `cup` | many rows, only two columns | `CIG`, `CUP` — nothing else | **yes, this is the bridge** |
+| `cig` | the wide one, published incrementally | `importo_lotto`, `cod_cpv`, `tipo_scelta_contraente`, `stato`, `ESITO`, **`luogo_istat`** (6 digits), `codice_ausa`, `cf_amministrazione_appaltante`, `CUI_PROGRAMMA`, `CIG_COLLEGAMENTO`, `cig_accordo_quadro`, `FLAG_PNRR_PNC` | no |
+| `smartcig` | narrower, and far fewer fields | `importo_lotto`, `tipo_scelta_contraente`, `tipo_fattispecie_contrattuale`, `stato`, `data_comunicazione`, **`istat_comune`** (9 digits), `codice_ausa`, `cf_amministrazione_appaltante` | no |
 
 Neither `cig` nor `smartcig` carries the CUP: for the association always go through the
 `cup` dataset.
@@ -115,8 +107,7 @@ Neither `cig` nor `smartcig` carries the CUP: for the association always go thro
 **Watch the two different territorial formats.** `cig.luogo_istat` is the plain 6-digit
 ISTAT code; `smartcig.istat_comune` is **9 digits** — region(3) + province(3) +
 comune(3) — so the ISTAT municipality code is its **last 6 characters**
-(`004021046` → `021046`, Malles Venosta). In the sample, `istat_comune` was empty in
-2,6% of records.
+(`004021046` → `021046`, Malles Venosta). It is sometimes empty.
 
 > `cig` is published as **incremental releases** on top of the last full dump: a single
 > monthly file gives a partial view that looks complete. Check `cig_csv_logCsv.csv` to
@@ -127,20 +118,20 @@ comune(3) — so the ISTAT municipality code is its **last 6 characters**
 - Find CIG(s) associated with a CUP: filter the `CUP` column.
 - Find the CUP(s) of a CIG, below-threshold included: filter the `CIG` column.
 
-> **The `cup` dataset is just two columns, `CIG;CUP` — 7.167.369 rows as of 2026-08-06.**
-> It is the authoritative CIG↔CUP bridge and it **does include below-threshold CIGs**
-> (verified on a head sample: 23.475 of 69.918 rows carry the historical `Z` prefix).
+> **The `cup` dataset is just two columns, `CIG;CUP`.**
+> It is the authoritative CIG↔CUP bridge and it **does include below-threshold CIGs** —
+> historical `Z` codes are a substantial share of it, not an afterthought.
 > The relation is **many-to-many**: the same CUP carries several CIG, and a CIG can
 > map to several CUP. Any amount aggregated across this join needs an explicit
 > de-duplication rule, or it double-counts.
 
-> **The two bridges do not fully agree — use both when completeness matters.** Measured on
-> **48 CUPs** present in both sources: MOP Gare yields 257 CUP-CIG pairs, ANAC `cup` yields
-> 251, **250 coincide — 7 exist only in MOP and 1 only in ANAC** (3,1% divergence). Five of
-> the seven missing from ANAC are historical `Z` codes, but not all: CUP `C32C20005090001`
-> has four CIG in MOP that ANAC does not associate, two of them ordinary. They come from
-> different administrative chains, so treat the **union** as the complete set and the
-> difference as a signal, not as an error — and state which source you used.
+> **The two bridges do not fully agree — use both when completeness matters.** On CUPs present
+> in both sources the overlap is large but not total: each holds pairs the other misses. It is
+> tempting to dismiss the difference as historical `Z` codes, and that explanation does not
+> hold — CUP `C32C20005090001`, for one, has CIG in MOP that ANAC does not associate,
+> **ordinary ones included**. They come from different administrative chains, so treat the
+> **union** as the complete set and the difference as a signal, not as an error — and state
+> which source you used.
 
 > Rows are **not sorted by CIG**, so prefix search is not possible on the raw file:
 > index it after download if you plan repeated lookups.

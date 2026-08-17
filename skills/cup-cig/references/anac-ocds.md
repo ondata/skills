@@ -16,20 +16,20 @@ uncompressed — over 35 GB for a year. Do not download one to look at it.
 
 ### Where the identifiers live
 
-Verified on 151 consecutive releases:
+Where each identifier actually lives:
 
 | Identifier | Path | Notes |
 |---|---|---|
-| **CIG** | `tender.lots[].id` | 151/151 releases; same value in `awards[].items[].id` and `relatedLot` |
-| tender id | `tender.id` | **not a CIG** — it is the procedure id (`CONSIP_RDO_5571347`, `225-17693`, a URI…). Only 1 of 151 happened to be a CIG |
+| **CIG** | `tender.lots[].id` | always present; same value in `awards[].items[].id` and `relatedLot` |
+| tender id | `tender.id` | **not a CIG** — it is the procedure id (`CONSIP_RDO_5571347`, `225-17693`, a URI…). It can coincidentally look like one, so never read it as a CIG |
 | OCID | `ocid` | `ocds-hu01ve-{tender.id}` |
 | CF stazione appaltante | `buyer.id`, `parties[].identifier.id` | scheme `IT-CF` |
 | **Codice AUSA** | `parties[].additionalIdentifiers[]` | scheme `AUSA` |
 | CPV | `awards[].items[].classification.id` | scheme `CPV` |
-| **CUP** | — | **absent**: no `planning` block in any of the 151 releases. For the CUP use the `cup` dataset |
+| **CUP** | — | **absent**: there is no `planning` block at all. For the CUP use the `cup` dataset |
 
-Most releases carry a single lot (148 of 151), so one release usually means one CIG — but
-do not assume it: read the array.
+Most releases carry a single lot, so one release usually means one CIG — but multi-lot
+releases exist, so do not assume it: read the array.
 
 ### Inspecting it without downloading it
 

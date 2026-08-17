@@ -13,8 +13,8 @@ three of the seven names documented elsewhere returned 404:
 | File | Size | Content |
 |---|---|---|
 | `PNRR_Progetti` | 317 MB | projects: title, financing by source, implementing body, mission/component |
-| `PNRR_Gare` | 111 MB | **CUP + CIG per tender** — 282.655 rows, 63.499 CUP, 244.510 CIG |
-| `PNRR_Localizzazione` | 66 MB | **CUP → territory with a share percentage** — 347.602 rows |
+| `PNRR_Gare` | 111 MB | **CUP + CIG per tender** — the third CIG↔CUP bridge, PNRR only |
+| `PNRR_Localizzazione` | 66 MB | **CUP → territory with a share percentage** |
 | `PNRR_Soggetti` | 674 MB | project subjects |
 
 Official field dictionaries (`.ods`, `.xlsx`, `.pdf` in one zip) sit next to the data:
@@ -34,12 +34,12 @@ in their HTML — only the metadata zip — so build the CSV URL from the patter
 > `head -c` and letting the pipe close the connection.
 
 > **Akamai blocks these CSVs from datacenter IPs, and wants two headers at once.**
-> Measured 2026-08-13 on `PNRR_Gare.csv`. From a Scaleway Serverless **Function**
-> (`51.15.x`, `62.210.x`): `User-Agent` browser + `Range` → **200**; UA alone → 403;
-> `Range` alone → 403; neither → 403. Both headers are required together. From a GitHub
-> Actions runner (Azure) even UA+`Range` returns **403** — an `AkamaiGHost` "Access
-> Denied" page — so the IP matters too. Scaleway is not uniformly allowed either: from a
-> Serverless **Job** (`51.159.174.75`) it is 403 with any headers, while Functions pass.
+> A browser `User-Agent` **and** a `Range` header must both be present: either one alone
+> gets a 403, and so does neither. That is the first surprise. The second is that headers
+> are not enough — from a GitHub Actions runner (Azure) even the correct pair returns 403,
+> an `AkamaiGHost` "Access Denied" page, so the source IP is judged too. And the allow-list
+> is finer than "cloud provider": on Scaleway the same request passes from a Serverless
+> Function and fails from a Serverless Job.
 >
 > `Range: bytes=0-` requests the whole file while keeping the header present, which is
 > what makes a full download work despite the quirk above.
@@ -52,9 +52,9 @@ in their HTML — only the metadata zip — so build the CSV URL from the patter
 
 ### `PNRR_Localizzazione` — the only source that splits a project across territories
 
-347.602 rows, 285.954 distinct CUP, extraction date 13/06/2026. Fields: submeasure,
-`CUP`, `Codice Locale Progetto`, region / province / municipality (both code and name),
-address, postcode, and — the one that matters — **`Percentuale di Localizzazione`**.
+Fields: submeasure, `CUP`, `Codice Locale Progetto`, region / province / municipality (both
+code and name), address, postcode, and — the one that matters — **`Percentuale di
+Localizzazione`**.
 
 This closes a gap left open everywhere else: BDAP MOP `loc` tells you a CUP spans several
 municipalities but **never how to split the amount**, so any per-municipality sum
@@ -98,26 +98,26 @@ prefer the union when you need completeness.
 `Importo Complessivo Gara`, `Importo Aggiudicazione`, `Data Aggiudicazione Definitiva`,
 `Descrizione Procedura di Aggiudicazione` and the submeasure classification.
 
-**The two channels are visible in the data, and mutually exclusive.** Measured on all
-282.655 rows:
+**The two channels are visible in the data, and mutually exclusive** — which is what lets you
+tell them apart row by row:
 
-| Origin | Rows | Share |
-|---|---|---|
-| `CIG` filled, no `Codice Procedura Utente` → **from ANAC via interoperability** | 257.405 | 91,1% |
-| `Codice Procedura Utente` filled, no `CIG` → **entered by the Soggetto Attuatore** | 25.249 | 8,9% |
-| neither | 1 | — |
+| Origin | How to recognise it |
+|---|---|
+| **from ANAC via interoperability** — the large majority | `CIG` filled, no `Codice Procedura Utente` |
+| **entered by the Soggetto Attuatore** — a small but significant minority | `Codice Procedura Utente` filled, no `CIG` |
 
-Zero rows carry both. Per the official dictionary, `Codice Procedura Utente` is "un codice
+No row carries both, so the test is unambiguous. Per the official dictionary, `Codice Procedura Utente` is "un codice
 inserito manualmente dal soggetto attuatore … non richiamato in automatico attraverso i
 servizi di interoperabilità con ANAC", and `Codice interno PDA` is assigned by ReGiS to
 identify the award procedure — it is **the key to the subcontractors dataset when there is
 no CIG**.
 
 The field no other source has is **`Descrizione Motivo Assenza CIG`**: when a tender carries
-no CIG, ReGiS says **why**. The 25.250 rows break down into explicit reasons — 6.993
-«temporaneo mancato recupero del CIG da ANAC» (a synchronisation gap between the two
-systems, stated by the source itself), 6.267 grants under art. 12 l. 241/1990, then
-employment contracts and other exclusions under d.lgs. 50/2016 and 36/2023.
+no CIG, ReGiS says **why**, with an explicit reason per row. The two commonest are worth
+knowing because they mean opposite things: «temporaneo mancato recupero del CIG da ANAC» is a
+**synchronisation gap** between the two systems — the CIG exists, ReGiS just has not pulled it
+yet — while grants under art. 12 l. 241/1990 have **no CIG by law**. The rest are employment
+contracts and other exclusions under d.lgs. 50/2016 and 36/2023.
 
 This turns "the CUP has no CIG" from a dead end into an answerable question.
 

@@ -2,11 +2,11 @@
 
 **Base URL:** `https://www.serviziocontrattipubblici.it/WSConsultBandi/rest/`
 **Method:** POST + `Content-Type: application/x-www-form-urlencoded`
-**Volume:** 232.227 Bandi, 561.871 Esiti
-**Full API reference:** `references/scp-mit-api.md`
+**Full API reference:** the WADL in `references/scp-mit-api.wadl`
 
 > **This source stopped being fed at the end of 2023.** Tenders published after
-> 01/01/2024 are **39** in the whole archive, and after 01/01/2025 **zero** — publication
+> 01/01/2024 are **a handful** in the whole archive — a hard stop, not a decline — and after
+> 01/01/2025 **zero** — publication
 > moved to ANAC with the digitalisation reform. Use SCP-MIT for the historical record
 > only; **from 2024 on its successor is the PVL (`anac-pvl.md`)**, which picks up exactly where
 > this one stops.
@@ -43,12 +43,11 @@ curl -sSX POST "https://www.serviziocontrattipubblici.it/WSConsultBandi/rest/Ban
 
 **Base URL:** `https://www.serviziocontrattipubblici.it/WSConsultBandi/rest`
 **Source:** WADL at `/application.wadl?detail=true`
-**SSL:** the certificate validates (checked 2026-08-12); `-k` is no longer needed.
+**SSL:** the certificate validates; `-k` is no longer needed.
 
-> **Coverage stops at 2023.** Bandi published after 01/01/2024: 39 in the whole archive.
-> After 01/01/2025: none. Totals: 232.227 Bandi, 561.871 Esiti. Publication moved to
-> ANAC's BDNCP with the 2024 digitalisation reform — treat this API as a historical
-> archive.
+> **Coverage stops at 2023.** Only a handful of Bandi were published after 01/01/2024, and
+> none at all after 01/01/2025. Publication moved to ANAC's BDNCP with the 2024
+> digitalisation reform — treat this API as a historical archive.
 >
 > **`stato` is mandatory**: without it a query returns `total: 0` even for a CIG that is
 > present. **Only Esiti carry the `cig` field**, with a trailing dash (`7383208FF8-`).

@@ -14,7 +14,7 @@ curl -sS "https://opencoesione.gov.it/it/api/progetti/?format=json&cup=E18B20001
 ```
 
 Resources: `progetti`, `soggetti`, `aggregati`, `temi`, `nature`, `territori`, `programmi`.
-Licence CC-BY 4.0. **1.838.162 projects** across the 2000-2006 → 2021-2027 cycles.
+Licence CC-BY 4.0. Covers the 2000-2006 → 2021-2027 programming cycles.
 
 | Field | Content |
 |---|---|
@@ -31,15 +31,15 @@ instruments or in successive phases.
 ### Three traps, all verified
 
 - **`limit` is silently ignored, and so is `per_page`.** The working parameter is
-  **`page_size`**. Without it a single call returns **26,8 MB**; with `page_size=1`, 2,3 KB.
-  Combined with the rate limit, guessing the wrong parameter will stall you.
+  **`page_size`**. Guess wrong and a single call returns tens of megabytes instead of a
+  couple of kilobytes — which, combined with the rate limit below, will stall you.
 - **Rate limit: 12 requests/minute anonymous**, 60/minute with free credentials requested at
   `info@opencoesione.gov.it`.
 - Filters must be real field names — `search=` and `q=` are accepted but **ignored**, and
-  return the full 1,8 M count, which looks like a successful query.
+  return the whole catalogue's count, which looks like a successful query.
 
-> For bulk work use the Parquet downloads below; the API is for point lookups. Do not
-> iterate 3.000 CUPs through it at 12 requests per minute — and note that a throttled reply
+> For bulk work use the Parquet downloads below; the API is for point lookups. At 12 requests
+> per minute, iterating a few thousand CUPs through it takes hours — and note that a throttled reply
 > is a JSON body with a `detail` key, **not an HTTP error**, so `.count // 0` silently reads
 > it as "project not found". Always branch on `.detail` before trusting a zero.
 
@@ -50,8 +50,8 @@ Every main dataset is published in **Parquet** alongside zip/csv, at stable URLs
 delimiter guessing — the opposite of the BDAP dumps.
 
 ```bash
-curl -sSL "https://opencoesione.gov.it/it/opendata/progetti.parquet" -o oc_progetti.parquet   # 229 MB
-duckdb -c "SELECT count(*) FROM read_parquet('oc_progetti.parquet')"                          # 2.320.817 rows
+curl -sSL "https://opencoesione.gov.it/it/opendata/progetti.parquet" -o oc_progetti.parquet
+duckdb -c "SELECT count(*) FROM read_parquet('oc_progetti.parquet')"
 ```
 
 Available: `progetti`, `progetti_esteso`, `soggetti`, `localizzazioni`, `fasi`, `pagamenti`,
@@ -64,8 +64,9 @@ A membership test over thousands of CUPs then costs one download and one join:
 duckdb -c "SELECT count(*) FROM read_csv('my_cups.csv') c WHERE c.cup IN (SELECT CUP FROM read_parquet('oc_progetti.parquet'))"
 ```
 
-Measured on a post-earthquake reconstruction dataset: of 3.482 CUPs, **11 are in
-OpenCoesione** — 9 from the 2014-2020 cycle, 2 from 2021-2027. Reconstruction is financed
-outside the cohesion perimeter, so absence from MOP cannot be explained by "it must be in
-BDU": that hypothesis is testable in one query, and here it accounts for a single CUP.
+Use it to kill a tempting hypothesis. When CUPs are missing from MOP it is natural to assume
+"then they must be in BDU" — and for whole categories of spending that is simply false, because
+they are financed outside the cohesion perimeter altogether. Post-earthquake reconstruction is
+one such case: run the join and a set of thousands of CUPs comes back with a handful of hits.
+**The assumption is testable in one query — test it instead of carrying it.**
 

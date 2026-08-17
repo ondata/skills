@@ -4,7 +4,7 @@ description: Guide users monitoring Italian public procurement to extract detail
 compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.12"
+  version: "0.13"
   updated: "2026-08-17"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, open-data, procurement, cup, cig, italy, public-works]
@@ -26,9 +26,9 @@ from CUP and CIG codes using open data sources.
 User has a CUP
   │
   ├─ START HERE, ALWAYS: OpenCUP  (`references/opencup.md`)
-  │    The registry: neutral, source-agnostic, answers for 99,3% of CUPs
-  │    (3.457 of 3.481 measured). Gives the anagraphics AND tells you
-  │    which monitoring system to try next — see below.
+  │    The registry: neutral, source-agnostic, answers for virtually
+  │    every CUP. Gives the anagraphics AND tells you which monitoring
+  │    system to try next — see below.
   │    If it does NOT resolve, the code may be a SUPERSEDED one: projects
   │    get merged and re-registered, documents record it as "già <CUP>",
   │    and the old code stops being published while its tenders stay in ANAC.
@@ -64,12 +64,12 @@ User has a CIG — branch on WHAT YOU NEED, not on the code shape
   │       (CUP, metadata, award, lifecycle). Does NOT scale to set-wide
   │       questions: for those use the bulk datasets.
   ├─ Which CUP does it belong to?
-  │    ├─ ANAC dataset `cup`      (7.1M pairs, SmartCIG included, N:N)
+  │    ├─ ANAC dataset `cup`      (widest coverage, SmartCIG included, N:N)
   │    ├─ BDAP MOP Gare via OData (public works only, adds bidder + amounts)
-  │    └─ ReGiS `PNRR_Gare`       (244.510 CIG on 63.499 CUP, PNRR only)
+  │    └─ ReGiS `PNRR_Gare`       (PNRR only)
   ├─ Tender metadata, amount, CPV, outcome, place of execution?
-  │    ├─ below-threshold → ANAC dataset `smartcig` (26 columns)
-  │    └─ ordinary        → ANAC dataset `cig`      (61 columns)
+  │    ├─ below-threshold → ANAC dataset `smartcig` (far fewer fields)
+  │    └─ ordinary        → ANAC dataset `cig`      (the full record)
   ├─ Who won it, at what price?
   │    ├─ ANAC `aggiudicazioni` + `aggiudicatari` (all sectors, adds discount)
   │    └─ BDAP MOP Gare via OData (public works only, no download needed)
@@ -83,9 +83,8 @@ User has a CIG — branch on WHAT YOU NEED, not on the code shape
 ```
 
 > **The `Z` prefix no longer identifies below-threshold CIGs.** It was the convention
-> **until 31/12/2023 only**: in the `smartcig` monthly files 96.5% of records carry it
-> in December 2023 and **0% from January 2024 onwards** (measured on 2020-06, 2023-06,
-> 2023-09, 2023-12, 2024-01, 2024-02, 2024-06, 2025-06 samples).
+> **until 31/12/2023 only**: in the `smartcig` monthly files it is the norm up to December
+> 2023 and appears on **no record at all from January 2024 onwards**.
 >
 > Cause: ANAC decommissioned the SmartCIG service on 31/12/2023; since 01/01/2024 every
 > CIG is issued through the certified digital procurement platforms (PCP) interoperating
@@ -106,16 +105,16 @@ attributes spending to the wrong municipality, silently. Always state which one 
 
 | Question | Field | Source | Caveat |
 |---|---|---|---|
-| Where is it **executed**? | `luogo_istat` (6 digits) / `istat_comune` (9 digits) | ANAC `cig` / `smartcig` | declared per tender; empty in 1,7% of `cig` and 2,6% of `smartcig` sampled rows |
-| Where does the **work fall**? | `Codice Regione`+`Provincia`+`Comune` | BDAP MOP `loc` | **one CUP can span many municipalities** — 5,17% do, up to 93 — and MOP gives **no share** |
+| Where is it **executed**? | `luogo_istat` (6 digits) / `istat_comune` (9 digits) | ANAC `cig` / `smartcig` | declared per tender, and sometimes empty |
+| Where does the **work fall**? | `Codice Regione`+`Provincia`+`Comune` | BDAP MOP `loc` | **one CUP can span many municipalities** — a minority, but some span dozens — and MOP gives **no share** |
 | Where does the **work fall**, with a share? | region/province/municipality + **`Percentuale di Localizzazione`** | ReGiS `PNRR_Localizzazione` | PNRR only, but the **only source that lets you split an amount** across territories |
 | Where does the **project** say it is? | `COMUNI`, `PROVINCE`, `REGIONI` | OpenCUP | single municipality only, and on an **older code vintage** than ANAC |
 | Who **awards** it? | `cf_amministrazione_appaltante` → IPA | ANAC + IPA | the entity's seat, not the works' location |
 
-Measured on a sample: among stazioni appaltanti with ≥5 CIG, 67 of 184 (36%) show several
-distinct `luogo_istat`, so the field does track execution rather than the entity's seat —
-but for the remaining 64% it collapses to a single municipality, which makes it easy to
-mistake for the seat.
+`luogo_istat` does track execution rather than the entity's seat: a stazione appaltante with
+several tenders often shows several distinct values. But for most of them it collapses to a
+single municipality, which is exactly what makes it easy to mistake for the seat — and the
+mistake is invisible until you aggregate.
 
 ### Four formats for the same thing
 
@@ -133,8 +132,8 @@ two sources of the same filière: for the same municipality **OpenCUP still retu
 2016-2026 code while ANAC returns the current one** (Sanluri: `111067` vs `117015`).
 
 The clearest case:
-**377 Sardinian municipalities changed ISTAT code on 01/01/2026**, when the new provinces
-instituted in 2025 took effect. ANAC publishes the **new** codes (`118002` Assemini,
+**Sardinian municipalities changed ISTAT code en masse on 01/01/2026**, when the new
+provinces instituted in 2025 took effect. ANAC publishes the **new** codes (`118002` Assemini,
 `112064` Valledoria, `114006` Bitti), while ISTAT's own `Elenco-comuni-italiani.csv` still
 carries the **old** ones (`092003`, `090079`, `091009`) and knows no `112`-`119` prefix.
 
@@ -187,10 +186,10 @@ Errors* happen.
 
 | # | Source | Answers | Reference |
 |---|---|---|---|
-| 1 | **OpenCUP** | project registry: 69 fields per CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare PIVA (10-record cap). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
+| 1 | **OpenCUP** | project registry: the full anagraphics of a CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare PIVA (10-record cap). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
 | 2 | **BDAP / OpenBDAP (MOP)** | seven families keyed on CUP: projects, **tenders with CIG**, **payments per year**, bidders, cost plan, owners, geolocation | `references/bdap-mop.md` |
 | 3 | **SCP-MIT** | published tenders and awards **up to 2023 only** — historical archive | `references/scp-mit.md` |
-| 4 | **ANAC BDNCP** | the `cup` bridge (7,1 M CIG↔CUP pairs), plus `cig` and `smartcig` tender metadata | `references/anac-datasets.md` |
+| 4 | **ANAC BDNCP** | the `cup` bridge — the widest CIG↔CUP mapping there is — plus `cig` and `smartcig` tender metadata | `references/anac-datasets.md` |
 | 5 | **ANAC OCDS bulk** | the whole procedure as one object: lots, parties, roles, awards, contracts | `references/anac-ocds.md` |
 | 6 | **ANAC lifecycle** | what happened after the award: SAL and certified payments, subcontracts, variants, suspensions, sign-off | `references/anac-lifecycle.md` |
 | 7 | **ANAC PVL** | the published notice itself, from 2024 — the only live per-CIG lookup, with links to the tender documents | `references/anac-pvl.md` |
@@ -215,7 +214,7 @@ scripts/cig-fetch.sh -o out/ -f cigs.txt             # batch from a list, one CI
 scripts/cig-fetch.sh --stdout A0059785CC | jq .      # single CIG straight into a pipe
 ```
 
-What comes back is one object with **20 top-level sections** — `bando`, `aggiudicazione`,
+What comes back is one object with the whole tender in it — `bando`, `aggiudicazione`,
 `partecipanti`, `stazioneAppaltante`, `fontiFinanziamento`, `quadroEconomico`,
 `statiAvanzamentoLavori`, `subappalti`, `varianti`, `sospensioni`, `collaudo` and more — so a
 single call answers what would otherwise take four or five different bulk datasets. It
@@ -229,8 +228,8 @@ Behaviour worth knowing:
   a wrong or truncated file is never left behind.
 - **Batch-friendly.** The browser session is reused: 3 CIGs take about as long as 1 (~10s
   total). Failures do not stop the batch; the exit code is 1 if any CIG failed.
-- **SmartCIG return less.** A pre-2024 `Z...` code yields ~6 populated sections against ~10
-  for an ordinary CIG. That is the source, not a fetch failure.
+- **SmartCIG return less.** A pre-2024 `Z...` code leaves several sections empty that an
+  ordinary CIG fills. That is the source, not a fetch failure.
 - **A non-existent CIG costs ~56s** (two attempts) and reports `starting the search` — a
   misleading message: nothing is wrong with the click, the code simply has no page.
 - Only accepts 10-character alphanumeric codes: passing a CUP exits 64 straight away.
@@ -290,17 +289,17 @@ And none of these silent failure modes is left unchecked:
 | OpenCUP returns **HTTP 200 with an empty body**, `jq` errors out | The CUP is not published — the API does not 404 | Test `[[ -s file ]]` before parsing |
 | A well-formed CUP does not resolve in OpenCUP | It may be a **superseded code** — projects get merged and re-registered | Search the documents for `già <CUP>`; the tenders stay in ANAC under the old code |
 | `soggettotitolare/{PIVA}` keeps returning the same 10 records | 12 pagination params tested, all ignored server-side; result order unstable | Mirror: `WHERE PIVA_CODFISCALE_SOG_TITOLARE = '…'` |
-| `soggettotitolare` answers `totcount: 10000` for a huge entity | `totcount` appears capped at 10.000 (AGEA: 1,56 M CUPs in the mirror) | Read it as «≥ 10.000»; count in the mirror |
+| `soggettotitolare` answers `totcount: 10000` for a huge entity | `totcount` appears capped at 10.000, and the biggest titolari hold orders of magnitude more | Read it as «≥ 10.000»; count in the mirror |
 | Empty results on OpenBDAP | CUP not in MOP dataset | Project may not have financial monitoring data |
 | Exactly 50 rows returned | No `$top` passed — silent truncation | Always set `$top` explicitly |
 | An ANAC dataset looks implausibly small | You pulled a monthly increment, not the full dump | Get `{dataset}_csv.zip` (no date prefix), then apply increments |
 | Row counts in `*_logCsv.csv` look inflated | The log mixes CSV, JSON and TTL rows | Filter on the format column before reading counts |
-| CSV dump returns **HTTP 200** and a 151-byte body `{"error": … "Attachment not found"}` | Used the OData resource id on the dump endpoint | Use the **package id** for `/datastore/dump/`; checking the status code is not enough, check `success` |
+| CSV dump returns **HTTP 200** and a tiny body `{"error": … "Attachment not found"}` | Used the OData resource id on the dump endpoint | Use the **package id** for `/datastore/dump/`; checking the status code is not enough, check `success` |
 | OData returns HTTP 500 with an empty body | Used the package id on the OData endpoint | Use the **XML resource id** + `@rgs` |
 | `__count` is `"0"` but rows exist | Known BDAP OData proxy defect | Count `.d.results` length, ignore `__count` |
 | BDAP OData returns rows but **all projected fields are empty** | A guessed mangled field name — no error is raised | List the keys of one row and use the real names |
-| A CUP is missing from BDAP MOP | MOP does not cover every CUP (7 of 10 in one sample) | Use OpenCUP for anagraphics, ANAC `cup` for tenders |
-| No results on SCP-MIT for a recent CIG | The archive stops at 2023 — 0 records published from 2025 | Use the ANAC datasets; SCP-MIT is historical only |
+| A CUP is missing from BDAP MOP | MOP coverage is substantially incomplete — a miss is expected, not an anomaly | Use OpenCUP for anagraphics, ANAC `cup` for tenders |
+| No results on SCP-MIT for a recent CIG | The archive stops at 2023 | Use the ANAC datasets; SCP-MIT is historical only |
 | No results on SCP-MIT even for an old CIG | `stato` not passed — it is mandatory | Add `stato=3` to the form body |
 | SCP-MIT Bandi have no CIG field | Only Esiti expose `cig` (with a trailing dash) | Query Esiti when you need the CIG |
 | A 2024+ CIG has no `Z` but behaves as below-threshold | The `Z` convention ended on 31/12/2023 | Do not classify by code shape; look it up in `cig` vs `smartcig` |

@@ -5,7 +5,7 @@ contract**: who bid, who won and at what discount, how the works advanced, what 
 certified and paid, what was subcontracted, varied, suspended or terminated early.
 
 Twelve datasets, **all keyed on `cig` as the first column**, most with
-`id_aggiudicazione` as a secondary key. Columns verified on 2026-08-12.
+`id_aggiudicazione` as a secondary key.
 
 | Dataset | Answers | Key columns beyond `cig` |
 |---|---|---|
@@ -29,13 +29,13 @@ SAL, with dates**.
 ### Full dumps and monthly increments
 
 Each dataset is published as a **full dump** plus **monthly incremental releases**
-(`{YYYYMMDD}-{dataset}_csv.zip`). Sizes of the full CSV archives: `partecipanti` 968 MB,
-`aggiudicazioni` 723 MB, `quadro-economico` 426 MB, `fonti-finanziamento` 182 MB,
-`stati-avanzamento` 129 MB, `subappalti` 116 MB.
+(`{YYYYMMDD}-{dataset}_csv.zip`). The full archives run from a hundred megabytes to nearly a
+gigabyte — `partecipanti` and `aggiudicazioni` are the heavy ones, `subappalti` and
+`stati-avanzamento` the manageable ones.
 
-The last increment (2026-08-06) is far smaller — 208.070 rows for `aggiudicazioni`,
-115.259 for `stati-avanzamento`, 23.391 for `subappalti`. **Pull the full dump first and
-apply the increments**, or you will be looking at one month of activity while believing it
+An increment is **orders of magnitude smaller than the dump**, and that is the trap: it
+downloads fast, parses cleanly and looks like a complete dataset. **Pull the full dump first
+and apply the increments**, or you will be looking at one month of activity while believing it
 is the whole archive. Read `{dataset}_csv_logCsv.csv` to see which releases exist — and
 filter it by format, since it lists CSV, JSON and TTL together and the TTL row counts are
 much larger.

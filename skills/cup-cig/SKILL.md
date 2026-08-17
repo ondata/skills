@@ -1,11 +1,11 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables.
+compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.11"
-  updated: "2026-08-15"
+  version: "0.12"
+  updated: "2026-08-17"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, open-data, procurement, cup, cig, italy, public-works]
 ---
@@ -58,6 +58,11 @@ User has a CUP
        ⚠ the three do not fully agree: use the union when completeness matters
 
 User has a CIG — branch on WHAT YOU NEED, not on the code shape
+  ├─ A HANDFUL of CIGs and you want EVERYTHING about them?
+  │    └─ `scripts/cig-fetch.sh` — one canonical JSON per CIG, ~10s each,
+  │       no bulk download. Covers in one shot most of the branches below
+  │       (CUP, metadata, award, lifecycle). Does NOT scale to set-wide
+  │       questions: for those use the bulk datasets.
   ├─ Which CUP does it belong to?
   │    ├─ ANAC dataset `cup`      (7.1M pairs, SmartCIG included, N:N)
   │    ├─ BDAP MOP Gare via OData (public works only, adds bidder + amounts)
@@ -194,6 +199,50 @@ Errors* happen.
 
 Rules of thumb that hold across all nine: **OpenCUP always answers**, the monitoring systems
 answer only for what they cover, and ANAC is where the tenders are regardless of funding.
+
+---
+
+## `scripts/cig-fetch.sh` — everything about a few CIGs, without bulk
+
+The nine sources above are built for set-wide questions and mostly require downloading
+monthly bulk files. When the question is about **a handful of specific CIGs**, this script
+is the shorter path: it drives ANAC's public *dettaglio-cig* page through `agent-browser`,
+clears the mosparo anti-spam control and saves the page's own JSON export.
+
+```bash
+scripts/cig-fetch.sh A0059785CC                      # one CIG → ./A0059785CC.json
+scripts/cig-fetch.sh -o out/ -f cigs.txt             # batch from a list, one CIG per line
+scripts/cig-fetch.sh --stdout A0059785CC | jq .      # single CIG straight into a pipe
+```
+
+What comes back is one object with **20 top-level sections** — `bando`, `aggiudicazione`,
+`partecipanti`, `stazioneAppaltante`, `fontiFinanziamento`, `quadroEconomico`,
+`statiAvanzamentoLavori`, `subappalti`, `varianti`, `sospensioni`, `collaudo` and more — so a
+single call answers what would otherwise take four or five different bulk datasets. It
+includes `bando.CUP`, which makes it a **CIG→CUP resolver** too.
+
+Behaviour worth knowing:
+
+- **Idempotent.** A `<CIG>.json` already on disk whose `.bando.CIG` matches is reported
+  `SKIP` and not re-fetched. Use `--force` to override.
+- **Validated.** The download is accepted only if `.bando.CIG` equals the requested code, so
+  a wrong or truncated file is never left behind.
+- **Batch-friendly.** The browser session is reused: 3 CIGs take about as long as 1 (~10s
+  total). Failures do not stop the batch; the exit code is 1 if any CIG failed.
+- **SmartCIG return less.** A pre-2024 `Z...` code yields ~6 populated sections against ~10
+  for an ordinary CIG. That is the source, not a fetch failure.
+- **A non-existent CIG costs ~56s** (two attempts) and reports `starting the search` — a
+  misleading message: nothing is wrong with the click, the code simply has no page.
+- Only accepts 10-character alphanumeric codes: passing a CUP exits 64 straight away.
+
+Requires `agent-browser`, `jq` and `timeout`. Tune with `CIG_FETCH_STEP_TIMEOUT` (default 8s)
+and `CIG_FETCH_ATTEMPT_TIMEOUT` (default 20s) on slow connections.
+
+`scripts/test-cig-fetch.sh` checks the CLI contracts offline against a fake browser — no
+network, about a second. Run it after touching the script.
+
+⚠ It depends on the page's DOM (`#mosparo-box`, `button.export-json-btn`): if ANAC restyles
+the page, the script breaks and the bulk datasets remain the stable route.
 
 ---
 

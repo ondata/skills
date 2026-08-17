@@ -3,7 +3,7 @@
 **Portal:** `https://bdap-opendata.rgs.mef.gov.it`
 **Auth:** None
 **Field name for CUP:** `Cccodice_cup_1267962549`
-**Full dataset map:** `references/bdap-mop-datasets.md`
+**Full dataset map:** in this same file, under *Dataset map — package and resource ids by region*
 
 ### Two ids per dataset — not interchangeable
 
@@ -46,8 +46,8 @@ Real CKAN endpoints, where the usual idioms do apply, are ANAC and IPA.
 
 ### Seven families, all keyed on the CUP
 
-Projects are only one of them. See `references/bdap-mop-datasets.md` for the full id map
-and the OData field names.
+Projects are only one of them. The OData field names and the package/resource ids are in the
+reference section in the second half of this file.
 
 | Family | Answers | Carries CIG? |
 |---|---|---|
@@ -107,7 +107,7 @@ resolver.
 curl -sS "https://bdap-opendata.rgs.mef.gov.it/ODataProxy/MdData('c4cce647-cec4-4b60-a8ab-d308ecfba743@rgs')/DataRows?\$filter=Cccodice_cup_1267962549%20eq%20'B24B13000160001'&\$top=1000&\$format=json" | jq -r '[.d.results[].Cccodice_region1532212456] | unique[]'
 # → 02  → the Valle d'Aosta partition (regNN follows ISTAT region codes)
 
-# step 2 — query that region's `gar` / `sal` resource id, from the reference file
+# step 2 — query that region's `gar` / `sal` resource id, from the dataset map below
 ```
 
 Three cases to handle explicitly:
@@ -189,11 +189,12 @@ curl -sS "https://bdap-opendata.rgs.mef.gov.it/ODataProxy/MdData('{RESOURCE_ID}@
 
 ---
 
-## Dataset map and OData field names
+## Reference — datasets, ids and field names
 
-## BDAP MOP — dataset map and OData field names
+Everything from here down is material to consult, not to read: how to reach a dataset, the
+seven families, the OData field names, and the package/resource ids region by region.
 
-Companion to the BDAP section of the skill. The Monitoraggio Opere Pubbliche (MEF-RGS)
+The Monitoraggio Opere Pubbliche (MEF-RGS)
 publishes **seven families** of datasets, all keyed on the **CUP**. Every family except
 Localizzazione is split into 21 territorial partitions.
 
@@ -310,7 +311,7 @@ member), plus `Tipo Partecipazione` (e.g. `RTI`).
 - Sizes: Localizzazione ~69 MB, Projects (national total) ~428 MB, a mid-size regional
   `gar` ~16 MB.
 
-## Dataset map
+## Dataset map — package and resource ids by region
 
 
 ### Progetti (`prg`)

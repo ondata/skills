@@ -4,7 +4,7 @@ description: Guide users monitoring Italian public procurement to extract detail
 compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.13"
+  version: "0.14"
   updated: "2026-08-17"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, open-data, procurement, cup, cig, italy, public-works]

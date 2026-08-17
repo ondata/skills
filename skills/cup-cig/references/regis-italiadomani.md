@@ -27,19 +27,35 @@ https://www.italiadomani.gov.it/content/dam/sogei-ng/opendata/PNRR_Soggetti_Meta
 The catalogue pages (`/it/it/catalogo-open-data/{slug}.html`) do **not** expose the CSV link
 in their HTML — only the metadata zip — so build the CSV URL from the pattern above.
 
-> **Two server quirks, both verified.** `HEAD` returns **404 on files that exist and
-> download fine with GET** (Progetti, Gare, Localizzazione behave this way; Soggetti does
-> not) — never probe these URLs with `curl -I`. And the server **ignores `Range`**: asking
-> for the first bytes downloads the whole file, so inspect headers by piping through
-> `head -c` and letting the pipe close the connection.
+> **`HEAD` lies here, and it does not even lie consistently.** It returns **404 on files
+> that exist and download fine with GET** — and repeating the identical request flips the
+> answer: five consecutive `HEAD` on `PNRR_Progetti` returned 404, 200, 404, 404, 404,
+> and `PNRR_Localizzazione` behaves the same way, while `PNRR_Gare` and `PNRR_Soggetti`
+> answered 200 every time. The edge nodes are not configured alike, so **which node serves
+> you decides the answer**. Never probe these URLs with `curl -I`, and never conclude a file
+> is missing from a 404 on `HEAD`.
+>
+> The corollary is about method, not about this server: a single probe per file is not a
+> measurement here. Whichever answer you get first will look like the rule, and it is not.
+>
+> The server also **ignores `Range`**: asking for the first bytes downloads the whole file,
+> and the response is `200`, not `206`. To inspect the head of a file, pipe a plain `GET`
+> through `head -c` and let the pipe close the connection.
 
-> **Akamai blocks these CSVs from datacenter IPs, and wants two headers at once.**
-> A browser `User-Agent` **and** a `Range` header must both be present: either one alone
-> gets a 403, and so does neither. That is the first surprise. The second is that headers
-> are not enough — from a GitHub Actions runner (Azure) even the correct pair returns 403,
-> an `AkamaiGHost` "Access Denied" page, so the source IP is judged too. And the allow-list
-> is finer than "cloud provider": on Scaleway the same request passes from a Serverless
-> Function and fails from a Serverless Job.
+> **Akamai blocks these CSVs from some networks — and the rule is about the caller, not
+> the request.** From ordinary consumer networks a plain `GET` works with no headers at
+> all. From datacenter egress it does not, and there the fix is to send a browser
+> `User-Agent` **and** a `Range` header together: either alone gets a 403, and so does
+> neither.
+>
+> But headers are not always enough, which is the part that costs time: from a GitHub
+> Actions runner (Azure) even the correct pair returns 403, an `AkamaiGHost` "Access
+> Denied" page. And the allow-list is finer than "cloud provider" — on Scaleway the same
+> request passes from a Serverless Function and fails from a Serverless Job.
+>
+> Practical consequence: **do not conclude anything about this source from a single
+> network.** Working from a laptop proves nothing about CI, and a 403 in CI proves nothing
+> about the file.
 >
 > `Range: bytes=0-` requests the whole file while keeping the header present, which is
 > what makes a full download work despite the quirk above.

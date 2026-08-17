@@ -4,7 +4,7 @@ Data charts inside a card, drawn by [gribouille](https://m.canouil.dev/gribouill
 
 ## Prerequisite: one network fetch
 
-The first compile downloads `gribouille`, plus `cetz` and `oxifmt`, from Typst Universe into `~/.cache/typst/packages`. It needs network once; after that it is offline. Whenever a deck has charts, check it alongside the binary in "Prerequisites — verify Typst".
+The first compile downloads `gribouille`, plus `cetz` and `oxifmt`, from Typst Universe into Typst's package cache (`~/.cache/typst/packages` on Linux; the location differs on macOS and Windows). It needs network once; after that it is offline. Whenever a deck has charts, check it alongside the binary in "Prerequisites — verify Typst".
 
 ```typst
 #import "@preview/gribouille:0.6.0": *
@@ -102,7 +102,7 @@ Two more things follow the deck rather than the theme:
 
 **Horizontal bars need `coord-flip()`**, not swapped aesthetics. Mapping `x: "n", y: "cat"` renders axes with no bars at all — again silently.
 
-**Category order is alphabetical, not data order.** To sort bars by value, state the order explicitly: `scales(x: scale-discrete(limits: ("Closed", "Restricted", "Open")))` — smallest first puts the longest bar at the bottom under `coord-flip()`.
+**Category order is alphabetical, not data order.** To sort bars by value, state the order explicitly in the `scales:` argument of `plot()`: `scales: scales(x: scale-discrete(limits: ("Closed", "Restricted", "Open")))` — smallest first puts the longest bar at the bottom under `coord-flip()`.
 
 ## When not to use a chart
 

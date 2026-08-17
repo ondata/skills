@@ -1,5 +1,13 @@
 # LOG
 
+## 2026-08-17
+
+- `typst-cards`: new `references/charts.md` — cards can now embed real data charts, drawn with [gribouille](https://m.canouil.dev/gribouille/) (grammar of graphics for Typst, same author as the full-bleed pattern already credited). Verified on gribouille 0.6.0 + typst 0.14.2
+- `typst-cards`: the sub reference pins only what is card-specific and delegates the API surface to the upstream `llms.txt` / `.llms.md`, regenerated on every release — a copy of the ~50-geom list here would rot within a release
+- `typst-cards`: `plot(width:)` rejects ratios, so the usable width is arithmetic the writer must do — 6.4in margined, 6.05in full-bleed on a 1:1 card. The plot is one rigid unbreakable block, so it overflows onto an extra page in the margined pattern and clips silently in the full-bleed one
+- `typst-cards`: brand mapping is `theme-minimal(ink:, paper:)`, with `paper: rgb(0,0,0,0)` when the chart sits on a colour band; fonts are inherited from the deck's `#set text`. Default tick labels read small at 1080px — raise them with `text: element-text(size: 13pt)`
+- `typst-cards`: three silent failure modes found by compiling, not by reading docs — `geom-text` draws nothing when `label` maps to a number instead of a string, horizontal bars need `coord-flip()` rather than swapped aesthetics (swapping renders axes with no bars), and category order is alphabetical unless fixed with `scale-discrete(limits:)`
+
 ## 2026-08-10
 
 - `typst-cards`: new full-bleed layout pattern — `margin: 0` + a `slide()` helper that adds the padding back via `inset`, with rail, page counter and URL drawn through `place` (out of flow, so content cannot push them). Enables backgrounds, colour bands and images reaching every edge, which the margined pattern cannot do. New `references/slides-fullbleed-starter.typ` (5 cards, 1:1); the two existing starters are unchanged. New "Two layout patterns" section with the rule for choosing. Adapted from Mickaël Canouil's post on Typst LinkedIn carousels (credited in SKILL.md); geometry kept in inches — `7.5in × 144ppi` = exactly 1080px, while his 21cm square gives 1191px

@@ -1,6 +1,6 @@
 ---
 name: typst-cards
-description: Generate PNG images and PDF carousels for online communication — social media, carousels, infographics, posts — using Typst. Use this skill whenever the user wants to create slides, cards, visual posts or any digital graphic content, even if they don't explicitly mention Typst. The skill drives an interview about brand materials (logo, palette, fonts, DESIGN.md), proposes the formats best suited to the context (Instagram 1:1, Stories 9:16, LinkedIn 16:9, etc.) and produces ready-to-use PNGs, plus a single PDF for LinkedIn document posts.
+description: Generate PNG images and PDF carousels for online communication — social media, carousels, infographics, posts — using Typst. Use this skill whenever the user wants to create slides, cards, visual posts or any digital graphic content, even if they don't explicitly mention Typst. The skill drives an interview about brand materials (logo, palette, fonts, DESIGN.md), proposes the formats best suited to the context (Instagram 1:1, Stories 9:16, LinkedIn 16:9, etc.) and produces ready-to-use PNGs, plus a single PDF for LinkedIn document posts. Cards can embed data charts (bars, lines, distributions) drawn with the gribouille grammar-of-graphics library.
 ---
 
 # Typst Cards
@@ -39,6 +39,7 @@ Before creating any file, ask these questions to the user **in a single message*
 
 **Desired output:**
 - What is the topic or content of the cards?
+- Is there data to show as a chart? If yes, where is it and what should it say? (see `references/charts.md`)
 - How many slides or cards? (a single image or a carousel?)
 - Which formats do you need? (propose those best suited to the context, see table below)
 - Where will it be published? (this decides the deliverable: PNGs for Instagram and most feeds, a single PDF for a LinkedIn document post — see "Compilation")
@@ -123,6 +124,7 @@ Instead of writing from scratch, **copy one of the reference templates** from th
 - `references/slides-1x1-starter.typ` → 5 Instagram 1:1 slides (cover + 3 content + outro), **margined** pattern
 - `references/slides-16x9-starter.typ` → 3 LinkedIn 16:9 slides (cover + two-column + 3 stat), **margined** pattern
 - `references/slides-fullbleed-starter.typ` → 5 1:1 cards, **full-bleed** pattern (`slide()` helper, no page margin)
+- `references/charts.md` → data charts inside a card, via the gribouille library (read it before writing any plot code)
 
 The templates are **already tested and compile cleanly**. They give you a proven structure; you change colors, fonts, content.
 
@@ -333,6 +335,8 @@ magick -delay 250 -loop 0 output/slide-*.png output/deck.gif
 - Do not clone the previous deck's layout. Consistency lives in the palette and typography, not in repeating the composition.
 
 **Story 9:16**: center the content vertically, use larger fonts, avoid corners.
+
+**Charts**: a card can carry a real data chart — bars, lines, distributions — drawn by the gribouille Typst library. One chart per card, sized in absolute inches, themed with the deck's own ink and paper. It needs one network fetch on first compile and it has its own set of silent failure modes, so read `references/charts.md` before writing any plot code.
 
 **Footer/edge content never clips**: any text near the page borders — footer, slide counter (`ctr`), source URL, page number — must be fully visible, no half-cut letters. If clipping occurs, increase the page bottom margin (`#set page(margin: (x: ..., y: ...))`) or reduce the footer font size. This is a must-check in Phase 4.
 

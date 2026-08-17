@@ -1,5 +1,14 @@
 # LOG
 
+## 2026-08-17
+
+- `cup-cig`: ported v0.11 into the repo. The skill had been developed for months in the installed copy at `~/.agents/skills/cup-cig/`, which is not a git clone, so v0.1 → v0.11 existed only there, unversioned and unbacked
+- `cup-cig`: decision tree rewritten — OpenCUP is now the mandatory entry point (resolves 3.457 of 3.481 CUPs measured), and its `DESC_TIPO_COPERTURA` / `DESC_STRUMENTO` fields are read as a routing hint to pick the monitoring system (PNRR → ReGiS, cohesion → OpenCoesione, national → BDAP MOP). The CIG branch now splits on *what you need*, not on the shape of the code
+- `cup-cig`: the `Z` prefix no longer identifies below-threshold CIGs — it was the convention until 31/12/2023 only; measured at 96.5% of `smartcig` records in December 2023 and 0% from January 2024 onwards
+- `cup-cig`: eight new reference files — `opencup.md`, `bdap-mop.md`, `anac-datasets.md`, `anac-lifecycle.md`, `anac-ocds.md`, `anac-pvl.md`, `opencoesione.md`, `regis-italiadomani.md`; `scp-mit-api.md` replaced by `scp-mit.md` (SCP-MIT is empty from 2024 on, superseded by ANAC PVL via the `anac-pl` CLI)
+- `cup-cig`: dropped `scripts/cig-fetch.sh` — the browser-scraping route to ANAC dettaglio-gara is superseded by the ANAC bulk datasets and CLIs. Recoverable from history at `bf37822` if ever needed
+- `cup-cig`: three CUP↔CIG sources exist (ANAC `cup`, BDAP MOP Gare, ReGiS `PNRR_Gare`) and they do not fully agree — use the union when completeness matters
+
 ## 2026-08-10
 
 - `typst-cards`: new full-bleed layout pattern — `margin: 0` + a `slide()` helper that adds the padding back via `inset`, with rail, page counter and URL drawn through `place` (out of flow, so content cannot push them). Enables backgrounds, colour bands and images reaching every edge, which the margined pattern cannot do. New `references/slides-fullbleed-starter.typ` (5 cards, 1:1); the two existing starters are unchanged. New "Two layout patterns" section with the rule for choosing. Adapted from Mickaël Canouil's post on Typst LinkedIn carousels (credited in SKILL.md); geometry kept in inches — `7.5in × 144ppi` = exactly 1080px, while his 21cm square gives 1191px

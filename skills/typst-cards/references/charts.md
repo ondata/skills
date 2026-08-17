@@ -95,12 +95,24 @@ Two more things follow the deck rather than the theme:
 
 **Drop the axis titles.** `labels(x: none, y: none)` — on a card the headline already says what the axis is, and the space is better spent on the plot.
 
-**Label directly, don't legend.** A legend eats card width and forces a colour-to-category round trip. Put the value on the mark instead, via `geom-text`. Two things about it:
+**Label directly, don't legend.** A legend eats card width — measured on a 1:1 card, roughly a fifth of it — and forces a colour-to-category round trip. Suppress it with `guides(colour: none)` (or `guides(fill: none)`, matching the aesthetic that produced it) and name the series in the subtitle, coloured to match:
+
+```typst
+guides: guides(colour: none),   // sibling of layers:/scales:, not inside them
+```
+
+Then put the value on the mark itself, via `geom-text`. Two things about it:
 
 - the `label` aesthetic must map to a **string** column. Point it at a number and the layer draws nothing — no error, no warning. Precompute a formatted string (`"62%"`) in the data.
 - `anchor: "east"` with the background colour puts the label *inside* the bar. With `anchor: "west"` the label sits outside and the longest one is clipped by the panel edge unless you widen the scale limits.
 
 **Horizontal bars need `coord-flip()`**, not swapped aesthetics. Mapping `x: "n", y: "cat"` renders axes with no bars at all — again silently.
+
+**A dense axis is thinned with `labels`, not `breaks`.** `scale-discrete` has no `breaks` argument — it errors listing the ones it does have. To keep every point of a long time series while labelling only some (thirteen years do not fit across a 1:1 card), pass a function that blanks the rest:
+
+```typst
+x: scale-discrete(labels: v => if v in ("2013", "2016", "2019", "2022", "2025") { v } else { "" }),
+```
 
 **Category order is alphabetical, not data order.** To sort bars by value, state the order explicitly in the `scales:` argument of `plot()`: `scales: scales(x: scale-discrete(limits: ("Closed", "Restricted", "Open")))` — smallest first puts the longest bar at the bottom under `coord-flip()`.
 

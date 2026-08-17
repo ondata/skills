@@ -33,7 +33,7 @@ Before creating any file, ask these questions to the user **in a single message*
 
 **Visual materials available?**
 - Do you have a logo? If yes, where is the file? (PNG, SVG, or other)
-- Do you have a `DESIGN.md` or brand guidelines to share?
+- Do you have a `DESIGN.md` or brand guidelines to share? (if it follows the DESIGN.md token format, see `references/design-md.md`)
 - Do you have color preferences? (specific palette, or a mood description: "dark and technical", "colorful and lively", "institutional", etc.)
 - Do you have specific fonts to use?
 
@@ -67,7 +67,7 @@ For carousels, always use the same format for every slide.
 
 ## Phase 2 — Material analysis
 
-**With DESIGN.md**: read it and extract — and **apply in theme.typ**:
+**With DESIGN.md**: if the file follows the [DESIGN.md format](https://github.com/google-labs-code/design.md) — YAML front matter with `colors`, `typography`, `spacing`, `rounded` tokens — read `references/design-md.md` first: it covers resolving `{token.references}`, the unit conversions (and the two that bite), and which sections map onto a card at all. Then extract — and **apply in theme.typ**:
 - **Colors**: every token (primary, secondary, accent, surface, neutral…)
 - **Fonts**: if the DESIGN.md specifies different fonts for different roles (e.g. display vs body), use them all in theme.typ as separate variables (`DISPLAY`, `SANS`, `MONO`). For example: a serif display face for headlines, a sans-serif for body.
 - **Visual style**: restrained? bold? editorial? Steer the layout accordingly.
@@ -125,6 +125,7 @@ Instead of writing from scratch, **copy one of the reference templates** from th
 - `references/slides-16x9-starter.typ` → 3 LinkedIn 16:9 slides (cover + two-column + 3 stat), **margined** pattern
 - `references/slides-fullbleed-starter.typ` → 5 1:1 cards, **full-bleed** pattern (`slide()` helper, no page margin)
 - `references/charts.md` → data charts inside a card, via the gribouille library (read it before writing any plot code)
+- `references/design-md.md` → turning a DESIGN.md (tokens + prose) into `theme.typ` (read it whenever the user supplies one)
 
 The templates are **already tested and compile cleanly**. They give you a proven structure; you change colors, fonts, content.
 

@@ -4,7 +4,7 @@ Data charts inside a card, drawn by [gribouille](https://m.canouil.dev/gribouill
 
 ## Prerequisite: one network fetch
 
-The first compile downloads `gribouille`, plus `cetz` and `oxifmt`, from Typst Universe into `~/.cache/typst/packages`. It needs network once; after that it is offline. Add this to the Typst check in Phase 0 whenever a deck has charts.
+The first compile downloads `gribouille`, plus `cetz` and `oxifmt`, from Typst Universe into `~/.cache/typst/packages`. It needs network once; after that it is offline. Whenever a deck has charts, check it alongside the binary in "Prerequisites — verify Typst".
 
 ```typst
 #import "@preview/gribouille:0.6.0": *
@@ -65,6 +65,23 @@ So after every compile: the PNG count must equal the number of cards, **and** Ph
 ```typst
 theme-minimal(ink: FG-DARK, paper: BG-DARK)              // chart on a dark card
 theme-minimal(ink: FG-LIGHT, paper: rgb(0, 0, 0, 0))     // transparent: sits on a full-bleed colour band
+```
+
+Inside the full-bleed `slide()` helper the chart is just another element of the body — only the width changes:
+
+```typst
+#slide(fill: BG-DARK, dark: true, {
+  text(size: 31pt, weight: 900)[Datasets published]
+  v(0.25in)
+  plot(
+    data: data, mapping: aes(x: "year", y: "n"),
+    layers: (geom-col(fill: ACC),),
+    labels: labels(x: none, y: none),
+    theme: theme-minimal(ink: FG-DARK, paper: BG-DARK, text: element-text(size: 13pt)),
+    width: 6.05in, height: 3.6in,
+  )
+  v(1fr)
+})
 ```
 
 Two more things follow the deck rather than the theme:

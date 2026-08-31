@@ -1,5 +1,13 @@
 # LOG
 
+## 2026-08-31
+
+- `cup-cig`: tested the OpenCoesione API with the credentials now available in the environment. They are plain HTTP Basic and buy throughput, not access: wrong ones give `401`, which is what tells a credentials problem apart from a quota one. Anonymous cannot sustain one request per second — 24 of 70 got through, first `429` on the twelfth; authenticated the same pace ran 70 out of 70. A burst cap sits well below the per-minute quota either way, so requests must be paced rather than batched
+- `cup-cig`: **the reference had the throttling failure mode backwards.** It said a throttled reply is a JSON body with a `detail` key and *not* an HTTP error, hence the advice to branch on `.detail`. It is `429`, anonymous and authenticated alike, so the rule is to branch on the HTTP status before parsing: `.count // 0` on a throttled body reads as "project not found" and hands back a false negative on a project that is there. A genuine miss is `200` with `count: 0`. No script does OpenCoesione lookups, so nothing but prose needed fixing
+- `cup-cig`: new trap, the mirror image of one already documented — filter *values* are slugs and an unknown one answers `500`, not an empty result (`territorio=sicilia` fails, `territorio=sicilia-regione` returns 118.846 projects). A wrong filter *name* fails silently and looks like data; a wrong filter *value* fails loudly. Slugs come from the `temi`, `nature`, `territori` and `programmi` endpoints
+- `cup-cig`: confirmed unchanged — `limit` and `per_page` are ignored (`limit=3` downloads 26 MB where `page_size=3` downloads 278 KB), `search=` and `q=` are accepted and ignored and return the whole catalogue's count
+- `cup-cig`: the router line in `SKILL.md` said "REST API without authentication". True, but it is the only line loaded by default, and as written it gave an agent no reason to open the reference looking for credentials it does not know exist. Reworded, and the optional env vars added to `compatibility`. Realigned `PLAN.md`, which still carried the `12 req/min` / `60 req/min` figures dropped from the references in v0.13
+
 ## 2026-08-17
 
 - `cup-cig` v0.14: fixed the dangling pointer in `bdap-mop.md` — two references to `references/bdap-mop-datasets.md`, a file that does not exist because the content was inlined into the same file. Found independently by three reviewers, which is what made it credible. Also removed the merge scar it left behind: two consecutive identical `##` headings and a paragraph declaring itself "companion to the BDAP section" while sitting inside that very section. The second half of the file now opens with an explicit *Reference* heading saying it is material to consult, not to read

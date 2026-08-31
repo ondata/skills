@@ -1,10 +1,10 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables.
+compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.14"
+  version: "0.15"
   updated: "2026-08-17"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, open-data, procurement, cup, cig, italy, public-works]
@@ -27,7 +27,7 @@ User has a CUP
   │
   ├─ START HERE, ALWAYS: OpenCUP  (`references/opencup.md`)
   │    The registry: neutral, source-agnostic, answers for virtually
-  │    every CUP. Gives the anagraphics AND tells you which monitoring
+  │    every CUP. Gives the registry details AND tells you which monitoring
   │    system to try next — see below.
   │    If it does NOT resolve, the code may be a SUPERSEDED one: projects
   │    get merged and re-registered, documents record it as "già <CUP>",
@@ -186,7 +186,7 @@ Errors* happen.
 
 | # | Source | Answers | Reference |
 |---|---|---|---|
-| 1 | **OpenCUP** | project registry: the full anagraphics of a CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare PIVA (10-record cap). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
+| 1 | **OpenCUP** | project registry: the full details of a CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare PIVA (10-record cap). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
 | 2 | **BDAP / OpenBDAP (MOP)** | seven families keyed on CUP: projects, **tenders with CIG**, **payments per year**, bidders, cost plan, owners, geolocation | `references/bdap-mop.md` |
 | 3 | **SCP-MIT** | published tenders and awards **up to 2023 only** — historical archive | `references/scp-mit.md` |
 | 4 | **ANAC BDNCP** | the `cup` bridge — the widest CIG↔CUP mapping there is — plus `cig` and `smartcig` tender metadata | `references/anac-datasets.md` |
@@ -194,7 +194,7 @@ Errors* happen.
 | 6 | **ANAC lifecycle** | what happened after the award: SAL and certified payments, subcontracts, variants, suspensions, sign-off | `references/anac-lifecycle.md` |
 | 7 | **ANAC PVL** | the published notice itself, from 2024 — the only live per-CIG lookup, with links to the tender documents | `references/anac-pvl.md` |
 | 8 | **ReGiS / ItaliaDomani** | PNRR monitoring: third CUP↔CIG bridge, **why a CIG is missing**, and territorial **shares** | `references/regis-italiadomani.md` |
-| 9 | **OpenCoesione / BDU** | cohesion-policy projects, 2021-2027 included — REST API without authentication, and the only source publishing **Parquet** for bulk membership tests | `references/opencoesione.md` |
+| 9 | **OpenCoesione / BDU** | cohesion-policy projects, 2021-2027 included — REST API with no auth required (optional Basic-auth credentials raise throughput), and the only source publishing **Parquet** for bulk membership tests | `references/opencoesione.md` |
 
 Rules of thumb that hold across all nine: **OpenCUP always answers**, the monitoring systems
 answer only for what they cover, and ANAC is where the tenders are regardless of funding.
@@ -298,7 +298,7 @@ And none of these silent failure modes is left unchecked:
 | OData returns HTTP 500 with an empty body | Used the package id on the OData endpoint | Use the **XML resource id** + `@rgs` |
 | `__count` is `"0"` but rows exist | Known BDAP OData proxy defect | Count `.d.results` length, ignore `__count` |
 | BDAP OData returns rows but **all projected fields are empty** | A guessed mangled field name — no error is raised | List the keys of one row and use the real names |
-| A CUP is missing from BDAP MOP | MOP coverage is substantially incomplete — a miss is expected, not an anomaly | Use OpenCUP for anagraphics, ANAC `cup` for tenders |
+| A CUP is missing from BDAP MOP | MOP coverage is substantially incomplete — a miss is expected, not an anomaly | Use OpenCUP for registry details, ANAC `cup` for tenders |
 | No results on SCP-MIT for a recent CIG | The archive stops at 2023 | Use the ANAC datasets; SCP-MIT is historical only |
 | No results on SCP-MIT even for an old CIG | `stato` not passed — it is mandatory | Add `stato=3` to the form body |
 | SCP-MIT Bandi have no CIG field | Only Esiti expose `cig` (with a trailing dash) | Query Esiti when you need the CIG |

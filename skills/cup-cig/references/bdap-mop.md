@@ -94,7 +94,7 @@ the same granularity: entity and accounting code, no CUP.
 > normal case, not an anomaly. Progress stage shifts the odds (projects whose works have
 > started are markedly better covered than those still in design) but does not explain the
 > rest. **Absence from MOP is not absence of the project**: check ReGiS and OpenCoesione, and
-> fall back to OpenCUP for the anagraphics and to ANAC `cup` for the tenders.
+> fall back to OpenCUP for the registry details and to ANAC `cup` for the tenders.
 
 ### Finding the right regional file for a CUP
 

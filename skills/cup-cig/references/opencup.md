@@ -258,7 +258,7 @@ Sizes are orders of magnitude, to decide whether a download is worth it at all:
 | `OpendataFontiCopertura.zip` | hundreds of MB | `OpendataFontiCopertura.zip/229bb5a8-cb28-cb64-dfd8-44ebac4b3693` |
 | `OpendataSoggetti.zip` | a few MB | `OpendataSoggetti.zip/411e1e80-bce0-d085-bb96-b8036deb590f` |
 
-`Progetti` is the anagraphics — the bulk equivalent of what the API returns per CUP.
+`Progetti` holds the registry details — the bulk equivalent of what the API returns per CUP.
 `Localizzazione`, `FontiCopertura` and `Soggetti` are the 1:N satellites, and they are the
 answer to questions the API cannot serve set-wide (which CUPs are in municipality X, which
 are funded by instrument Y). Note the asymmetry: `Soggetti` is three orders of magnitude

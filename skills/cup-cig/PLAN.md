@@ -252,11 +252,15 @@ excludes most Z-prefix CIGs.
 breakdown (EU/state/region/private), payments, advancement %, programming cycle, theme, nature,
 subjects (programmers, implementers, beneficiaries), territories.
 
-**REST API (no auth, confirmed working):**
+**REST API (auth optional, confirmed working):**
 
 Base: `https://opencoesione.gov.it/it/api/`
 
-Rate limits: 12 req/min (anonymous), 60 req/min (registered via `info@opencoesione.gov.it`).
+Auth: optional HTTP Basic (`OPEN_COESIONE_USER` / `OPEN_COESIONE_PWD`); wrong credentials give 401.
+Throttling (measured 2026-08-31): anonymous cannot sustain 1 req/s — most of a 70-request run comes
+back `429`; the same pace runs clean with credentials. A burst cap sits well below the per-minute
+quota either way, so requests must be paced, not batched. A throttled reply is HTTP `429` with a
+`detail` key and no `count` — branch on the status before parsing.
 
 **Main endpoints:**
 
@@ -365,7 +369,7 @@ Not all CUPs generate CIGs (grants, research), and not all CIGs are linked to a 
 
 | Portal | Owner | Subset | API |
 |---|---|---|---|
-| **OpenCoesione** | DIPE/PCM | Cohesion-funded projects (EU structural funds, FSC, PAC) | REST API, free, no auth |
+| **OpenCoesione** | DIPE/PCM | Cohesion-funded projects (EU structural funds, FSC, PAC) | REST API, free, auth optional |
 | **OpenBDAP/MOP** | RGS/MEF | Public works (opere pubbliche) — financial monitoring | OData API, free, no auth |
 | **SCP/MIT** | MIT | MIT-domain tenders (above threshold) | REST API, free, no auth |
 | **SILOS** | Camera dei Deputati | Strategic infrastructure (~hundreds of major projects) | No API |
@@ -406,7 +410,7 @@ Not all CUPs generate CIGs (grants, research), and not all CIGs are linked to a 
 3. Non-works investments (grants, services) have CUPs but don't appear in BDAP/MOP.
 4. No physical outcome data (beneficiaries reached, infrastructure utilization).
 5. PNRR creates a parallel tracking layer (ReGiS/ItaliaDomani) that partially overlaps BDAP and OpenCoesione.
-6. ~~No real-time API for any source — all rely on periodic bulk exports.~~ **Partially resolved: OpenCoesione has a proper REST API (12 req/min free).**
+6. ~~No real-time API for any source — all rely on periodic bulk exports.~~ **Partially resolved: OpenCoesione has a proper REST API, usable at ~1 req/s with free credentials.**
 
 ---
 
@@ -430,6 +434,7 @@ Given a list of CUP+CIG pairs, the skill guides the user to:
 - [ ] Test OpenBDAP OData for 3 sample CUPs (find exact URL + dataset ID)
 - [ ] Test Servizio Contratti Pubblici endpoints for 3 sample CIGs
 - [x] Test OpenCoesione API for demo CUPs (1/11 found: B31B95000000003; added 3 cohesion-specific CUPs)
+- [x] Re-test OpenCoesione API with credentials (2026-08-31): Basic auth honoured, throttling is `429`, filter values are slugs and an unknown slug returns `500`
 - [ ] Document actual response fields for each source
 
 ### Phase 1 — Write skill instructions
@@ -460,8 +465,8 @@ procurement data directly, without generating curl commands.
 |---|---|---|---|
 | `query_opencup` | OpenCUP HTML scrape | `cup` | none |
 | `query_opencup_api` | Sogei REST | `cup` | Basic Auth (env vars) |
-| `query_opencoesione_projects` | OpenCoesione REST | `cup`, `tema`, `natura`, `territorio`, `programma`, `soggetto`, `stato`, `fonte`, `ciclo_programmazione`, `focus` | none (12 req/min) |
-| `query_opencoesione_subjects` | OpenCoesione REST | `tema`, `ruolo` | none |
+| `query_opencoesione_projects` | OpenCoesione REST | `cup`, `tema`, `natura`, `territorio`, `programma`, `soggetto`, `stato`, `fonte`, `ciclo_programmazione`, `focus` | optional Basic Auth (env vars) |
+| `query_opencoesione_subjects` | OpenCoesione REST | `tema`, `ruolo` | optional Basic Auth (env vars) |
 | `query_openbdap` | OpenBDAP OData | `cup`, `codice_fiscale`, `stato`, `settore` | none |
 | `query_scp_bandi` | SCP REST | `cig` | none (invalid TLS) |
 | `query_scp_esiti` | SCP REST | `cig` | none |
@@ -471,7 +476,7 @@ procurement data directly, without generating curl commands.
 
 **Design notes:**
 
-- Server-side rate limiting queue (especially OpenCoesione 12 req/min)
+- Server-side rate limiting queue: OpenCoesione needs paced requests (~1 req/s with credentials, slower without) and retries on `429`
 - Centralized TLS handling (SCP requires `-k` / skip verify)
 - Normalize response fields across sources into a common schema where possible
 - Batch input support: accept list of CUPs/CIGs, return aggregated results

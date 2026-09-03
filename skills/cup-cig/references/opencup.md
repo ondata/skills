@@ -20,30 +20,39 @@ guard against it, or one bad code kills the run:
 while IFS= read -r cup; do echo "=== $cup ==="; curl -sS -o /tmp/cup.json -X GET "https://api.sogei.it/rgs/opencup/o/extServiceApi/v1/opendataes/cup/$cup" -H "x-ibm-client-id: ${OPENCUP_API_CLIENT_ID}" -H "x-ibm-client-secret: ${OPENCUP_API_CLIENT_SECRET}" -H "Accept: application/json"; [[ -s /tmp/cup.json ]] && jq '.results[0]|{cup:.CUP, stato:.COD_STATO_PROGETTO, soggetto:.DESC_SOGGETTO, settore:.DESC_SETTORE_INTERVENTO, importo:.IMPORTO_COSTO_PROGETTO}' /tmp/cup.json || echo "not found"; done < cups.txt
 ```
 
-### Look up by owner entity — the second key, capped at 10 records
+### Look up by owner entity — the second key, and it paginates
 
-The API's entire query surface is **two keys** — a CUP and a titolare's PIVA; no other field can be a predicate. The titolare key returns that entity's CUPs.
+The API's entire query surface is **two keys** — a CUP and a titolare's **codice fiscale**; no other field can be a predicate. The titolare key returns that entity's CUPs.
+
+**It is the CF, not the P.IVA.** The two differ for most large bodies, and the wrong one returns an
+empty body rather than an error — Regione Lombardia answers nothing to `12874720159` and everything
+to `80050050154`. The unresolved example in the vendor documentation is the same mistake.
+
+Pagination works but is **undocumented**: `itemsPerPage` and `numeropagina`.
 
 ```bash
-curl -sS -X GET "https://api.sogei.it/rgs/opencup/o/extServiceApi/v1/opendataes/soggettotitolare/00269510624" -H "x-ibm-client-id: ${OPENCUP_API_CLIENT_ID}" -H "x-ibm-client-secret: ${OPENCUP_API_CLIENT_SECRET}" -H "Accept: application/json" | jq '{totcount, CurrentPage, numpages, results: (.results|length)}'
+curl -sS -X GET "https://api.sogei.it/rgs/opencup/o/extServiceApi/v1/opendataes/soggettotitolare/80050050154?itemsPerPage=50&numeropagina=2" -H "x-ibm-client-id: ${OPENCUP_API_CLIENT_ID}" -H "x-ibm-client-secret: ${OPENCUP_API_CLIENT_SECRET}" -H "Accept: application/json" | jq '{totcount, CurrentPage, numpages, results: (.results|length)}'
 ```
 
 Response: `{totcount, CurrentPage, numpages, results[]}` — the same full per-CUP records, in a
-pagination envelope of **10 records per page**.
+pagination envelope. Default page size is 10; `itemsPerPage` raises it up to **10.000**, and a
+larger value is silently clamped there.
 
 | Behaviour | What it means for you |
 |---|---|
-| `totcount` is trustworthy below 10.000 | use it as the entity's project count, but only under that ceiling |
-| **Only the first 10 records are retrievable** | every documented and undocumented pagination parameter is ignored server-side: the response always says `CurrentPage: 1` and returns the same 10 CUPs. `numpages` is computed but meaningless — do not loop on it |
-| **`totcount` appears capped at 10.000** | the largest titolari hold orders of magnitude more, and all answer exactly `10000`. Read it as «≥ 10.000» |
-| Result order is not stable | identical calls return the same 10 CUPs in a different array order — deduplicate by `CUP`, never by position |
-| Unknown PIVA → HTTP 200 with an empty body | same guard as for CUPs; even the **documentation's own example** PIVA behaves this way |
+| Pages tile the window exactly | at `itemsPerPage=2000` the five pages return 10.000 distinct CUPs, no overlap, no gap — within one page size you can loop `numeropagina` without deduplicating |
+| **`totcount` saturates at 10.000** | attributed by the source to an Elasticsearch limit. Below it, it is the entity's project count; at exactly `10000` read it as «≥ 10.000» |
+| `numpages` is `ceil(totcount/itemsPerPage)` **on the saturated count** | above the cap it is a floor, so a loop that stops at `numpages` stops early believing it is done |
+| Overshooting `numpages` does not error | HTTP 200 with a full page labelled `CurrentPage: 1` — a loop that runs long collects duplicates instead of stopping |
+| The retrievable window depends on `itemsPerPage` | repeating the identical call returns the identical set; **changing `itemsPerPage` returns a different 10.000**. For Regione Lombardia the windows at 2.000, 10.000 and 20.000 union to 18.872 distinct CUPs — so several passes at different page sizes, deduplicated by `CUP`, do get past the cap |
+| Unknown CF → HTTP 200 with an empty body | same guard as for CUPs |
 
-So this route answers exactly one question — «how many CUPs does this titolare own?», up to the
-cap — plus a 10-record sample. For a single call it is actually **faster** than the mirror; the
-whole set is what it cannot serve, at any speed, because the pages do not exist. Go to the mirror
-for that. Note `PIVA` is not the mirror's sort key, so filtering on it costs a full scan rather
-than row-group pruning — still one query, just not the cheap kind.
+So the route now serves two questions: the entity's project count up to the cap, and — for an
+entity **under** the cap — its complete set in a single call with `itemsPerPage` set to `totcount`.
+Above the cap it can only sample, and that is where the mirror wins. Note the volume: a
+10.000-record page is ~28 MB, so write it to a file and project the fields you need, never inline
+it. `PIVA_CODFISCALE_SOG_TITOLARE` is not the mirror's sort key either, so filtering on it there
+costs a full scan rather than row-group pruning — still one query, just not the cheap kind.
 
 ### What the response actually contains
 
@@ -125,6 +134,14 @@ Practical consequences:
 - source files often keep both, sometimes in the **same cell** (`X – Y – Z`), so splitting a
   multi-code cell by pattern can turn one project into three;
 - historical CUPs remain the right key for the tenders of their own era.
+
+The mechanism is codified: Delibera CIPE 63/2020 calls it «sostituzione» — the object, purpose,
+location or perimeter of the intervention changes substantially, the original CUP is revoked and
+a new one issued, and the titolare can change with it. **Neither the API nor the portal publishes
+the revoked code**, because both carry only active and closed CUPs; a separate file in the open
+data section is reported to hold the revoked and cancelled ones (not verified here). There is no
+public «superseded by» chain: `CUP_IN_RELAZIONE` exists in the record but is filled at the
+titolare's discretion and is empty in the cases checked.
 
 This explains only part of the unresolved codes. For the rest no explanation was found, and
 some have suspicious shapes (`G27B18000000000`) — transcription errors that still pass a
@@ -227,11 +244,20 @@ Everything else is decided by three asymmetries:
 - **parallelising the API buys nothing**: the gateway serialises per credential, so ten
   concurrent calls take as long as ten sequential ones. This is the one that surprises people.
 
-Add that the titolare route stops at 10 records and that aggregation is not expressible at all
-— no filters, no listing — and the rule falls out: break-even sits around **ten CUPs**, and past
-it the gap only widens.
+Add that aggregation is not expressible at all — no filters, no listing, no grouping — and the
+rule falls out: for a **list of arbitrary CUPs** break-even sits around **ten codes**, and past it
+the gap only widens.
 
-**One CUP and freshness → API; any set, or any aggregate → mirror.**
+A titolare's set is the one case that splits three ways:
+
+- **under 10.000 CUPs** → one API call with `itemsPerPage` set to `totcount` returns the complete
+  set, and it is fresher than the mirror;
+- **at the 10.000 cap** → the API can only sample. Several passes at different page sizes get past
+  it, but the mirror answers exactly and in one query;
+- **any aggregate, any filter that is not the CF** → mirror, always.
+
+**One CUP, or one titolare under the cap, and freshness → API; any other set, or any aggregate →
+mirror.**
 
 ## Bulk open data — the whole archive, no credentials
 

@@ -186,7 +186,7 @@ Errors* happen.
 
 | # | Source | Answers | Reference |
 |---|---|---|---|
-| 1 | **OpenCUP** | project registry: the full details of a CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare PIVA (10-record cap). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
+| 1 | **OpenCUP** | project registry: the full details of a CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare **codice fiscale** (paginated, but the count saturates at 10.000). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
 | 2 | **BDAP / OpenBDAP (MOP)** | seven families keyed on CUP: projects, **tenders with CIG**, **payments per year**, bidders, cost plan, owners, geolocation | `references/bdap-mop.md` |
 | 3 | **SCP-MIT** | published tenders and awards **up to 2023 only** — historical archive | `references/scp-mit.md` |
 | 4 | **ANAC BDNCP** | the `cup` bridge — the widest CIG↔CUP mapping there is — plus `cig` and `smartcig` tender metadata | `references/anac-datasets.md` |
@@ -288,8 +288,9 @@ And none of these silent failure modes is left unchecked:
 | `401 Unauthorized` on OpenCUP | Wrong credentials or not set | Check `OPENCUP_API_CLIENT_ID`/`SECRET` |
 | OpenCUP returns **HTTP 200 with an empty body**, `jq` errors out | The CUP is not published — the API does not 404 | Test `[[ -s file ]]` before parsing |
 | A well-formed CUP does not resolve in OpenCUP | It may be a **superseded code** — projects get merged and re-registered | Search the documents for `già <CUP>`; the tenders stay in ANAC under the old code |
-| `soggettotitolare/{PIVA}` keeps returning the same 10 records | 12 pagination params tested, all ignored server-side; result order unstable | Mirror: `WHERE PIVA_CODFISCALE_SOG_TITOLARE = '…'` |
-| `soggettotitolare` answers `totcount: 10000` for a huge entity | `totcount` appears capped at 10.000, and the biggest titolari hold orders of magnitude more | Read it as «≥ 10.000»; count in the mirror |
+| `soggettotitolare/{codice}` returns an empty body | you passed the P.IVA — the endpoint answers to the **codice fiscale** only, and returns 0 bytes rather than an error | Retry with the CF |
+| `soggettotitolare` returns only 10 records | pagination is undocumented but works: `?itemsPerPage=N&numeropagina=P`, up to 10.000 per page | Under the cap, one call with `itemsPerPage=totcount` |
+| `soggettotitolare` answers `totcount: 10000` for a huge entity | `totcount` saturates at 10.000, and the biggest titolari hold far more; `numpages` is computed on the saturated count, so looping it stops early | Read it as «≥ 10.000»; count in the mirror. Several passes at different `itemsPerPage` values, deduplicated by `CUP`, do get past the cap |
 | Empty results on OpenBDAP | CUP not in MOP dataset | Project may not have financial monitoring data |
 | Exactly 50 rows returned | No `$top` passed — silent truncation | Always set `$top` explicitly |
 | An ANAC dataset looks implausibly small | You pulled a monthly increment, not the full dump | Get `{dataset}_csv.zip` (no date prefix), then apply increments |

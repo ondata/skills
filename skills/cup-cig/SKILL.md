@@ -4,7 +4,7 @@ description: Guide users monitoring Italian public procurement to extract detail
 compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.16"
+  version: "0.17"
   updated: "2026-09-19"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, open-data, procurement, cup, cig, italy, public-works]
@@ -106,7 +106,7 @@ attributes spending to the wrong municipality, silently. Always state which one 
 | Question | Field | Source | Caveat |
 |---|---|---|---|
 | Where is it **executed**? | `luogo_istat` (6 digits) / `istat_comune` (9 digits) | ANAC `cig` / `smartcig` | declared per tender, and sometimes empty |
-| Where does the **work fall**? | `Codice Regione`+`Provincia`+`Comune` | BDAP MOP `loc` | **one CUP can span many municipalities** — a minority, but some span dozens — and MOP gives **no share** |
+| Where does the **work fall**? | `Codice Regione`+`Provincia`+`Comune` | BDAP MOP `loc` | **one CUP can span many municipalities** — a minority, but some span dozens — and MOP gives **no share**. `openbdap-pp-cli dossier` returns this as its `localizzazione` section, with the 6-digit code already assembled |
 | Where does the **work fall**, with a share? | region/province/municipality + **`Percentuale di Localizzazione`** | ReGiS `PNRR_Localizzazione` | PNRR only, but the **only source that lets you split an amount** across territories |
 | Where does the **project** say it is? | `COMUNI`, `PROVINCE`, `REGIONI` | OpenCUP | single municipality only, and on an **older code vintage** than ANAC |
 | Who **awards** it? | `cf_amministrazione_appaltante` → IPA | ANAC + IPA | the entity's seat, not the works' location |
@@ -293,7 +293,7 @@ And none of these silent failure modes is left unchecked:
 | `soggettotitolare` returns only 10 records | pagination is undocumented but works: `?itemsPerPage=N&numeropagina=P`, up to 10.000 per page | Under the cap, one call with `itemsPerPage=totcount` |
 | `soggettotitolare` answers `totcount: 10000` for a huge entity | `totcount` saturates at 10.000, and the biggest titolari hold far more; `numpages` is computed on the saturated count, so looping it stops early | Read it as «≥ 10.000»; count in the mirror. Several passes at different `itemsPerPage` values, deduplicated by `CUP`, do get past the cap |
 | Empty results on OpenBDAP | CUP not in MOP dataset | Project may not have financial monitoring data |
-| Exactly 50 rows returned | No `$top` passed — silent truncation. `openbdap-pp-cli righe` has the same default and warns no more than the API does | Always set `$top` explicitly; with the CLI, `conta` first or `--tutte --limite 0` |
+| Exactly 50 rows returned | No `$top` passed — silent truncation | Always set `$top` explicitly. `openbdap-pp-cli righe` keeps the same default but says so: `meta.nota` carries the real total |
 | An ANAC dataset looks implausibly small | You pulled a monthly increment, not the full dump | Get `{dataset}_csv.zip` (no date prefix), then apply increments |
 | Row counts in `*_logCsv.csv` look inflated | The log mixes CSV, JSON and TTL rows | Filter on the format column before reading counts |
 | CSV dump returns **HTTP 200** and a tiny body `{"error": … "Attachment not found"}` | Used the OData resource id on the dump endpoint | Use the **package id** for `/datastore/dump/`; checking the status code is not enough, check `success` |

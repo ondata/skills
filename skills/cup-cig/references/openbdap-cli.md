@@ -3,8 +3,9 @@
 `openbdap-pp-cli` is a command-line client for **one** of the nine sources: BDAP / OpenBDAP
 (MOP), source #2. It does not know about OpenCUP, ANAC, ReGiS, OpenCoesione or SCP-MIT, and
 it does not change the entry point of the decision tree: **a CUP still starts at OpenCUP**.
-What it collapses is the MOP branch — the hunt for the right regional partition, the two-ids problem, the
-mangled column names and the client-side counting that `bdap-mop.md` documents by hand.
+What it collapses is the MOP branch — the hunt for the right regional partition, the two-ids
+problem, the mangled column names and the client-side counting that `bdap-mop.md` documents
+by hand.
 
 A miss here is still the normal case: roughly half of an arbitrary set of CUP is not in MOP.
 `openbdap-pp-cli cup X` answering `trovati: 0` means *not in MOP*, never *no such project*.
@@ -21,6 +22,12 @@ openbdap-pp-cli doctor                                     # connectivity + path
 The CLI's own help and JSON keys are in Italian (`righe`, `dove`, `limite`, `trovati`). Add
 `--agent` to any command for JSON on stdout and no prompts.
 
+Everything here was checked on 2026-09-19. A build older than that date differs on four
+points, all of them ways of being quietly wrong rather than failing: no `localizzazione`
+section in `dossier` and the region guessed from the owner's name, no note when a result is
+truncated, no `archivio_vuoto` field, and `scarica` emitting latin-1. If a run does not match
+what this file describes, reinstall before suspecting the data.
+
 ---
 
 ## Run `allinea` first — almost everything depends on it
@@ -32,17 +39,14 @@ openbdap-pp-cli campi --aggiorna --tema <tema>   # second index, only for `campi
 ```
 
 The archive holds the catalogue, not the rows: `cup`, `cig`, `dossier` and `opere` fetch live
-data, but they need it to know **which** dataset to query. Verified against an empty archive:
-all four answer `trovati: 0`, `sezioni: {}` and **exit 0**, with a `nota` in the JSON and a
-warning on stderr. An agent that reads only `trovati` cannot tell that from a real miss — and
-a real miss is the normal case here, so the misreading is silent and plausible.
+data, but they need it to know **which** dataset to query. With no archive all four answer
+`trovati: 0`, `sezioni: {}` and **exit 0** — the same shape as a genuine miss, which here is
+the normal case. What separates the two is `archivio_vuoto: true`, set alongside the `nota`
+and absent when the code is simply not in MOP. **Read that field before concluding anything
+from a zero**; the exit code will not tell you, by design, because the command did not fail.
 
 Genuinely archive-free, because they take an OData resource id directly: `colonne`, `righe`,
 `conta`, `scarica`, plus `catalogo`, `dati`, `gruppi`, `tag`, `licenze`.
-
-`--home` does not move the archive: the `--db` default is an absolute platform path
-(`~/.local/share/openbdap-pp-cli/data.db` on Linux) and only `--db` overrides it. A "fresh
-home" test that does not pass `--db` is still reading the old archive.
 
 ---
 
@@ -51,10 +55,11 @@ home" test that does not pass `--db` is still reading the old archive.
 | Question | Command | What it replaces |
 |---|---|---|
 | Registry details of a CUP in MOP | `cup <CUP>` | one OData call on the national `prg`, with readable field names |
-| Everything MOP holds on a CUP | `dossier <CUP>` | five regional resources queried one by one, after finding out which region they are |
+| Everything MOP holds on a CUP | `dossier <CUP>` | Localizzazione to find the region, then six regional resources queried one by one |
 | Whose CUP is this CIG, and at what price | `cig <CIG>` | a fan-out over the 21 regional `gar` partitions, plus `pga` for the bidders |
 | All the works of an entity | `opere --cf <CF>` | the paginated national `prg` query plus a client-side count |
 | Which resource id for region × family | `mop --regione X --famiglia Y` | the dataset map, both ids returned |
+| Where does the work fall | `dossier` section `localizzazione`, or `mop --famiglia localizzazione` | the national Localizzazione dataset, with the 6-digit ISTAT code assembled by hand |
 | Which dataset holds a field | `campi "codice fiscale"` | opening datasets one by one |
 | Readable name → filter id | `colonne <odata id>` | guessing `Cccodice_cup_1267962549` |
 | Filtered rows | `righe <odata id> --dove "Codice CUP=..."` | `$filter` with mangled ids |
@@ -71,24 +76,27 @@ and `odata_id` (XML resource id, for OData) — which is what makes the two-ids 
 openbdap-pp-cli dossier B24B13000160001 --agent
 ```
 
-One call, about 5 seconds: it finds the project in the national `prg`, works out which regional
-partitions to query and returns `progetto` plus the sections `gare`, `pagamenti`,
-`partecipanti`, `piano-costi`, `soggetti-titolari`. `gare` comes
-back with `Codice CIG`, `Importo Aggiudicazione` and `Descrizione Soggetto` already filled,
-so a CUP→CIG bridge and the award amount arrive in the same object.
+One call, about 9 seconds: it finds the project in the national `prg`, reads the national
+Localizzazione to learn which region it is, and returns `progetto` plus the sections
+`localizzazione`, `gare`, `pagamenti`, `partecipanti`, `piano-costi`, `soggetti-titolari`.
+`gare` comes back with `Codice CIG`, `Importo Aggiudicazione` and `Descrizione Soggetto`
+already filled, so a CUP→CIG bridge and the award amount arrive in the same object, and
+`localizzazione` carries `Codice ISTAT Comune` already concatenated from province and
+municipality.
 
-How it picks the region is worth knowing, because it is not what it looks like: it matches a
-region name inside `Descrizione Titolare` / `Descrizione Ente` (`REGIONE AUTONOMA VALLE
-D'AOSTA` → `regione: "Valle d'Aosta"`, `regione_dedotta: true`). For a municipality or a
-ministry nothing matches, `regione` comes back `null` and the command falls back to querying
-every partition — still correct, just slower. It never reads the Localizzazione dataset, so a
-`null` region says nothing about where the work is.
+When Localizzazione has no row for the CUP, the region is guessed from a region name inside
+`Descrizione Titolare` / `Descrizione Ente`, and that guess is declared with
+`regione_dedotta: true`. It only fires for entities whose name contains the region
+(`REGIONE AUTONOMA VALLE D'AOSTA`), never for a municipality, so on a fallback the command
+queries every partition: correct, just slower.
 
-From a CIG instead, when you also know the region, scope the search: **~24s against ~2s**,
-measured with `--no-cache`. The cost is not serial requests — those already run six at a time —
-but the sheer number of them, `gar` and `pga` for 21 regions, two calls each. Responses are
-cached for a few minutes, so a list of CIGs worked through in one go pays less than the first
-number suggests.
+From a CIG instead, when you also know the region, scope the search: **~19s against ~2s**,
+measured with `--no-cache`. What is left is not traffic — the 42 partitions of `gar` and `pga`
+are queried twelve at a time and their schema is read once per family — but the client's own
+rate limiter, which paces at two requests a second out of courtesy to a public portal.
+`--rate-limit 0` takes the same search to ~4s; use it for one search, not for `allinea`.
+Responses are cached for a few minutes, so a list of CIGs worked through in one go pays less
+than the first number suggests.
 
 ```bash
 openbdap-pp-cli cig BAE51BB300 --regione "Valle d'Aosta" --agent
@@ -107,33 +115,25 @@ openbdap-pp-cli righe bda1676b-62ab-44b7-8f9a-ca93b8534488 --dove "Descrizione T
 
 ## What the CLI does not cover
 
-- **`dossier` has no `localizzazione` section.** It returns six families — `progetti`, `gare`,
-  `partecipanti`, `pagamenti`, `piano-costi`, `soggetti-titolari` — so it answers everything
-  about a work except where it is. `mop` does map the seventh: `--famiglia localizzazione`
-  works and returns the national dataset, even though the flag's help text lists only six
-  values and a `--regione` filter hides it (Localizzazione is national, so it carries no
-  region). The territorial question in the SKILL's *Territorial attribution* table therefore
-  goes through that dataset directly:
-
-  ```bash
-  openbdap-pp-cli righe c4cce647-cec4-4b60-a8ab-d308ecfba743 --dove "Codice CUP=B24B13000160001" --agent
-  ```
-
-  Remember it returns `Codice Provincia` and `Codice Comune` separately: concatenate for the
-  6-digit ISTAT code, and expect more than one row for a multi-municipality CUP.
 - **Nothing outside BDAP.** OpenCUP registry, ANAC tenders, PNRR and cohesion monitoring stay
   where the decision tree puts them.
+- **No territorial share.** `localizzazione` lists every municipality a CUP touches and gives
+  no percentage, so an amount still cannot be split across them: that is a MOP limit, not a
+  CLI one, and ReGiS remains the only source with a share.
+
+All seven MOP families are reachable. `dossier` returns six of them plus `localizzazione`, and
+`mop --famiglia localizzazione` returns the national dataset on its own — note that a
+`--regione` filter hides that row, because Localizzazione is national and carries no region.
 
 ## Traps that survive the CLI
 
 | Trap | What happens | Fix |
 |---|---|---|
-| Silent truncation | `righe` defaults to `--limite 50` and returns exactly 50 rows **with no warning**, even when the filter matches hundreds | run `conta` first, or `--tutte --limite 0` |
-| Same for sections | `dossier` and `cup` cap each section at `--limite 50` | raise `--limite` when a section looks suspiciously round |
-| `scarica` is latin-1 | the CSV dump is passed through as the portal serves it: `à` arrives as the single byte `0xE0`, delimiter `;`, CRLF | `iconv -f latin1 -t utf8` before DuckDB, exactly as for the raw dump |
-| JSON is not | the OData path (`cup`, `dossier`, `righe`, `cig`) returns clean UTF-8 — no conversion, and converting it corrupts it | leave it alone |
+| Truncation, now announced | `righe` still defaults to `--limite 50`, but a result that touches the limit carries `meta.nota` with the real total (`risultato troncato a --limite 50 di 347 righe`) and a warning on stderr. `results` stays an array | read `meta.nota`, then `--tutte --limite 0`. Same note in `cup`, `cig` and each `dossier` section |
 | A CUP outside MOP | `trovati: 0`, `sezioni: {}`, exit code 0 | not an error: fall back to OpenCUP and ANAC |
-| An empty archive looks the same | same `trovati: 0` and exit 0, told apart only by the `nota` field | read `nota`, or run `allinea` before concluding a CUP is not in MOP |
+| An empty archive looks the same | same `trovati: 0` and exit 0 | the discriminator is `archivio_vuoto: true`, not the exit code |
+| `scarica --raw` is latin-1 | the default output is converted to UTF-8 (byte-identical to `iconv -f ISO-8859-1`), but `--raw` hands you the portal's own bytes: `à` as `0xE0`, delimiter `;`, CRLF | only ask for `--raw` if you are going to convert it yourself |
+| JSON needs nothing | the OData path (`cup`, `dossier`, `righe`, `cig`) returns clean UTF-8 — converting it corrupts it | leave it alone |
 
 ---
 

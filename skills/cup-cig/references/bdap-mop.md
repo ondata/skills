@@ -98,6 +98,9 @@ the same granularity: entity and accounting code, no CUP.
 
 ### Finding the right regional file for a CUP
 
+> If `openbdap-pp-cli` is installed, `dossier <CUP>` does the whole dance below in one call —
+> see `openbdap-cli.md`. Everything here still works without it, and remains the fallback.
+
 Every family except `loc` is split into 21 partitions, so a CUP lookup seems to need 21
 queries. It does not: **Localizzazione is national and unpartitioned**, so it works as a
 resolver.

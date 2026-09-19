@@ -1,5 +1,14 @@
 # LOG
 
+## 2026-09-19
+
+- `cup-cig`: new reference `references/openbdap-cli.md` for `openbdap-pp-cli`, a CLI that covers source #2 only. It collapses the MOP branch — `dossier <CUP>` derives the region from the national Localizzazione and returns project, payments, tenders with CIG, bidders, cost plan and owners in one call, where the reference documents five hand-built OData requests. `mop` and `cerca` return both ids per dataset (package for the CSV dump, XML resource for OData), which retires the two-ids trap, and `colonne` maps readable names to the mangled filter ids
+- `cup-cig`: `allinea` is a prerequisite for `cup`, `cig`, `dossier` and `opere` too — they fetch live rows but read the local catalogue to know which dataset to query. Against an empty archive all four answer `trovati: 0` and exit 0, told apart from a real miss only by a `nota` field, which is the one misreading this skill keeps warning about. Note for the record: `--home` does not relocate the archive, only `--db` does, so a fresh-home test silently keeps reading the populated one
+- `cup-cig`: verified the one claim that justifies the tool — the API answers `"__count" : "0"` on a filter that matches rows, while `conta` and `opere --solo-conteggio` both answer 13489 for ANAS, and raw pagination counts 13489
+- `cup-cig`: three traps survive the CLI and are documented as such. `righe` defaults to `--limite 50` and returns exactly 50 rows with no warning where the true count is 347, so it must be paired with `conta` or `--tutte --limite 0`; `scarica` passes the dump through as latin-1 (`à` as the single byte `0xE0`) while the OData path is clean UTF-8; `cig` without `--regione` scans all 21 partitions, 24s against 2s, measured with `--no-cache`
+- `cup-cig`: the CLI maps six of the seven MOP families — `localizzazione` is missing from both `mop --famiglia` and `dossier`, so the territorial question still goes through `righe` on the national Localizzazione dataset
+- `cup-cig`: the portal's `RICERCA PER CUP` form returns an Excel with a *Dettaglio Indicatori* sheet that has no counterpart in the open data. Of the 29 datasets matching `indicator` in the catalogue, all are budget Note Integrative, none is MOP — so that sheet, and the 300-CUP cap that comes with it, is the one reason left to use the browser
+
 ## 2026-08-31
 
 - `cup-cig`: tested the OpenCoesione API with the credentials now available in the environment. They are plain HTTP Basic and buy throughput, not access: wrong ones give `401`, which is what tells a credentials problem apart from a quota one. Anonymous cannot sustain one request per second — 24 of 70 got through, first `429` on the twelfth; authenticated the same pace ran 70 out of 70. A burst cap sits well below the per-minute quota either way, so requests must be paced rather than batched

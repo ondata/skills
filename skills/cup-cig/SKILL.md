@@ -1,11 +1,11 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit.
+compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit. The openbdap-pp-cli CLI is optional: it shortens the BDAP MOP branch, and raw OData works without it.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
-  version: "0.15"
-  updated: "2026-08-17"
+  version: "0.16"
+  updated: "2026-09-19"
   author: "Andrea Borruso <aborruso@gmail.com>"
   tags: [api, open-data, procurement, cup, cig, italy, public-works]
 ---
@@ -187,7 +187,7 @@ Errors* happen.
 | # | Source | Answers | Reference |
 |---|---|---|---|
 | 1 | **OpenCUP** | project registry: the full details of a CUP, and the dispatch hint telling you which monitoring system to query. API keys: a CUP, or a titolare **codice fiscale** (paginated, but the count saturates at 10.000). For anything set-wide use the **Parquet mirror on Source Cooperative** — queryable over HTTP, no credentials, no download — or the raw bulk archive | `references/opencup.md` |
-| 2 | **BDAP / OpenBDAP (MOP)** | seven families keyed on CUP: projects, **tenders with CIG**, **payments per year**, bidders, cost plan, owners, geolocation | `references/bdap-mop.md` |
+| 2 | **BDAP / OpenBDAP (MOP)** | seven families keyed on CUP: projects, **tenders with CIG**, **payments per year**, bidders, cost plan, owners, geolocation | `references/bdap-mop.md`, and `references/openbdap-cli.md` if `openbdap-pp-cli` is installed |
 | 3 | **SCP-MIT** | published tenders and awards **up to 2023 only** — historical archive | `references/scp-mit.md` |
 | 4 | **ANAC BDNCP** | the `cup` bridge — the widest CIG↔CUP mapping there is — plus `cig` and `smartcig` tender metadata | `references/anac-datasets.md` |
 | 5 | **ANAC OCDS bulk** | the whole procedure as one object: lots, parties, roles, awards, contracts | `references/anac-ocds.md` |
@@ -292,12 +292,12 @@ And none of these silent failure modes is left unchecked:
 | `soggettotitolare` returns only 10 records | pagination is undocumented but works: `?itemsPerPage=N&numeropagina=P`, up to 10.000 per page | Under the cap, one call with `itemsPerPage=totcount` |
 | `soggettotitolare` answers `totcount: 10000` for a huge entity | `totcount` saturates at 10.000, and the biggest titolari hold far more; `numpages` is computed on the saturated count, so looping it stops early | Read it as «≥ 10.000»; count in the mirror. Several passes at different `itemsPerPage` values, deduplicated by `CUP`, do get past the cap |
 | Empty results on OpenBDAP | CUP not in MOP dataset | Project may not have financial monitoring data |
-| Exactly 50 rows returned | No `$top` passed — silent truncation | Always set `$top` explicitly |
+| Exactly 50 rows returned | No `$top` passed — silent truncation. `openbdap-pp-cli righe` has the same default and warns no more than the API does | Always set `$top` explicitly; with the CLI, `conta` first or `--tutte --limite 0` |
 | An ANAC dataset looks implausibly small | You pulled a monthly increment, not the full dump | Get `{dataset}_csv.zip` (no date prefix), then apply increments |
 | Row counts in `*_logCsv.csv` look inflated | The log mixes CSV, JSON and TTL rows | Filter on the format column before reading counts |
 | CSV dump returns **HTTP 200** and a tiny body `{"error": … "Attachment not found"}` | Used the OData resource id on the dump endpoint | Use the **package id** for `/datastore/dump/`; checking the status code is not enough, check `success` |
 | OData returns HTTP 500 with an empty body | Used the package id on the OData endpoint | Use the **XML resource id** + `@rgs` |
-| `__count` is `"0"` but rows exist | Known BDAP OData proxy defect | Count `.d.results` length, ignore `__count` |
+| `__count` is `"0"` but rows exist | Known BDAP OData proxy defect | Count `.d.results` length, ignore `__count`; `openbdap-pp-cli conta` already does this |
 | BDAP OData returns rows but **all projected fields are empty** | A guessed mangled field name — no error is raised | List the keys of one row and use the real names |
 | A CUP is missing from BDAP MOP | MOP coverage is substantially incomplete — a miss is expected, not an anomaly | Use OpenCUP for registry details, ANAC `cup` for tenders |
 | No results on SCP-MIT for a recent CIG | The archive stops at 2023 | Use the ANAC datasets; SCP-MIT is historical only |

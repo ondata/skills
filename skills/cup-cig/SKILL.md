@@ -1,7 +1,7 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit.
+compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout. OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
   version: "0.16"
@@ -234,7 +234,8 @@ Behaviour worth knowing:
   misleading message: nothing is wrong with the click, the code simply has no page.
 - Only accepts 10-character alphanumeric codes: passing a CUP exits 64 straight away.
 
-Requires `agent-browser`, `jq` and `timeout`. Tune with `CIG_FETCH_STEP_TIMEOUT` (default 8s)
+Requires `agent-browser`, `jq` and `timeout` — the latter is GNU coreutils, so on macOS it
+takes a `brew install coreutils`. Tune with `CIG_FETCH_STEP_TIMEOUT` (default 8s)
 and `CIG_FETCH_ATTEMPT_TIMEOUT` (default 20s) on slow connections.
 
 `scripts/test-cig-fetch.sh` checks the CLI contracts offline against a fake browser — no

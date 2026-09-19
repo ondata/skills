@@ -1,7 +1,7 @@
 ---
 name: cup-cig
 description: Guide users monitoring Italian public procurement to extract detailed information from lists of CUP (Codice Unico di Progetto) and CIG (Codice Identificativo Gara). Use when the user wants to look up project metadata, financial status, or tender details for Italian public contracts.
-compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit. The openbdap-pp-cli CLI is optional: it shortens the BDAP MOP branch, and raw OData works without it.
+compatibility: Requires curl, jq, bash, internet access. Bulk sources also need duckdb, unzip and iconv; resolving territorial codes at a date needs the opensituas CLI; querying published notices needs the anac-pl CLI; scripts/cig-fetch.sh needs agent-browser and timeout (GNU coreutils; macOS: brew install coreutils). OpenCUP API requires OPENCUP_API_CLIENT_ID and OPENCUP_API_CLIENT_SECRET environment variables. OpenCoesione works without credentials; OPEN_COESIONE_USER and OPEN_COESIONE_PWD are optional and raise its rate limit.
 license: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International)
 metadata:
   version: "0.16"

@@ -98,6 +98,9 @@ the same granularity: entity and accounting code, no CUP.
 
 ### Finding the right regional file for a CUP
 
+> If `openbdap-pp-cli` is installed, `dossier <CUP>` does the whole dance below in one call —
+> see `openbdap-cli.md`. Everything here still works without it, and remains the fallback.
+
 Every family except `loc` is split into 21 partitions, so a CUP lookup seems to need 21
 queries. It does not: **Localizzazione is national and unpartitioned**, so it works as a
 resolver.
@@ -290,7 +293,7 @@ curl -sS "https://bdap-opendata.rgs.mef.gov.it/ODataProxy/MdData('{RESOURCE_ID}@
 ## Column layout of the less obvious families
 
 **`sal` — Payments**: `Codice Locale Progetto`, `Codice CUP`, `Anno Pagamenti`,
-`Importo Pagamenti`. One row per project-year; decimals use a dot here.
+`Importo Pagamenti`. One row per project-year.
 
 **`pdc` — Cost plan**: project code, CUP, `Anno Piano dei Costi`, `Importo da Realizzare`,
 `Importo Realizzato`.
@@ -306,8 +309,14 @@ member), plus `Tipo Partecipazione` (e.g. `RTI`).
 
 - CSV dumps are **latin-1**, delimiter `;`. Convert before feeding DuckDB:
   `iconv -f latin1 -t utf8 in.csv > out.csv`.
-- Decimals: **comma** in `prg` (needs `REPLACE(col, ',', '.')` before casting), **dot** in
-  `gar` and `sal`.
+- Decimals: **a dot, in every family**. Verified 2026-09-19 on the `/datastore/dump/` endpoint:
+  the national `prg` (66.633 rows) has 866.216 numeric fields with a dot and none with a comma,
+  and the six Sicilian regional files agree. Until v0.15 this note claimed a comma in `prg`
+  against a dot in `gar` and `sal`; that contrast is no longer observable. A leftover
+  `REPLACE(col, ',', '.')` does nothing here, which is worse than failing, because the wrong
+  `CAST` it was protecting shows up later as truncated amounts.
+- Quoting is **not** uniform: numeric fields come quoted in the national `prg` (`"0.00"`) and
+  bare in the regional files (`0.00;362144.35;`). Do not write a parser that assumes either.
 - Sizes: Localizzazione ~69 MB, Projects (national total) ~428 MB, a mid-size regional
   `gar` ~16 MB.
 

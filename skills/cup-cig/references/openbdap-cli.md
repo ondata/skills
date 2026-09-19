@@ -3,7 +3,7 @@
 `openbdap-pp-cli` is a command-line client for **one** of the nine sources: BDAP / OpenBDAP
 (MOP), source #2. It does not know about OpenCUP, ANAC, ReGiS, OpenCoesione or SCP-MIT, and
 it does not change the entry point of the decision tree: **a CUP still starts at OpenCUP**.
-What it collapses is the MOP branch — the region-resolution dance, the two-ids problem, the
+What it collapses is the MOP branch — the hunt for the right regional partition, the two-ids problem, the
 mangled column names and the client-side counting that `bdap-mop.md` documents by hand.
 
 A miss here is still the normal case: roughly half of an arbitrary set of CUP is not in MOP.
@@ -51,8 +51,8 @@ home" test that does not pass `--db` is still reading the old archive.
 | Question | Command | What it replaces |
 |---|---|---|
 | Registry details of a CUP in MOP | `cup <CUP>` | one OData call on the national `prg`, with readable field names |
-| Everything MOP holds on a CUP | `dossier <CUP>` | the `loc` → region → five regional resources dance |
-| Whose CUP is this CIG, and at what price | `cig <CIG>` | a fan-out over the 21 regional `gar` partitions |
+| Everything MOP holds on a CUP | `dossier <CUP>` | five regional resources queried one by one, after finding out which region they are |
+| Whose CUP is this CIG, and at what price | `cig <CIG>` | a fan-out over the 21 regional `gar` partitions, plus `pga` for the bidders |
 | All the works of an entity | `opere --cf <CF>` | the paginated national `prg` query plus a client-side count |
 | Which resource id for region × family | `mop --regione X --famiglia Y` | the dataset map, both ids returned |
 | Which dataset holds a field | `campi "codice fiscale"` | opening datasets one by one |
@@ -71,14 +71,24 @@ and `odata_id` (XML resource id, for OData) — which is what makes the two-ids 
 openbdap-pp-cli dossier B24B13000160001 --agent
 ```
 
-One call, about 5 seconds: it finds the project in the national `prg`, derives the region
-(`regione: "Valle d'Aosta"`, `regione_dedotta: true`) and returns `progetto` plus the
-sections `gare`, `pagamenti`, `partecipanti`, `piano-costi`, `soggetti-titolari`. `gare` comes
+One call, about 5 seconds: it finds the project in the national `prg`, works out which regional
+partitions to query and returns `progetto` plus the sections `gare`, `pagamenti`,
+`partecipanti`, `piano-costi`, `soggetti-titolari`. `gare` comes
 back with `Codice CIG`, `Importo Aggiudicazione` and `Descrizione Soggetto` already filled,
 so a CUP→CIG bridge and the award amount arrive in the same object.
 
-From a CIG instead, when you also know the region, scope the search — the difference is real
-and not cache: **~24s scanning all partitions, ~2s with `--regione`**.
+How it picks the region is worth knowing, because it is not what it looks like: it matches a
+region name inside `Descrizione Titolare` / `Descrizione Ente` (`REGIONE AUTONOMA VALLE
+D'AOSTA` → `regione: "Valle d'Aosta"`, `regione_dedotta: true`). For a municipality or a
+ministry nothing matches, `regione` comes back `null` and the command falls back to querying
+every partition — still correct, just slower. It never reads the Localizzazione dataset, so a
+`null` region says nothing about where the work is.
+
+From a CIG instead, when you also know the region, scope the search: **~24s against ~2s**,
+measured with `--no-cache`. The cost is not serial requests — those already run six at a time —
+but the sheer number of them, `gar` and `pga` for 21 regions, two calls each. Responses are
+cached for a few minutes, so a list of CIGs worked through in one go pays less than the first
+number suggests.
 
 ```bash
 openbdap-pp-cli cig BAE51BB300 --regione "Valle d'Aosta" --agent
@@ -97,10 +107,13 @@ openbdap-pp-cli righe bda1676b-62ab-44b7-8f9a-ca93b8534488 --dove "Descrizione T
 
 ## What the CLI does not cover
 
-- **No `localizzazione` family.** `mop` maps six families — `progetti`, `gare`, `partecipanti`,
-  `pagamenti`, `piano-costi`, `soggetti-titolari` — and `dossier` returns the same six. The
-  territorial question in the SKILL's *Territorial attribution* table goes through the
-  national Localizzazione dataset by hand, which the CLI still makes comfortable:
+- **`dossier` has no `localizzazione` section.** It returns six families — `progetti`, `gare`,
+  `partecipanti`, `pagamenti`, `piano-costi`, `soggetti-titolari` — so it answers everything
+  about a work except where it is. `mop` does map the seventh: `--famiglia localizzazione`
+  works and returns the national dataset, even though the flag's help text lists only six
+  values and a `--regione` filter hides it (Localizzazione is national, so it carries no
+  region). The territorial question in the SKILL's *Territorial attribution* table therefore
+  goes through that dataset directly:
 
   ```bash
   openbdap-pp-cli righe c4cce647-cec4-4b60-a8ab-d308ecfba743 --dove "Codice CUP=B24B13000160001" --agent

@@ -250,8 +250,8 @@ the page, the script breaks and the bulk datasets remain the stable route.
 | Source | Trap | Fix |
 |---|---|---|
 | BDAP CSV dumps | **latin-1**, delimiter `;`, no `charset` in the HTTP header | `iconv -f latin1 -t utf8 in.csv > out.csv` before DuckDB |
-| BDAP `prg` | decimals with a **comma** | `REPLACE(col, ',', '.')` before casting |
-| BDAP `gar`, `sal` | decimals with a **dot** — same system, different convention | no conversion; do not reuse the `prg` pipeline blindly |
+| BDAP MOP dumps | decimals with a **dot** in every family, checked 2026-09-19 — the `prg`/`gar` contrast documented until v0.15 is no longer observable | no separator conversion; a `REPLACE(col, ',', '.')` on these fields is a no-op that hides a wrong `CAST` later |
+| BDAP MOP dumps | **numeric fields are quoted in some datasets and bare in others** (`"0.00"` in the national `prg`, `0.00` in the regional ones) | never write a parser that assumes the quotes |
 | ISTAT comuni, POSAS | latin-1 | same `iconv` step |
 | ISTAT comuni | column names change between yearly editions | detect columns heuristically, never hardcode |
 | ANAC `cig` | text with **double-encoded UTF-8** (`÷` stored as `C3 83 C2 B7`, reads as `Ã·`) | decode twice where it appears |

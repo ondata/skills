@@ -335,6 +335,10 @@ magick -delay 250 -loop 0 output/slide-*.png output/deck.gif
 - One visual idea per deck: a palette, a font pairing, a single recurring motif. Do not restate the same idea on every card.
 - Do not clone the previous deck's layout. Consistency lives in the palette and typography, not in repeating the composition.
 
+**Gender in the copy** (Italian and other gendered languages): check how every person or group is named before compiling.
+- Roles and titles take the gender of the person holding them: a woman president is "la/una Presidente", not "il/un Presidente"; likewise "la sindaca", "la ministra", "l'assessora". If the gender is unknown, ask; do not default to the masculine.
+- Groups: consider naming both ("bambine e bambini", "cittadine e cittadini") instead of the generic masculine. It is a judgement call, not a rule: flag the choice to the user and let them decide, since space on a card is tight and the masculine may be acceptable to them.
+
 **Story 9:16**: center the content vertically, use larger fonts, avoid corners.
 
 **Charts**: a card can carry a real data chart — bars, lines, distributions — drawn by the gribouille Typst library. One chart per card, sized in absolute inches, themed with the deck's own ink and paper. It needs one network fetch on first compile and it has its own set of silent failure modes, so read `references/charts.md` before writing any plot code.
@@ -463,7 +467,7 @@ After every compile:
 
 1. **Count** the generated PNGs — the total must equal the number of cards you wrote. More pages means overflow; the same number is not by itself proof that nothing was cut (see the silent-clipping pitfall)
 2. **Read** the PNGs with the Read tool — look at each slide, don't just confirm the file exists
-3. **Evaluate** against the design principles above: hierarchy, white space, contrast, text overflow/clipping, counter visibility, image quality
+3. **Evaluate** against the design principles above: hierarchy, white space, contrast, text overflow/clipping, counter visibility, image quality, gender agreement in the copy
 4. **Report and propose**: list what works, what doesn't, and propose concrete fixes (e.g. "slide 3 title clips on the right — reduce from 44pt to 38pt", "increase top margin from 0.58in to 0.75in")
 5. **Wait** for user feedback before applying any change — do not auto-iterate
 

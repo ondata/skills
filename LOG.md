@@ -1,5 +1,9 @@
 # LOG
 
+## 2026-09-21
+
+- `difensore-civico-ti-scrivo`: new Category I, geo-blocking (PA sites unreachable from abroad via IP-geolocation restrictions), with the supporting norms in `references/normativa.md` (CAD art. 9 and art. 53, D.Lgs. 36/2006 art. 8); trigger description updated
+
 ## 2026-09-19
 
 - `cup-cig`: new reference `references/openbdap-cli.md` for `openbdap-pp-cli`, a CLI that covers source #2 only. It collapses the MOP branch — `dossier <CUP>` works out which regional partitions to query and returns project, payments, tenders with CIG, bidders, cost plan and owners in one call, where the reference documents five hand-built OData requests. `mop` and `cerca` return both ids per dataset (package for the CSV dump, XML resource for OData), which retires the two-ids trap, and `colonne` maps readable names to the mangled filter ids

@@ -21,6 +21,7 @@ article (or other norm) directly — do not force-fit it into the nearest catego
 | Formal reuse request sent and unanswered past 30 days | **E** (requires delivery proof) |
 | Prior DCD complaint unacted on | **F** (requires prior protocol number) |
 | Entity's data in the IPA registry is outdated, wrong, or never verified (wrong/missing PEC or email, dead domain) | **H** |
+| Site/service blocks access by geographic origin of the IP (e.g. unreachable from abroad) | **I** |
 
 A and B can overlap — cite both if wrong format AND access barrier coexist.
 H differs from C: C is about the PA's website/service being broken; H is about the PA's
@@ -29,6 +30,11 @@ the PA's own site works. One *segnalazione* per PA: a systemic problem across ma
 is still filed entity by entity to the DCD, never to the IPA Gestore (AgID-as-administrator
 is not a tutela channel; CAD violations go only to the DCD).
 G requires verifying absence on both dati.gov.it AND data.europa.eu before claiming total absence.
+I differs from B and C: B is an automated-access barrier (CAPTCHA, login, broken API) that still
+lets a human browser through; C is a malfunction. I is a *deliberate, working-as-designed*
+restriction that blocks everyone — human and machine — based on the geographic origin of the IP.
+Evidence of the block from a foreign IP (e.g. an HTTP 403 / connection reset reproducible from a
+US exit, working from an Italian IP) is essential.
 
 ---
 
@@ -464,3 +470,89 @@ dell'Ente, con pregiudizio per [istanze / notifiche / fatturazione elettronica /
 **Remedy to request:** "inviti [ENTE] ad aggiornare e correggere senza ritardo i dati
 pubblicati nell'IPA — in particolare [DATO SPECIFICO] — e a procedere alla verifica periodica
 almeno semestrale prevista dall'art. 6-ter, comma 3, del CAD."
+
+---
+
+## Category I — Blocco geografico dell'accesso (geo-blocking)
+
+**When:** A PA's website or digital service is deliberately unreachable from outside Italy (or
+from specific countries) because of IP-geolocation filtering — typically a WAF/CDN geo-fence
+adopted "per motivi di sicurezza". The site works from an Italian IP but returns an error
+(HTTP 403, connection reset, timeout) from a foreign one. This blocks Italian citizens abroad
+(AIRE), foreign researchers/journalists, and any automated cross-border reuse.
+
+**Framing — do not overclaim.** No norm *authorises* geo-blocking, and none *explicitly*
+prohibits it. The correct argument is that a blanket geographic block is a **restriction of an
+access right** whose **necessity and proportionality the PA must justify** — and an
+indiscriminate block of everyone abroad does not pass that test. Concede that targeted,
+proportionate security measures (WAF rules, rate limiting, bot mitigation) are legitimate; the
+violation is the *disproportion* of excluding all legitimate foreign access to mitigate a
+subset of threats.
+
+**Additional questions to ask the user:**
+- From which country/IP was the block observed, and what exactly happened? (error code, message)
+- Is the same URL reachable from an Italian IP? (the contrast is the core evidence)
+- Date(s) of observation. Is it persistent or intermittent?
+- What does the block affect — the whole site, the open-data/trasparenza section, an API?
+- Did the PA state anywhere that access is restricted "for security reasons"?
+
+**Common weaknesses for this category:**
+- No reproducible evidence from a foreign IP: a single screenshot is weak. Collect dated proof
+  of the block from a US/EU exit AND of the page working from an Italian IP (curl headers, HTTP
+  status, traceroute/timestamp). Without the contrast the DCD cannot identify the problem.
+- Intermittent/transient block: if it was a temporary mitigation already lifted, the DCD will
+  archive under art. 5 lett. c Regolamento. Document persistence over time.
+- Do NOT cite Reg. (UE) 2018/302 (the "geoblocking" regulation): it applies to traders /
+  e-commerce, not PAs — an opponent will use it to discredit the complaint.
+- The strongest single provision (art. 2, co. 2, D.Lgs. 33/2013 — access to sites "direttamente
+  ed immediatamente, senza autenticazione ed identificazione") sits in the *trasparenza* domain,
+  at the edge of the DCD perimeter (closer to ANAC/RPCT). Cite it as supporting principle, not
+  as the backbone of a DCD complaint; lead with the CAD and D.Lgs. 36/2006 grounds below.
+
+**Articles to cite:** CAD art. 53 (reperibilità/usabilità dei siti); CAD art. 9 (partecipazione
+dei cittadini anche residenti all'estero); CAD art. 7 co. 1 (qualità dei servizi on-line); CAD
+art. 50 co. 1 (disponibilità e fruibilità dei dati); D.Lgs. 36/2006 art. 8 co. 2 e 4 (condizioni
+proporzionate e non discriminatorie, divieto di discriminazione anche transfrontaliera); CAD
+art. 17 co. 1-quater. Supporting: D.Lgs. 33/2013 art. 2 co. 2 (vedi avvertenza sopra).
+
+**Adaptable legal language (Italian):**
+
+```
+Il sito [URL], di competenza di [ENTE], non è raggiungibile dall'estero a causa di un filtro
+basato sulla geolocalizzazione dell'indirizzo IP. In particolare, in data [DATA] la pagina
+[URL] ha restituito [HTTP 403 / connessione azzerata / timeout] se richiesta da un indirizzo IP
+[statunitense/estero], mentre risultava regolarmente accessibile dallo stesso momento da un
+indirizzo IP italiano. Il blocco appare adottato "per motivi di sicurezza".
+
+Tale misura, nella sua attuale configurazione generalizzata, esclude dall'accesso i cittadini
+italiani residenti all'estero, i riutilizzatori e i ricercatori esteri, nonché qualsiasi
+accesso transfrontaliero ai dati e ai servizi dell'Ente. Ciò contrasta con:
+
+- l'art. 53 del CAD, che impone che i siti istituzionali rispettino i principi di reperibilità,
+  elevata usabilità e semplicità di consultazione, qui compromessi dall'impossibilità di
+  raggiungere il sito da determinati Paesi;
+- l'art. 9 del CAD, che riconosce e promuove la partecipazione dei cittadini "anche residenti
+  all'estero" all'uso dei servizi digitali della pubblica amministrazione;
+- l'art. 7, comma 1, del CAD, che impone la disponibilità on-line dei servizi nel rispetto dei
+  livelli di qualità individuati da AgID;
+- l'art. 50, comma 1, del CAD, che impone che i dati siano resi disponibili e fruibili;
+- l'art. 8, commi 2 e 4, del D.Lgs. 36/2006, secondo cui il riutilizzo può essere soggetto solo
+  a condizioni "obiettive, proporzionate, non discriminatorie e giustificate da un pubblico
+  interesse" e le condizioni non possono comportare discriminazioni "compreso il riutilizzo
+  transfrontaliero".
+
+Non si contesta la legittimità di misure di sicurezza mirate e proporzionate (es. regole WAF,
+limitazione del traffico, mitigazione dei bot); si contesta la sproporzione di un blocco
+geografico generalizzato, che sacrifica ogni accesso legittimo dall'estero per fronteggiare un
+sottoinsieme di minacce, in assenza di una giustificazione puntuale di necessità e
+proporzionalità il cui onere ricade sull'Ente.
+
+[FACOLTATIVO, come principio di supporto:] Si richiama altresì l'art. 2, comma 2, del D.Lgs.
+33/2013, secondo cui alla pubblicazione corrisponde "il diritto di chiunque di accedere ai siti
+direttamente ed immediatamente, senza autenticazione ed identificazione".
+```
+
+**Remedy to request:** "rimuova il blocco geografico generalizzato dell'accesso al sito [URL],
+sostituendolo, ove necessario, con misure di sicurezza mirate e proporzionate che non
+precludano l'accesso legittimo dall'estero ai dati e ai servizi dell'Ente, e garantisca la
+raggiungibilità del sito indipendentemente dalla provenienza geografica dell'indirizzo IP."

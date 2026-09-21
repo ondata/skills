@@ -3,6 +3,7 @@
 ## 2026-09-21
 
 - `difensore-civico-ti-scrivo`: new Category I, geo-blocking (PA sites unreachable from abroad via IP-geolocation restrictions), with the supporting norms in `references/normativa.md` (CAD art. 9 and art. 53, D.Lgs. 36/2006 art. 8); trigger description updated
+- `typst-cards`: nuovo principio "Gender in the copy" - ruoli e titoli prendono il genere di chi li ricopre ("una Presidente", non "un Presidente"); per i gruppi va valutata la doppia forma ("bambine e bambini") e la scelta va lasciata all'utente. Aggiunto il controllo alla Phase 4
 
 ## 2026-09-19
 

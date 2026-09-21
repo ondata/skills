@@ -77,6 +77,13 @@ Use this when building or debugging non-trivial queries.
 4. Tune one parameter at a time (`search`, `filter`, `sort`, `per-page`, pagination mode).
 5. Scale only after validation (`per-page=200`, then `cursor=*` for deep pagination).
 6. Log each run: command, key parameters, result count, and quick notes.
+7. **Known-item recall test.** Before trusting a survey, take one work you already know belongs in the answer, look it up by DOI to get its OpenAlex ID, then check whether your query returns it and at what rank:
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search=...' --data-urlencode 'filter=...' --data-urlencode 'per-page=200' --data-urlencode 'select=display_name,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" > r.json; jq -r '.results | to_entries[] | select(.value.doi=="https://doi.org/10.XXXX/YYY") | "rank \(.key+1)"' r.json
+```
+
+Rank far down a long result list is the failure this catches: the query did return the work, but no human reading the top of the list would have seen it. That is a triage problem, not a query problem, and the fix is a narrower filter that makes the whole set readable - not a different search string.
 
 Avoid jumping directly from a paper/spec to a full extraction script without this short validation loop.
 
@@ -84,7 +91,9 @@ Avoid jumping directly from a paper/spec to a full extraction script without thi
 
 - `title.search=`: searches only in the title — use this by default for focused results. Must be passed inside `filter=`, not as a standalone parameter: `filter=title.search:"your query"`.
 - `search=`: full-text search across the entire document — use only when title-only matching is too restrictive.
-- `search.semantic=`: semantic/conceptual search (costs $0.001/request; requires API key).
+- `search.exact=`: like `search=` but without stemming.
+- `search.semantic=`: semantic/conceptual search ($0.001/request; requires API key). See "Semantic search".
+- `corpus=`: `core` (default, curated ~300M works) or `all` (adds datasets and repository records). Measured on `publication_year:2024`: 10.8M works with `core`, 28.0M with `all`. Never compare counts taken under different `corpus` values.
 - `filter=`: exact/structured constraints; comma means AND.
 - `sort=`: `relevance_score:desc`, `cited_by_count:desc`, `publication_date:desc`, etc.
 - `per-page=`: 1..200. **Default is 25 — always set `per-page=200` for bulk queries (8× fewer API calls).**
@@ -93,6 +102,52 @@ Avoid jumping directly from a paper/spec to a full extraction script without thi
 - `select=`: reduce payload; nested paths are not allowed in `select`.
 - `group_by=`: aggregate results by a field (e.g. `group_by=publication_year`, `group_by=topics.id`).
 - `sample=`: random sample of N results (e.g. `sample=20`). Add `seed=42` for reproducibility.
+
+## Field-Scoped Search
+
+`search=` covers title, abstract and fulltext together. To search one field, append `.search` to the field name **inside `filter=`** — these are not standalone parameters:
+
+| Filter | Searches | Hits for `heatwave`, 2025 |
+|---|---|---|
+| `title.search` | title only | 1.901 |
+| `title_and_abstract.search` | title and abstract | 5.102 |
+| `abstract.search` | abstract only | - |
+| `fulltext.search` | title, abstract and fulltext (same as `search=`) | 17.192 |
+| `raw_author_name.search` | the byline as published | - |
+
+Title-only is the narrowest and misses any work whose subject is not in the title; `fulltext.search` and `search=` are the noisiest. `title_and_abstract.search` (or `abstract.search`) is usually the useful middle, especially combined with a structured filter such as `authorships.institutions.country_code` to scope by country without relying on the country name appearing in the text.
+
+**Deprecation:** OpenAlex marks the whole `filter=field.search:` syntax as deprecated and recommends the `search` parameter instead. All of these still work (counts above measured 19 September 2026), and there is no `search` parameter equivalent for scoping to a single field, so they remain the tool for field-scoped queries - just expect them to change. `default.search` is a deprecated alias of `fulltext.search`. `raw_author_name.search` is the one the docs state has no replacement.
+
+## Search Syntax
+
+Applies to the `search=` parameter:
+
+- Boolean `AND`, `OR`, `NOT` in uppercase, with parentheses; words with no operator are treated as `AND`.
+- Double quotes for phrases: `search="fierce creatures"`.
+- Proximity: `search="climate change"~5` matches the two words within 5 positions.
+- Wildcards: `machin*`, `wom?n`. At least 3 characters before the wildcard; leading wildcards are not supported.
+- Fuzzy: `machin~1` allows up to N character edits (N is 0, 1 or 2); at least 3 characters before the `~`.
+- Stemming and stop-word removal are on by default (`possums` matches `possum`). Use `search.exact=` to turn stemming off.
+- Only one search parameter per request: `search`, `search.exact` or `search.semantic`.
+
+**URL length limit.** The whole request URL is capped at about 4 KB, which a long Boolean `OR` list can exceed - the API answers `400` with `"error": "Request URL too long"`. Split the `OR` list into chunks, request each, and take the union of the IDs client-side: `(X AND (a OR b OR c))` equals `(X AND (a OR b)) union (X AND (c))`. Each chunk is billed separately; splitting does not reduce cost and does not lose results.
+
+## Semantic Search
+
+Use `search.semantic=` to match by meaning, and above all when the input is long - an abstract, a grant aim, a paragraph. It embeds title and abstract of every work and ranks by cosine similarity.
+
+| Constraint | Value |
+|---|---|
+| Max input length | 2.000 characters (longer is truncated) |
+| Max results | 50 per query |
+| Rate limit | 1 request per second |
+
+Filters behave differently here. The docs say most filters work and name only `last_known_institutions.country_code` and `cited_by_count` as unsupported, but the API refuses more than that: `from_publication_date` is rejected with a message listing the whitelist it does accept - `author.id`, `authorships.author.id`, `authorships.institutions.id`, `authorships.institutions.lineage`, `funders.id`, `has_abstract`, `has_fulltext`, `institution.id`, `institutions.id`, `is_oa`, `is_retracted`, `language`, `open_access.is_oa`, `primary_location.license`, `primary_location.source.id`, `publication_year`, `type`. Read the error message rather than the docs: it is the live list. Use `publication_year` to bound the period.
+
+Long queries can also return `"reason": "query_timeout"` - the response says you were not charged. Shorten the query and retry.
+
+**What semantic search does not do.** It will not rescue a recall gap on its own. Tested against a known target - a paper on urban tree cover and heatwave mortality in Italian cities - `search.semantic=heatwave mortality Italy municipal data` did not return it in the top 25, with or without a year filter; it surfaced only when the query itself named "urban trees", which means already knowing the answer. Treat it as a way to find neighbours of a concept you can already phrase, not as a safety net.
 
 ## Filter Syntax
 
@@ -185,7 +240,7 @@ attempt 1 → wait 1s → attempt 2 → wait 2s → attempt 3 → wait 4s → at
 
 HTTP codes:
 - `200` — success
-- `400` — invalid parameter or filter syntax; fix the query
+- `400` — invalid parameter or filter syntax; fix the query. The `message` field is the most reliable reference in this API: it lists the valid parameters, or the filters a given mode accepts. Read it before consulting the docs. Two specific cases: `"Request URL too long"` (split the Boolean query) and `"reason": "query_timeout"` on semantic search (not charged; shorten and retry)
 - `403` — rate limit exceeded; back off and retry
 - `404` — entity not found
 - `500` — temporary server error; retry with backoff
@@ -201,6 +256,10 @@ With the free $1/day budget:
 | Search (full-text or semantic) | $0.001 | ~1,000 requests |
 | PDF download (`content.openalex.org`) | $0.01 | ~100 downloads |
 
+A `.search` filter is billed as a search, not as a list+filter: `filter=title_and_abstract.search:...` returns `cost_usd` 0.001, the same as `search=`. Only the plain structured filters cost 0.0001.
+
+Every list response carries `meta.cost_usd`, what that single call actually cost. Use it instead of estimating: `jq '.meta.cost_usd'`.
+
 Use `select=` and `per-page=200` to minimize request count.
 
 ## Common Pitfalls
@@ -215,7 +274,9 @@ Use `select=` and `per-page=200` to minimize request count.
 - Expect some records to have no downloadable PDF.
 - `search=` searches full text and can return loosely related results. Use `title.search=` when the topic must appear in the title.
 - Always write `curl` commands on a single line — multi-line `\` continuation breaks argument parsing in agent environments.
-- `title.search` is NOT a valid standalone parameter — always pass it inside `filter=`: `filter=title.search:"your query"`.
+- `title.search` is NOT a valid standalone parameter — always pass it inside `filter=`: `filter=title.search:"your query"`. Same for `abstract.search`, `title_and_abstract.search` and `fulltext.search`. Passing one standalone returns a `400` whose message lists every valid parameter: `apc_sum, api-key, api_key, cited_by_count_sum, corpus, cursor, data-version, data_version, filter, format, group-by, group-bys, group_by, group_bys, include-xpac, include_xpac, mailto, page, per-page, per_page, q, sample, search, seed, select, sort, warm` (`search.exact` and `search.semantic` are absent from that list but work).
+- Do not trust the docs on page size: the reference table says `per_page` maxes at 100, but the API accepts 200 and its own `400` message says "per-page parameter must be between 1 and 200". `per-page` and `per_page` are both accepted.
+- Do not search only the title when the work might be about your subject without naming it — a paper can use Italian mortality data with neither "Italy" nor "mortality" in the title. Widen to `title_and_abstract.search` or add a structured filter.
 - Always include `api_key=$OPENALEX_API_KEY` in every request.
 - **Never expose the actual key value** — not in text output, not in echoed commands, not in logs, and not in any other form. Always use the variable reference `$OPENALEX_API_KEY`.
   - To verify it is set: `[[ -n "${OPENALEX_API_KEY:-}" ]] && echo "key is set" || echo "ERROR: OPENALEX_API_KEY not set"`.

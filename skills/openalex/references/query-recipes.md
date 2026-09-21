@@ -8,11 +8,12 @@ export OPENALEX_API_KEY='...'
 
 ## 1) Title search (focused)
 
-Use `title.search=` instead of `search=` when the topic must appear in the title.
+Use `title.search` instead of `search=` when the topic must appear in the title.
 `search=` does full-text matching and often returns loosely related results.
+Note: `.search` filters go inside `filter=`, never as standalone parameters.
 
 ```bash
-curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'title.search="open government data"' --data-urlencode 'filter=type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=cited_by_count:desc' --data-urlencode 'per-page=10' --data-urlencode 'select=id,display_name,publication_year,cited_by_count,doi' | jq '.results[] | {title:.display_name, year:.publication_year, cited:.cited_by_count}'
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'filter=title.search:"open government data",type:article,from_publication_date:2023-01-01' --data-urlencode 'sort=cited_by_count:desc' --data-urlencode 'per-page=10' --data-urlencode 'select=display_name,publication_year,cited_by_count,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq '.results[] | {title:.display_name, year:.publication_year, cited:.cited_by_count}'
 ```
 
 ## 2) Topic search + structured filter
@@ -86,3 +87,46 @@ fi
 
 **When to use:** after `openalex_download_pdf.sh` returns exit code 2 and the work is Open Access.
 Check `open_access.is_oa` and `ids.pmcid` in the metadata before attempting this fallback.
+
+## 8) Field-scoped search plus a structured filter
+
+The narrow-but-readable recipe: search the abstract instead of the title, and scope by the
+country of the authors' institutions instead of hoping the country is named in the text.
+Produces a result set small enough to read in full, so nothing depends on ranking.
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'filter=title_and_abstract.search:<terms>,authorships.institutions.country_code:it,from_publication_date:2024-09-01,type:article' --data-urlencode 'per-page=200' --data-urlencode 'select=display_name,publication_year,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq -r '.results[] | "\(.publication_year) - \(.display_name)"'
+```
+
+`institutions.country_code` and `authorships.institutions.country_code` are the same filter
+(identical counts). Run the recipe several times with complementary terms rather than once
+with a long `OR` list: each pass stays readable, and no single phrasing has to be exhaustive.
+
+## 9) Known-item recall test
+
+Before trusting a survey, check that a work you already know is in the answer set, and where
+it ranks. A low rank in a long list means the triage will miss it.
+
+```bash
+DOI='https://doi.org/10.XXXX/YYY'
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search=<your query>' --data-urlencode 'filter=type:article,from_publication_date:2024-09-01' --data-urlencode 'per-page=200' --data-urlencode 'select=display_name,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" > r.json
+jq -r --arg d "$DOI" '(.results | map(.doi) | index($d)) as $i | if $i then "found at rank \($i+1) of \(.results|length) (total \(.meta.count))" else "NOT in the first \(.results|length) of \(.meta.count)" end' r.json
+```
+
+Check the topics too when a query underperforms: OpenAlex may file two works on the same
+research question under unrelated topics, so filtering by the topic of one known paper
+silently excludes the other.
+
+```bash
+curl -sS "https://api.openalex.org/works/$DOI?select=id,topics&api_key=$OPENALEX_API_KEY" | jq -r '.topics[] | "\(.id) \(.display_name) | \(.field.display_name)"'
+```
+
+## 10) Semantic search, with its filter whitelist
+
+```bash
+curl -sS --get 'https://api.openalex.org/works' --data-urlencode 'search.semantic=<a sentence, an abstract, a grant aim>' --data-urlencode 'filter=publication_year:2025,type:article' --data-urlencode 'per-page=50' --data-urlencode 'select=display_name,publication_year,doi' --data-urlencode "api_key=$OPENALEX_API_KEY" | jq -r '.results[] | "\(.publication_year) - \(.display_name)"'
+```
+
+Use `publication_year`, not `from_publication_date`: the latter is rejected, and the error
+message lists the filters semantic search does accept. Max 50 results, max 2.000 characters
+of input, 1 request per second. Long queries can return `query_timeout` (not charged).

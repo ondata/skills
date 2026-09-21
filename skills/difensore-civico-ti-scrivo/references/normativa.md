@@ -83,6 +83,35 @@ URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2
 
 ---
 
+### Art. 9 — Partecipazione democratica elettronica
+
+> "I soggetti di cui all'articolo 2, comma 2, favoriscono ogni forma di uso delle nuove
+> tecnologie per promuovere una maggiore partecipazione dei cittadini, anche residenti
+> all'estero, al processo democratico e per facilitare l'esercizio dei diritti politici e
+> civili [...]."
+
+Riconoscimento legislativo esplicito che la platea degli utenti dei servizi digitali della
+PA include i cittadini residenti all'estero. Da citare contro un blocco geografico
+dell'accesso, che esclude per definizione chi si collega da fuori dall'Italia.
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art9>
+
+---
+
+### Art. 53 — Caratteristiche dei siti delle PA (reperibilità e usabilità)
+
+> "Le pubbliche amministrazioni realizzano siti istituzionali su reti telematiche che
+> rispettano i principi di accessibilità, nonché di elevata usabilità e reperibilità, anche da
+> parte delle persone disabili, completezza di informazione, chiarezza di linguaggio,
+> affidabilità, semplicità di consultazione, qualità, omogeneità ed interoperabilità."
+
+La reperibilità e la semplicità di consultazione del sito sono compromesse da un blocco
+geografico che impedisce di raggiungere il sito da determinati Paesi.
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-03-07;82~art53>
+
+---
+
 ### Art. 6-ter — Indice dei domicili digitali delle PA e dei gestori di pubblici servizi (IPA)
 
 > "[...] è istituito il pubblico elenco di fiducia denominato Indice dei domicili digitali
@@ -165,6 +194,24 @@ URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2
 > adeguate e, ove possibile, come download in blocco."
 
 URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2006-01-24;36~art6>
+
+---
+
+### Art. 8 — Condizioni per il riutilizzo (non discriminazione, anche transfrontaliera)
+
+> **Co. 2** — "Il riutilizzo di documenti non è soggetto a condizioni, salvo che tali
+> condizioni non siano obiettive, proporzionate, non discriminatorie e siano giustificate da
+> un pubblico interesse."
+
+> **Co. 4** — "Le condizioni poste per il riutilizzo di documenti non comportano
+> discriminazioni per categorie analoghe di riutilizzo, compreso il riutilizzo transfrontaliero,
+> né possono costituire ostacolo alla concorrenza."
+
+Disposizione più puntuale contro il geo-blocking: un blocco su base geografica è una barriera
+al riutilizzo transfrontaliero (co. 4) e una condizione che non è né proporzionata né non
+discriminatoria (co. 2). L'onere di dimostrarne necessità e proporzionalità è sulla PA.
+
+URL: <https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2006-01-24;36~art8>
 
 ---
 
